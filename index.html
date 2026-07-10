@@ -1,0 +1,367 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>tools-for-agents — an operating system for agents</title>
+<meta name="description" content="An operating system for agents: six zero-dependency, MCP-native tools that form one agent loop — coordinate, read code, run safely, remember, read the web, recall. Each ships a live web view." />
+<meta property="og:title" content="tools-for-agents — an operating system for agents" />
+<meta property="og:description" content="Six zero-dependency, MCP-native tools that form one agent loop." />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27><text y=%27.9em%27 font-size=%2790%27>🛠️</text></svg>" />
+</head>
+<body>
+<style>
+  :root {
+    --bg:#0a0b0e; --surface:#12141a; --surface-2:#181b22; --surface-3:#1f232c;
+    --line:#242832; --line-2:#333947;
+    --txt:#e8ebf2; --muted:#8a92a3; --faint:#565d6b;
+    /* the six tool identities */
+    --hq:#6ea8fe; --lens:#4fd6be; --anvil:#ff6a1a; --cortex:#a78bfa; --scout:#e0a24e; --recall:#ec4899;
+    --sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    --mono:ui-monospace,"SFMono-Regular","JetBrains Mono","Cascadia Code",Menlo,monospace;
+    --maxw:1080px;
+  }
+  * { box-sizing:border-box; }
+  html { scroll-behavior:smooth; }
+  body {
+    margin:0; background:var(--bg); color:var(--txt);
+    font-family:var(--sans); font-size:16px; line-height:1.6; -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  .wrap { max-width:var(--maxw); margin:0 auto; padding:0 24px; }
+  a { color:inherit; }
+
+  /* ── Nav ─────────────────────────────────────────────────── */
+  .nav { display:flex; align-items:center; gap:12px; padding:20px 24px; max-width:var(--maxw); margin:0 auto; }
+  .nav .mark { font-family:var(--mono); font-weight:700; font-size:15px; letter-spacing:.3px; display:flex; align-items:center; gap:9px; }
+  .nav .mark .dots { display:inline-flex; gap:3px; }
+  .nav .mark .dots i { width:7px; height:7px; border-radius:50%; }
+  .nav .spacer { flex:1; }
+  .nav a.gh { font-family:var(--mono); font-size:12.5px; color:var(--muted); text-decoration:none; border:1px solid var(--line); padding:7px 13px; border-radius:9px; transition:border-color .15s, color .15s; }
+  .nav a.gh:hover { color:var(--txt); border-color:var(--line-2); }
+
+  /* ── Hero ────────────────────────────────────────────────── */
+  .hero { display:grid; grid-template-columns:1.05fr .95fr; gap:26px; align-items:center; padding:26px 0 40px; }
+  .eyebrow { font-family:var(--mono); font-size:12.5px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); display:flex; align-items:center; gap:10px; }
+  .eyebrow::before { content:""; width:26px; height:1px; background:var(--line-2); }
+  h1 { font-size:clamp(34px,5vw,54px); line-height:1.04; letter-spacing:-1.4px; font-weight:800; margin:18px 0 0; text-wrap:balance; }
+  h1 .grad { background:linear-gradient(96deg,var(--hq),var(--lens) 24%,var(--cortex) 46%,var(--recall) 66%,var(--anvil) 84%,var(--scout)); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
+  .lede { color:var(--muted); font-size:17.5px; line-height:1.62; margin:20px 0 24px; max-width:42ch; }
+  .lede b { color:var(--txt); font-weight:600; }
+  .cta { display:flex; gap:12px; flex-wrap:wrap; align-items:center; }
+  .cta .primary { font-family:var(--mono); font-size:13px; text-decoration:none; background:var(--txt); color:var(--bg); font-weight:600; padding:11px 18px; border-radius:10px; transition:transform .1s; }
+  .cta .primary:hover { transform:translateY(-1px); }
+  .cta .ghost { font-family:var(--mono); font-size:13px; color:var(--muted); text-decoration:none; padding:11px 4px; }
+  .cta .ghost:hover { color:var(--txt); }
+
+  .ring-stage { position:relative; aspect-ratio:1; width:100%; max-width:480px; margin-left:auto; }
+  #ring { width:100%; height:100%; display:block; }
+  .ring-cap { position:absolute; left:0; right:0; bottom:-6px; text-align:center; font-family:var(--mono); font-size:11px; color:var(--faint); letter-spacing:.5px; }
+
+  /* ── Section frame ───────────────────────────────────────── */
+  section { padding:34px 0; }
+  .sec-h { font-family:var(--mono); font-size:12px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin-bottom:6px; }
+  .sec-t { font-size:26px; font-weight:750; letter-spacing:-.5px; margin:0 0 22px; }
+
+  /* ── Tool grid ───────────────────────────────────────────── */
+  .tools { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+  .tool { --c:var(--muted); position:relative; background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:18px; overflow:hidden; transition:border-color .16s, transform .16s, background .16s; cursor:default; }
+  .tool::before { content:""; position:absolute; inset:0 auto 0 0; width:3px; background:var(--c); opacity:.9; }
+  .tool:hover, .tool.lit { border-color:color-mix(in srgb, var(--c) 55%, var(--line)); transform:translateY(-2px); background:var(--surface-2); }
+  .tool .th { display:flex; align-items:center; gap:11px; margin-bottom:11px; }
+  .tool .g { font-size:24px; filter:drop-shadow(0 0 10px color-mix(in srgb, var(--c) 60%, transparent)); }
+  .tool .nm { font-family:var(--mono); font-weight:700; font-size:15.5px; color:var(--c); }
+  .tool .verb { margin-left:auto; font-family:var(--mono); font-size:10.5px; letter-spacing:1px; text-transform:uppercase; color:var(--faint); border:1px solid var(--line); border-radius:20px; padding:3px 9px; }
+  .tool .pitch { font-size:13.5px; line-height:1.55; color:var(--txt); opacity:.9; margin:0 0 12px; }
+  .tool .view { font-size:12.5px; line-height:1.5; color:var(--muted); display:flex; gap:7px; }
+  .tool .view b { color:var(--c); font-family:var(--mono); font-weight:600; font-size:11px; text-transform:uppercase; letter-spacing:.5px; white-space:nowrap; }
+  .tool .chips { display:flex; gap:6px; margin-top:14px; flex-wrap:wrap; }
+  .tool .chip { font-family:var(--mono); font-size:10px; color:var(--muted); background:var(--surface-3); border:1px solid var(--line); border-radius:6px; padding:2px 7px; }
+
+  /* ── Boot log ────────────────────────────────────────────── */
+  .terminal { background:#08090c; border:1px solid var(--line); border-radius:14px; overflow:hidden; box-shadow:0 20px 60px rgba(0,0,0,.4); }
+  .term-bar { display:flex; align-items:center; gap:8px; padding:11px 15px; border-bottom:1px solid var(--line); background:var(--surface); }
+  .term-bar .b { width:11px; height:11px; border-radius:50%; background:var(--line-2); }
+  .term-bar .t { font-family:var(--mono); font-size:11.5px; color:var(--faint); margin-left:8px; }
+  .term-body { padding:16px 18px; font-family:var(--mono); font-size:13px; line-height:1.85; overflow-x:auto; }
+  .term-body .ln { white-space:pre; }
+  .term-body .p { color:var(--lens); } .term-body .g { color:var(--faint); }
+  .term-body .ok { color:#7fd88f; }
+  .term-body .tool-g { filter:drop-shadow(0 0 6px currentColor); }
+
+  /* ── DNA band ────────────────────────────────────────────── */
+  .dna { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:1px; background:var(--line); border:1px solid var(--line); border-radius:14px; overflow:hidden; }
+  .dna .cell { background:var(--surface); padding:20px 18px; }
+  .dna .cell .k { font-family:var(--mono); font-size:11px; letter-spacing:1px; text-transform:uppercase; color:var(--faint); }
+  .dna .cell .v { font-size:19px; font-weight:750; letter-spacing:-.3px; margin-top:8px; }
+  .dna .cell .d { font-size:12.5px; color:var(--muted); margin-top:5px; line-height:1.5; }
+  .dna .cell .v.spectrum { background:linear-gradient(92deg,var(--hq),var(--cortex),var(--recall),var(--anvil)); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
+
+  /* ── Footer ──────────────────────────────────────────────── */
+  footer { border-top:1px solid var(--line); margin-top:20px; padding:34px 0 60px; }
+  footer .loop { font-family:var(--mono); font-size:13px; color:var(--muted); display:flex; flex-wrap:wrap; gap:9px 4px; align-items:center; justify-content:center; margin-bottom:22px; }
+  footer .loop .step { color:var(--txt); }
+  footer .loop .arw { color:var(--faint); }
+  footer .fbar { display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; color:var(--muted); font-size:13px; }
+  footer .fbar a { color:var(--txt); text-decoration:none; font-family:var(--mono); }
+  footer .fbar a:hover { color:var(--lens); }
+
+  @media (max-width:860px) {
+    .hero { grid-template-columns:1fr; gap:8px; }
+    .ring-stage { max-width:360px; margin:8px auto 18px; }
+    .tools { grid-template-columns:1fr; }
+  }
+</style>
+
+<nav class="nav">
+  <div class="mark">
+    <span class="dots"><i style="background:var(--hq)"></i><i style="background:var(--lens)"></i><i style="background:var(--anvil)"></i><i style="background:var(--cortex)"></i><i style="background:var(--scout)"></i><i style="background:var(--recall)"></i></span>
+    tools-for-agents
+  </div>
+  <div class="spacer"></div>
+  <a class="gh" href="https://github.com/tools-for-agents" target="_blank" rel="noopener">github.com/tools-for-agents ↗</a>
+</nav>
+
+<header class="wrap hero">
+  <div class="hero-copy">
+    <div class="eyebrow">an operating system for agents</div>
+    <h1>Six primitives.<br />One <span class="grad">agent loop.</span></h1>
+    <p class="lede">A toolkit an agent fully owns: <b>coordinate, read code, run safely, remember, read the web, recall.</b> Every tool is <b>zero-dependency</b>, <b>MCP-native</b>, and ships its own live web view.</p>
+    <div class="cta">
+      <a class="primary" href="https://github.com/tools-for-agents" target="_blank" rel="noopener">Explore the toolkit</a>
+      <a class="ghost" href="#tools">See the six ↓</a>
+    </div>
+  </div>
+  <div class="ring-stage">
+    <canvas id="ring" width="480" height="480" aria-label="The agent loop: six tools connected in a cycle"></canvas>
+    <div class="ring-cap" id="ringcap">the loop, running</div>
+  </div>
+</header>
+
+<section id="tools" class="wrap">
+  <div class="sec-h">the six</div>
+  <h2 class="sec-t">Each tool owns one move in the loop</h2>
+  <div class="tools" id="toolgrid"></div>
+</section>
+
+<section class="wrap">
+  <div class="sec-h">one loop, one run</div>
+  <h2 class="sec-t">What a single turn looks like</h2>
+  <div class="terminal">
+    <div class="term-bar"><span class="b"></span><span class="b"></span><span class="b"></span><span class="t">agent@tools-for-agents · one turn</span></div>
+    <div class="term-body" id="termbody"></div>
+  </div>
+</section>
+
+<section class="wrap">
+  <div class="sec-h">shared dna</div>
+  <h2 class="sec-t">The same discipline in every tool</h2>
+  <div class="dna">
+    <div class="cell"><div class="k">dependencies</div><div class="v spectrum">Zero</div><div class="d">Node standard library + built-in <code>node:sqlite</code>. Nothing to <code>npm install</code>, nothing to break.</div></div>
+    <div class="cell"><div class="k">interface</div><div class="v">MCP-native</div><div class="d">Every tool ships an MCP server over stdio, so any model can drive the whole kit.</div></div>
+    <div class="cell"><div class="k">web views</div><div class="v">6 / 6</div><div class="d">Each tool has a <code>serve</code> command — a live, self-contained dashboard for humans.</div></div>
+    <div class="cell"><div class="k">trust</div><div class="v">Local · auditable</div><div class="d">Runs on your machine. Every line is readable; every run is attributable and CI-green.</div></div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="loop" id="footloop"></div>
+    <div class="fbar">
+      <span>tools-for-agents — an operating system for agents</span>
+      <a href="https://github.com/tools-for-agents" target="_blank" rel="noopener">github.com/tools-for-agents ↗</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+(() => {
+  "use strict";
+  // ── The six tools, in loop order ──────────────────────────────────────────
+  const TOOLS = [
+    { key:'agent-hq', glyph:'🛰️', verb:'coordinate', color:'#6ea8fe',
+      pitch:'Shared memory, a kanban board, an agent registry and a cost ledger — the company\'s work made visible.',
+      view:'live dashboard — kanban, agents, a knowledge-graph tab, ledger & activity.' },
+    { key:'lens', glyph:'🔎', verb:'read code', color:'#4fd6be',
+      pitch:'Token-efficient code retrieval: FTS search, symbol outlines and surgical reads instead of whole files.',
+      view:'code explorer — file tree, ranked search, syntax reader, symbol outline.' },
+    { key:'anvil', glyph:'⚒', verb:'run safely', color:'#ff6a1a',
+      pitch:'A throwaway Docker sandbox — run untrusted code network-off, capped and timed, for a structured result.',
+      view:'forge log — every run with its code, output, exit status & limits.' },
+    { key:'cortex', glyph:'🧠', verb:'remember', color:'#a78bfa',
+      pitch:'A local, Obsidian-compatible second brain: markdown notes, [[wikilinks]] and a knowledge graph.',
+      view:'force-graph explorer — notes, links, tags, click-to-read.' },
+    { key:'scout', glyph:'🧭', verb:'read the web', color:'#e0a24e',
+      pitch:'The agent\'s web reader — a URL becomes clean, cached markdown and your reading history is searchable.',
+      view:'reading room — cached articles, full-text search, a serif reader.' },
+    { key:'recall', glyph:'◎', verb:'recall it all', color:'#ec4899',
+      pitch:'One query, federated across every store — brain, team, reading and code — as one budgeted briefing.',
+      view:'convergence console — four sources interleaved into one briefing.' },
+  ];
+  const N = TOOLS.length;
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // ── Tool cards ────────────────────────────────────────────────────────────
+  const grid = document.getElementById('toolgrid');
+  grid.innerHTML = TOOLS.map((t, i) => `
+    <div class="tool" data-i="${i}" style="--c:${t.color}">
+      <div class="th"><span class="g">${t.glyph}</span><span class="nm">${t.key}</span><span class="verb">${t.verb}</span></div>
+      <p class="pitch">${t.pitch}</p>
+      <div class="view"><b>web&nbsp;view</b><span>${t.view}</span></div>
+      <div class="chips"><span class="chip">zero-dep</span><span class="chip">MCP</span><span class="chip">serve</span><span class="chip">CI ✓</span></div>
+    </div>`).join('');
+
+  // ── Footer loop strip ─────────────────────────────────────────────────────
+  document.getElementById('footloop').innerHTML = TOOLS.map((t, i) =>
+    `<span class="step" style="color:${t.color}">${t.glyph} ${t.verb}</span>${i < N - 1 ? '<span class="arw">→</span>' : '<span class="arw">↺</span>'}`).join('');
+
+  // ── Boot-log terminal ─────────────────────────────────────────────────────
+  const LOG = [
+    { t:0, msg:'claimed task #1042 · "ship the graph tab"' },
+    { t:1, msg:'5 snippets · ~2.3k tokens  (skipped ~18k of file reads)' },
+    { t:2, msg:'python · exit 0 · 612ms · network off' },
+    { t:3, msg:'wrote note [[graph-tab]] · 2 broken links healed' },
+    { t:4, msg:'read 3 pages · 87% lighter than the raw html' },
+    { t:5, msg:'14 hits across brain · team · reading · code · ~478 tok' },
+  ];
+  const term = document.getElementById('termbody');
+  term.innerHTML =
+    `<div class="ln"><span class="p">$</span> <span>agent run --loop</span></div>` +
+    LOG.map((l) => { const t = TOOLS[l.t];
+      return `<div class="ln"><span class="tool-g" style="color:${t.color}">${t.glyph}</span> <span style="color:${t.color}">${t.key.padEnd(9)}</span><span class="g">▸</span> ${esc(l.msg)}</div>`;
+    }).join('') +
+    `<div class="ln"><span class="ok">✓ loop complete</span> <span class="g">— zero deps · MCP-native · fully auditable</span></div>`;
+  function esc(s){ return String(s).replace(/[&<>]/g,(c)=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
+
+  // ── Kernel ring (canvas) ──────────────────────────────────────────────────
+  const cv = document.getElementById('ring'), ctx = cv.getContext('2d');
+  let W = 480, H = 480, DPR = 1, cx = 240, cy = 240, R = 150;
+  let hovered = -1, pulse = 0, start = performance.now(), raf = 0;
+  const BOOT = reduce ? 0 : 1500;            // boot-in duration
+  const nodeAngle = (i) => -Math.PI / 2 + i * (Math.PI * 2 / N);
+  const nodePos = (i) => [cx + R * Math.cos(nodeAngle(i)), cy + R * Math.sin(nodeAngle(i))];
+
+  function size() {
+    const rect = cv.getBoundingClientRect();
+    DPR = window.devicePixelRatio || 1;
+    W = rect.width || 480; H = rect.height || W;
+    cv.width = W * DPR; cv.height = H * DPR;
+    cx = W / 2; cy = H / 2; R = Math.min(W, H) / 2 - Math.max(58, W * 0.16);
+  }
+
+  function draw(now) {
+    const bootT = BOOT ? Math.min(1, (now - start) / BOOT) : 1;
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    ctx.clearRect(0, 0, W, H);
+
+    // arcs between consecutive nodes (drawn progressively during boot)
+    for (let i = 0; i < N; i++) {
+      const seg = Math.max(0, Math.min(1, bootT * (N + 1) - i - 0.5));
+      if (seg <= 0) continue;
+      const a0 = nodeAngle(i), a1 = a0 + (Math.PI * 2 / N) * seg;
+      const col = TOOLS[(i + 1) % N].color;
+      const lit = hovered === -1 || hovered === i || hovered === (i + 1) % N;
+      ctx.beginPath();
+      ctx.arc(cx, cy, R, a0, a1);
+      ctx.strokeStyle = col; ctx.globalAlpha = lit ? 0.5 : 0.16; ctx.lineWidth = 2; ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+
+    // travelling energy pulse (after boot)
+    if (!reduce && bootT >= 1) {
+      const seg = Math.floor(pulse), frac = pulse - seg;
+      const a = nodeAngle(seg) + (Math.PI * 2 / N) * frac;
+      const col = TOOLS[(seg + 1) % N].color;
+      for (let tr = 0; tr < 5; tr++) {
+        const f = frac - tr * 0.03; if (f < 0) continue;
+        const aa = nodeAngle(seg) + (Math.PI * 2 / N) * f;
+        ctx.beginPath(); ctx.arc(cx + R * Math.cos(aa), cy + R * Math.sin(aa), 4 - tr * 0.7, 0, 7);
+        ctx.fillStyle = col; ctx.globalAlpha = (1 - tr / 5) * 0.9; ctx.fill();
+      }
+      ctx.globalAlpha = 1; ctx.shadowBlur = 0;
+      // glowing head
+      ctx.beginPath(); ctx.arc(cx + R * Math.cos(a), cy + R * Math.sin(a), 4.5, 0, 7);
+      ctx.fillStyle = '#fff'; ctx.shadowColor = col; ctx.shadowBlur = 14; ctx.fill(); ctx.shadowBlur = 0;
+    }
+
+    // core
+    const coreLit = bootT > 0.15;
+    ctx.beginPath(); ctx.arc(cx, cy, 25, 0, 7);
+    ctx.fillStyle = 'rgba(255,255,255,.04)'; ctx.fill();
+    ctx.strokeStyle = 'rgba(255,255,255,.16)'; ctx.lineWidth = 1; ctx.stroke();
+    if (coreLit) {
+      ctx.font = `600 22px ${MONO}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillStyle = '#e8ebf2'; ctx.fillText('◉', cx, cy + 1);
+      ctx.font = `10px ${MONO}`; ctx.fillStyle = '#565d6b';
+      ctx.fillText('agent', cx, cy + 20);
+    }
+
+    // nodes (ignite in sequence)
+    for (let i = 0; i < N; i++) {
+      const lit = Math.max(0, Math.min(1, bootT * (N + 1) - i));
+      if (lit <= 0) continue;
+      const [x, y] = nodePos(i);
+      const t = TOOLS[i];
+      const focus = hovered === i;
+      const dim = hovered !== -1 && !focus;
+      const r = (focus ? 24 : 20) * (0.6 + 0.4 * lit);
+      ctx.globalAlpha = (dim ? 0.4 : 1) * lit;
+      // halo
+      ctx.beginPath(); ctx.arc(x, y, r + 4, 0, 7);
+      ctx.fillStyle = t.color; ctx.globalAlpha = (dim ? 0.06 : 0.14) * lit; ctx.fill();
+      ctx.globalAlpha = (dim ? 0.4 : 1) * lit;
+      // disc
+      ctx.beginPath(); ctx.arc(x, y, r, 0, 7);
+      ctx.fillStyle = 'rgba(10,11,14,.9)'; ctx.fill();
+      ctx.lineWidth = 2; ctx.strokeStyle = t.color; ctx.shadowColor = t.color; ctx.shadowBlur = focus ? 20 : 10; ctx.stroke(); ctx.shadowBlur = 0;
+      // glyph
+      ctx.font = `${r * 0.95}px ${SANS}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(t.glyph, x, y + 1);
+      // label — anchored so it radiates outward from the ring and never clips
+      if (bootT > 0.85) {
+        ctx.globalAlpha = (dim ? 0.4 : 1) * Math.min(1, (bootT - 0.85) / 0.15);
+        const ang = nodeAngle(i), ca = Math.cos(ang), sa = Math.sin(ang);
+        const off = R + 16 - (Math.abs(ca) > 0.7 ? 10 : 0);   // pull side labels in so they don't clip
+        const lx = cx + off * ca, ly = cy + off * sa;
+        ctx.textAlign = Math.abs(ca) < 0.35 ? 'center' : (ca > 0 ? 'left' : 'right');
+        ctx.textBaseline = sa < -0.35 ? 'bottom' : sa > 0.35 ? 'top' : 'middle';
+        const dy = sa < -0.35 ? -14 : sa > 0.35 ? 14 : -5;
+        ctx.font = `600 11px ${MONO}`; ctx.fillStyle = focus ? t.color : '#9098a8';
+        ctx.fillText(t.key, lx, ly + dy);
+        ctx.font = `9px ${MONO}`; ctx.fillStyle = '#565d6b';
+        ctx.fillText(t.verb, lx, ly + dy + (sa > 0.35 ? 13 : 12));
+      }
+      ctx.globalAlpha = 1;
+    }
+
+    if (!reduce && bootT >= 1) pulse = (pulse + 0.012) % N;
+    raf = requestAnimationFrame(draw);
+  }
+
+  const MONO = "ui-monospace, Menlo, monospace";
+  const SANS = "system-ui, sans-serif";
+
+  // hover detection → cross-highlight cards
+  cv.addEventListener('pointermove', (e) => {
+    const rect = cv.getBoundingClientRect();
+    const mx = e.clientX - rect.left, my = e.clientY - rect.top;
+    let h = -1;
+    for (let i = 0; i < N; i++) { const [x, y] = nodePos(i); if ((mx - x) ** 2 + (my - y) ** 2 < 26 * 26) { h = i; break; } }
+    if (h !== hovered) { hovered = h; syncCards(); cv.style.cursor = h >= 0 ? 'pointer' : 'default'; }
+  });
+  cv.addEventListener('pointerleave', () => { hovered = -1; syncCards(); });
+  function syncCards() {
+    document.querySelectorAll('.tool').forEach((el) => el.classList.toggle('lit', +el.dataset.i === hovered));
+    document.getElementById('ringcap').textContent = hovered >= 0 ? TOOLS[hovered].verb + ' · ' + TOOLS[hovered].key : 'the loop, running';
+  }
+  // card hover → highlight ring node
+  grid.addEventListener('pointerover', (e) => { const c = e.target.closest('.tool'); if (c) { hovered = +c.dataset.i; syncCards(); } });
+  grid.addEventListener('pointerout', (e) => { if (e.target.closest('.tool')) { hovered = -1; syncCards(); } });
+
+  addEventListener('resize', size);
+  size();
+  raf = requestAnimationFrame(draw);
+})();
+</script>
+</body>
+</html>
