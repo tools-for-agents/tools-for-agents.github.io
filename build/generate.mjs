@@ -112,6 +112,53 @@ async function servedPort(id) {
   return +m[1];
 }
 
+/**
+ * NEVER ADVERTISE A COMMAND YOU HAVE NOT VERIFIED.
+ *
+ * This file was telling agents to run `npx -y @tools-for-agents/lens mcp`, and that
+ * package does not exist. It also named an MCP-registry entry that returns zero
+ * servers. Both were written the day the server.json files were prepared, as if
+ * preparing to publish were the same act as publishing.
+ *
+ * A manifest for agents that hands out a 404 is worse than one that says nothing: the
+ * agent does not get to find out it was lied to until it is already failing.
+ *
+ * So we ASK. And a check that could not be made is not a pass — if npm is unreachable
+ * we say nothing rather than guess, because the safe direction is silence.
+ */
+async function onNpm(pkg) {
+  try {
+    const r = await fetch(`https://registry.npmjs.org/${pkg.replace("/", "%2f")}`,
+      { signal: AbortSignal.timeout(8000) });
+    if (r.status === 404) return false;
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    return true;
+  } catch (e) {
+    console.log(`  ! could not reach npm for ${pkg} (${e.message}) — not advertising what I cannot verify`);
+    return false;
+  }
+}
+
+async function inMcpRegistry(name) {
+  try {
+    const r = await fetch(
+      `https://registry.modelcontextprotocol.io/v0.1/servers?search=${encodeURIComponent(name)}`,
+      { signal: AbortSignal.timeout(8000) });
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    const j = await r.json();
+    // The registry wraps each entry: { servers: [ { server: {name,…}, _meta:{…} } ] }.
+    // Reading `s.name` gets undefined for every row, so the check answers "no" for
+    // everything, forever — including after we publish. A verifier that can only ever
+    // say no is not a verifier; it is a constant wearing a function's clothes. Caught
+    // by asking it about a server that IS published (io.github.06ketan/slideshot) and
+    // watching it deny that too.
+    return (j.servers || []).some((s) => (s.server?.name ?? s.name) === name);
+  } catch (e) {
+    console.log(`  ! could not reach the MCP registry (${e.message}) — not claiming an entry I cannot see`);
+    return false;
+  }
+}
+
 const tools = [];
 for (const t of TOOLS) {
   const mcpTools = await askServer(t.id);
@@ -124,8 +171,13 @@ for (const t of TOOLS) {
     throw new Error(`${t.id}: the MCP server answered with no tools. That is a broken handshake, `
       + `not a tool with nothing to offer — refusing to write a manifest that says so.`);
   }
-  console.log(`  ${t.glyph} ${t.id.padEnd(9)} ${String(mcpTools.length).padStart(2)} MCP tools`);
-  tools.push({ ...t, package: pkg.name, version: pkg.version, mcpTools });
+  const onNpmNow = await onNpm(pkg.name);
+  const registryName = `io.github.tools-for-agents/${t.id}`;
+  const inRegistryNow = await inMcpRegistry(registryName);
+  console.log(`  ${t.glyph} ${t.id.padEnd(9)} ${String(mcpTools.length).padStart(2)} MCP tools`
+    + `   npm:${onNpmNow ? "yes" : "no "}  mcp-registry:${inRegistryNow ? "yes" : "no "}`);
+  tools.push({ ...t, package: pkg.name, version: pkg.version, mcpTools,
+    onNpm: onNpmNow, registryName, inRegistry: inRegistryNow });
 }
 
 const total = tools.reduce((n, t) => n + t.mcpTools.length, 0);
@@ -158,6 +210,25 @@ const manifest = {
       ])),
     },
   },
+  // Say where things actually stand, rather than leaving an agent to discover it by
+  // running a command that fails. Checked against npm and the MCP registry at build
+  // time — this block is derived, not asserted.
+  publication: {
+    npm: {
+      published: tools.every((t) => t.onNpm),
+      scope: "@tools-for-agents",
+      note: tools.every((t) => t.onNpm)
+        ? "Every tool is on npm; `npx` is in each tool's mcpServer block."
+        : "NOT on npm yet. Install from source (see `install`) — an `npx` command appears here only once npm answers for the package.",
+    },
+    mcpRegistry: {
+      published: tools.every((t) => t.inRegistry),
+      namespace: "io.github.tools-for-agents/*",
+      note: tools.every((t) => t.inRegistry)
+        ? "Every tool is in the official MCP registry."
+        : "NOT in the registry yet. A `server.json` is committed in every repo and validated against the live schema; publishing needs an npm release first, since the registry hosts metadata only.",
+    },
+  },
   tools: tools.map((t) => ({
     id: t.id,
     verb: t.verb,
@@ -166,21 +237,26 @@ const manifest = {
     whenToUse: t.use,
     repository: `${GH}/${t.id}`,
     readme: `${RAW}/${t.id}/main/README.md`,
-    npmPackage: t.package,
     version: t.version,
-    // The name this server is published under in the official MCP registry
-    // (registry.modelcontextprotocol.io). Mirrors each repo's server.json.
-    mcpRegistryName: `io.github.tools-for-agents/${t.id}`,
+    // Only stated when it is TRUE. `npx @tools-for-agents/lens` was advertised here
+    // while the package 404'd, and an MCP-registry name was given for an entry that
+    // returned zero servers — because the server.json files had been *prepared*, and
+    // preparing to publish is not publishing.
+    ...(t.onNpm ? { npmPackage: t.package } : {}),
+    ...(t.inRegistry ? { mcpRegistryName: t.registryName } : {}),
     mcpServer: {
       transport: "stdio",
-      // From a clone:
+      // This works today, from a clone. It is the only install we can stand behind.
       command: "node",
       args: [`${t.id}/mcp/mcp-server.js`],
-      // Once on npm — `npx <pkg>` runs the bin named after the package, which for the
-      // six CLI tools is the CLI, so the server is reached through its `mcp` subcommand.
-      npx: t.id === "agent-hq"
-        ? ["npx", "-y", t.package]
-        : ["npx", "-y", t.package, "mcp"],
+      // `npx <pkg>` runs the bin named after the package — which for the six CLI tools
+      // is the CLI — so the server is reached through its `mcp` subcommand. Emitted
+      // only once npm actually answers for the package.
+      ...(t.onNpm ? {
+        npx: t.id === "agent-hq"
+          ? ["npx", "-y", t.package]
+          : ["npx", "-y", t.package, "mcp"],
+      } : {}),
     },
     webView: { command: `${t.id} serve`, url: `http://localhost:${t.port}` },
     mcpTools: t.mcpTools,
