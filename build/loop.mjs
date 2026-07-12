@@ -135,7 +135,14 @@ try {
     });
     taskId = task.id;
     await hq.call("kanban_claim_task", { task_id: taskId, agent: "loop-prover" });
-    return `task ${taskId} created and claimed`;
+    // And put something in the TEAM's shared memory — the fourth store recall federates,
+    // and the only one that lives behind an HTTP call rather than a file on disk.
+    await hq.call("memory_write", {
+      title: "Retrieval on a token budget",
+      content: "An agent pulls just enough context, never a whole file: the token budget fills and stops.",
+      namespace: "engineering", tags: ["retrieval"], importance: 3,
+    });
+    return `task ${taskId} created and claimed, memory written`;
   });
 
   // ── 2. read code ─────────────────────────────────────────────────────────────
@@ -184,13 +191,21 @@ try {
     // a check that can pass for the wrong reason is a check that has not been written.
     // Each of these EXISTS ONLY because an earlier step in this run created it:
     //   brain   ← the note cortex wrote in step 4
+    //   team    ← the memory agent-hq stored in step 1
     //   reading ← the page scout cached in step 5
     //   code    ← the index lens built in step 2
-    const need = ["brain", "reading", "code"];
+    //
+    // `team` was missing from this list, and the loop passed anyway — because LOCALLY my
+    // agent-hq had months of memories in it, so team answered by accident. In CI, where
+    // HQ starts empty, it answered nothing and nobody noticed: "3 stores at once" looked
+    // like a pass. The one store that lives behind an HTTP call rather than a file was
+    // the one the loop never proved. A test that quietly covers less than it claims is
+    // the same bug as a tool that quietly answers less than it claims.
+    const need = ["brain", "team", "reading", "code"];
     const absent = need.filter((s) => !sources.has(s));
     if (absent.length) {
       throw new Error(`${absent.join(" + ")} did not answer — the loop did not close. `
-        + `What ${absent.map((s) => ({ brain: "cortex", reading: "scout", code: "lens" }[s])).join(" and ")} `
+        + `What ${absent.map((s) => ({ brain: "cortex", team: "agent-hq", reading: "scout", code: "lens" }[s])).join(" and ")} `
         + `just did is not visible from here. Answered: ${[...sources].join(", ") || "nothing"}`);
     }
     return `${r.results.length} hits from ${sources.size} stores at once: ${[...sources].join(" · ")}`;
