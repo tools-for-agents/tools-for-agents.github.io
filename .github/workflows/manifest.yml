@@ -43,7 +43,15 @@ jobs:
             git clone --depth 1 -q "https://github.com/tools-for-agents/$t.git" "_tools/$t"
           done
 
-      - name: re-derive the manifest by asking each MCP server what it can do
+      # This step is also, for free, THE INSTALL TEST.
+      #
+      # It clones the seven repos exactly as an agent following /tools.json would, runs
+      # `node <tool>/mcp/mcp-server.js` with nothing installed, and refuses to write the
+      # manifest if any of them fails to answer `tools/list`. So the install command we
+      # publish cannot rot without this going red — which matters more than usual, given
+      # that cortex's `./vault` turned out not to be committed and nobody noticed for
+      # months. A fresh clone is the only clone whose opinion counts.
+      - name: re-derive the manifest — and prove a fresh clone still works
         run: node build/generate.mjs "$PWD/_tools"
 
       - name: is what we publish still true?
