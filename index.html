@@ -4,19 +4,23 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>tools-for-agents — an operating system for agents</title>
-<meta name="description" content="An operating system for agents: six zero-dependency, MCP-native tools that form one agent loop — coordinate, read code, run safely, remember, read the web, recall. Each ships a live web view." />
+<meta name="description" content="An operating system for agents: seven zero-dependency, MCP-native tools that form one agent loop — coordinate, read code, run safely, remember, read the web, recall, and see. 67 callable MCP tools. Each ships a live web view." />
 <meta property="og:title" content="tools-for-agents — an operating system for agents" />
-<meta property="og:description" content="Six zero-dependency, MCP-native tools that form one agent loop." />
+<meta property="og:description" content="Seven zero-dependency, MCP-native tools that form one agent loop. 67 callable MCP tools." />
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27><text y=%27.9em%27 font-size=%2790%27>🛠️</text></svg>" />
+<link rel="llms" href="/llms.txt" />
 </head>
 <body>
 <style>
+  /* Type, spacing, radii and the contrast floor come from the kit's design
+     system — iris/tokens.json. type[12,14,16,20,24,30,40] · grid 4 · radius[4,8,12,999] */
   :root {
     --bg:#0a0b0e; --surface:#12141a; --surface-2:#181b22; --surface-3:#1f232c;
     --line:#242832; --line-2:#333947;
-    --txt:#e8ebf2; --muted:#8a92a3; --faint:#565d6b;
-    /* the six tool identities */
-    --hq:#6ea8fe; --lens:#4fd6be; --anvil:#ff6a1a; --cortex:#a78bfa; --scout:#e0a24e; --recall:#ec4899;
+    --txt:#e8ebf2; --muted:#9aa3b5; --faint:#7b8391;
+    /* the seven tool identities */
+    --hq:#6ea8fe; --lens:#4fd6be; --anvil:#ff6a1a; --cortex:#a78bfa;
+    --scout:#e0a24e; --recall:#ec4899; --iris:#c792ea;
     --sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
     --mono:ui-monospace,"SFMono-Regular","JetBrains Mono","Cascadia Code",Menlo,monospace;
     --maxw:1080px;
@@ -33,89 +37,101 @@
 
   /* ── Nav ─────────────────────────────────────────────────── */
   .nav { display:flex; align-items:center; gap:12px; padding:20px 24px; max-width:var(--maxw); margin:0 auto; }
-  .nav .mark { font-family:var(--mono); font-weight:700; font-size:15px; letter-spacing:.3px; display:flex; align-items:center; gap:9px; }
-  .nav .mark .dots { display:inline-flex; gap:3px; }
-  .nav .mark .dots i { width:7px; height:7px; border-radius:50%; }
+  .nav .mark { font-family:var(--mono); font-weight:700; font-size:14px; letter-spacing:.3px; display:flex; align-items:center; gap:8px; }
+  .nav .mark .dots { display:inline-flex; gap:4px; }
+  .nav .mark .dots i { width:8px; height:8px; border-radius:999px; }
   .nav .spacer { flex:1; }
-  .nav a.gh { font-family:var(--mono); font-size:12.5px; color:var(--muted); text-decoration:none; border:1px solid var(--line); padding:7px 13px; border-radius:9px; transition:border-color .15s, color .15s; }
+  .nav a.gh { font-family:var(--mono); font-size:12px; color:var(--muted); text-decoration:none; border:1px solid var(--line); padding:8px 12px; border-radius:8px; transition:border-color .15s, color .15s; }
   .nav a.gh:hover { color:var(--txt); border-color:var(--line-2); }
 
   /* ── Hero ────────────────────────────────────────────────── */
-  .hero { display:grid; grid-template-columns:1.05fr .95fr; gap:26px; align-items:center; padding:26px 0 40px; }
-  .eyebrow { font-family:var(--mono); font-size:12.5px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); display:flex; align-items:center; gap:10px; }
-  .eyebrow::before { content:""; width:26px; height:1px; background:var(--line-2); }
-  h1 { font-size:clamp(34px,5vw,54px); line-height:1.04; letter-spacing:-1.4px; font-weight:800; margin:18px 0 0; text-wrap:balance; }
-  h1 .grad { background:linear-gradient(96deg,var(--hq),var(--lens) 24%,var(--cortex) 46%,var(--recall) 66%,var(--anvil) 84%,var(--scout)); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
-  .lede { color:var(--muted); font-size:17.5px; line-height:1.62; margin:20px 0 24px; max-width:42ch; }
+  .hero { display:grid; grid-template-columns:1.05fr .95fr; gap:24px; align-items:center; padding:24px 0 40px; }
+  .eyebrow { font-family:var(--mono); font-size:12px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); display:flex; align-items:center; gap:8px; }
+  .eyebrow::before { content:""; width:24px; height:1px; background:var(--line-2); }
+  h1 { font-size:clamp(30px,5vw,40px); line-height:1.08; letter-spacing:-1.2px; font-weight:800; margin:16px 0 0; text-wrap:balance; }
+  h1 .grad { background:linear-gradient(96deg,var(--hq),var(--lens) 22%,var(--cortex) 42%,var(--iris) 60%,var(--recall) 76%,var(--scout)); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
+  .lede { color:var(--muted); font-size:16px; line-height:1.62; margin:20px 0 24px; max-width:44ch; }
   .lede b { color:var(--txt); font-weight:600; }
   .cta { display:flex; gap:12px; flex-wrap:wrap; align-items:center; }
-  .cta .primary { font-family:var(--mono); font-size:13px; text-decoration:none; background:var(--txt); color:var(--bg); font-weight:600; padding:11px 18px; border-radius:10px; transition:transform .1s; }
+  .cta .primary { font-family:var(--mono); font-size:14px; text-decoration:none; background:var(--txt); color:var(--bg); font-weight:600; padding:12px 16px; border-radius:8px; transition:transform .1s; }
   .cta .primary:hover { transform:translateY(-1px); }
-  .cta .ghost { font-family:var(--mono); font-size:13px; color:var(--muted); text-decoration:none; padding:11px 4px; }
+  .cta .ghost { font-family:var(--mono); font-size:14px; color:var(--muted); text-decoration:none; padding:12px 4px; }
   .cta .ghost:hover { color:var(--txt); }
 
   .ring-stage { position:relative; aspect-ratio:1; width:100%; max-width:480px; margin-left:auto; }
   #ring { width:100%; height:100%; display:block; }
-  .ring-cap { position:absolute; left:0; right:0; bottom:-6px; text-align:center; font-family:var(--mono); font-size:11px; color:var(--faint); letter-spacing:.5px; }
+  .ring-cap { position:absolute; left:0; right:0; bottom:-4px; text-align:center; font-family:var(--mono); font-size:12px; color:var(--faint); letter-spacing:.5px; }
 
   /* ── Section frame ───────────────────────────────────────── */
-  section { padding:34px 0; }
-  .sec-h { font-family:var(--mono); font-size:12px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin-bottom:6px; }
-  .sec-t { font-size:26px; font-weight:750; letter-spacing:-.5px; margin:0 0 22px; }
+  section { padding:32px 0; }
+  .sec-h { font-family:var(--mono); font-size:12px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin-bottom:8px; }
+  .sec-t { font-size:24px; font-weight:750; letter-spacing:-.5px; margin:0 0 20px; }
+  .sec-t .sub { display:block; font-size:14px; font-weight:400; letter-spacing:0; color:var(--muted); margin-top:8px; }
 
   /* ── Tool grid ───────────────────────────────────────────── */
-  .tools { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
-  .tool { --c:var(--muted); position:relative; background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:18px; overflow:hidden; transition:border-color .16s, transform .16s, background .16s; cursor:default; }
-  .tool::before { content:""; position:absolute; inset:0 auto 0 0; width:3px; background:var(--c); opacity:.9; }
+  .tools { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+  .tool { --c:var(--muted); position:relative; background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:16px; overflow:hidden; transition:border-color .16s, transform .16s, background .16s; cursor:default; }
+  .tool::before { content:""; position:absolute; inset:0 auto 0 0; width:4px; background:var(--c); opacity:.9; }
   .tool:hover, .tool.lit { border-color:color-mix(in srgb, var(--c) 55%, var(--line)); transform:translateY(-2px); background:var(--surface-2); }
-  .tool .th { display:flex; align-items:center; gap:11px; margin-bottom:11px; }
-  .tool .g { font-size:24px; filter:drop-shadow(0 0 10px color-mix(in srgb, var(--c) 60%, transparent)); }
-  .tool .nm { font-family:var(--mono); font-weight:700; font-size:15.5px; color:var(--c); }
-  .tool .verb { margin-left:auto; font-family:var(--mono); font-size:10.5px; letter-spacing:1px; text-transform:uppercase; color:var(--faint); border:1px solid var(--line); border-radius:20px; padding:3px 9px; }
-  .tool .pitch { font-size:13.5px; line-height:1.55; color:var(--txt); opacity:.9; margin:0 0 12px; }
-  .tool .view { font-size:12.5px; line-height:1.5; color:var(--muted); display:flex; gap:7px; }
-  .tool .view b { color:var(--c); font-family:var(--mono); font-weight:600; font-size:11px; text-transform:uppercase; letter-spacing:.5px; white-space:nowrap; }
-  .tool .chips { display:flex; gap:6px; margin-top:14px; flex-wrap:wrap; }
-  .tool .chip { font-family:var(--mono); font-size:10px; color:var(--muted); background:var(--surface-3); border:1px solid var(--line); border-radius:6px; padding:2px 7px; }
+  .tool .th { display:flex; align-items:center; gap:8px; margin-bottom:12px; }
+  .tool .g { font-size:24px; filter:drop-shadow(0 0 8px color-mix(in srgb, var(--c) 60%, transparent)); }
+  .tool .nm { font-family:var(--mono); font-weight:700; font-size:16px; color:var(--c); }
+  .tool .verb { margin-left:auto; font-family:var(--mono); font-size:12px; letter-spacing:.5px; text-transform:uppercase; color:var(--faint); border:1px solid var(--line); border-radius:999px; padding:4px 8px; }
+  .tool .pitch { font-size:14px; line-height:1.55; color:var(--txt); opacity:.9; margin:0 0 12px; }
+  .tool .view { font-size:12px; line-height:1.5; color:var(--muted); display:flex; gap:8px; }
+  .tool .view b { color:var(--c); font-family:var(--mono); font-weight:600; font-size:12px; text-transform:uppercase; letter-spacing:.5px; white-space:nowrap; }
+  .tool .chips { display:flex; gap:4px; margin-top:12px; flex-wrap:wrap; }
+  .tool .chip { font-family:var(--mono); font-size:12px; color:var(--muted); background:var(--surface-3); border:1px solid var(--line); border-radius:4px; padding:4px 8px; }
 
-  /* ── Boot log ────────────────────────────────────────────── */
-  .terminal { background:#08090c; border:1px solid var(--line); border-radius:14px; overflow:hidden; box-shadow:0 20px 60px rgba(0,0,0,.4); }
-  .term-bar { display:flex; align-items:center; gap:8px; padding:11px 15px; border-bottom:1px solid var(--line); background:var(--surface); }
-  .term-bar .b { width:11px; height:11px; border-radius:50%; background:var(--line-2); }
-  .term-bar .t { font-family:var(--mono); font-size:11.5px; color:var(--faint); margin-left:8px; }
-  .term-body { padding:16px 18px; font-family:var(--mono); font-size:13px; line-height:1.85; overflow-x:auto; }
+  /* ── For agents ──────────────────────────────────────────── */
+  .agents { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:16px; }
+  .card { display:block; text-decoration:none; background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:16px; transition:border-color .16s, background .16s, transform .16s; }
+  .card:hover { border-color:var(--line-2); background:var(--surface-2); transform:translateY(-2px); }
+  .card .p { font-family:var(--mono); font-size:14px; font-weight:700; color:var(--txt); margin-bottom:8px; }
+  .card .p .badge { font-size:12px; font-weight:400; color:var(--faint); text-transform:uppercase; letter-spacing:1px; margin-left:8px; }
+  .card .x { font-size:14px; line-height:1.55; color:var(--muted); margin:0; }
+  .card .x b { color:var(--txt); font-weight:600; }
+
+  /* ── Boot log / code block ───────────────────────────────── */
+  .terminal { background:#08090c; border:1px solid var(--line); border-radius:12px; overflow:hidden; box-shadow:0 20px 60px rgba(0,0,0,.4); }
+  .term-bar { display:flex; align-items:center; gap:8px; padding:12px 16px; border-bottom:1px solid var(--line); background:var(--surface); }
+  .term-bar .b { width:12px; height:12px; border-radius:999px; background:var(--line-2); }
+  .term-bar .t { font-family:var(--mono); font-size:12px; color:var(--muted); margin-left:8px; }
+  .term-body { padding:16px; font-family:var(--mono); font-size:12px; line-height:1.9; overflow-x:auto; }
   .term-body .ln { white-space:pre; }
   .term-body .p { color:var(--lens); } .term-body .g { color:var(--faint); }
   .term-body .ok { color:#7fd88f; }
   .term-body .tool-g { filter:drop-shadow(0 0 6px currentColor); }
+  .term-body .c { color:var(--muted); }
 
   /* ── DNA band ────────────────────────────────────────────── */
-  .dna { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:1px; background:var(--line); border:1px solid var(--line); border-radius:14px; overflow:hidden; }
-  .dna .cell { background:var(--surface); padding:20px 18px; }
-  .dna .cell .k { font-family:var(--mono); font-size:11px; letter-spacing:1px; text-transform:uppercase; color:var(--faint); }
-  .dna .cell .v { font-size:19px; font-weight:750; letter-spacing:-.3px; margin-top:8px; }
-  .dna .cell .d { font-size:12.5px; color:var(--muted); margin-top:5px; line-height:1.5; }
-  .dna .cell .v.spectrum { background:linear-gradient(92deg,var(--hq),var(--cortex),var(--recall),var(--anvil)); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
+  .dna { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:1px; background:var(--line); border:1px solid var(--line); border-radius:12px; overflow:hidden; }
+  .dna .cell { background:var(--surface); padding:20px 16px; }
+  .dna .cell .k { font-family:var(--mono); font-size:12px; letter-spacing:1px; text-transform:uppercase; color:var(--muted); }
+  .dna .cell .v { font-size:20px; font-weight:750; letter-spacing:-.3px; margin-top:8px; }
+  .dna .cell .d { font-size:12px; color:var(--muted); margin-top:4px; line-height:1.5; }
+  .dna .cell .v.spectrum { background:linear-gradient(92deg,var(--hq),var(--cortex),var(--iris),var(--recall),var(--anvil)); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
 
   /* ── Footer ──────────────────────────────────────────────── */
-  footer { border-top:1px solid var(--line); margin-top:20px; padding:34px 0 60px; }
-  footer .loop { font-family:var(--mono); font-size:13px; color:var(--muted); display:flex; flex-wrap:wrap; gap:9px 4px; align-items:center; justify-content:center; margin-bottom:22px; }
+  footer { border-top:1px solid var(--line); margin-top:20px; padding:32px 0 60px; }
+  footer .loop { font-family:var(--mono); font-size:12px; color:var(--muted); display:flex; flex-wrap:wrap; gap:8px 4px; align-items:center; justify-content:center; margin-bottom:20px; }
   footer .loop .step { color:var(--txt); }
   footer .loop .arw { color:var(--faint); }
-  footer .fbar { display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; color:var(--muted); font-size:13px; }
-  footer .fbar a { color:var(--txt); text-decoration:none; font-family:var(--mono); }
+  footer .fbar { display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; color:var(--muted); font-size:12px; }
+  footer .fbar a { color:var(--txt); text-decoration:none; font-family:var(--mono); padding:4px 0; }
   footer .fbar a:hover { color:var(--lens); }
+  footer .fbar .links { display:flex; gap:16px; flex-wrap:wrap; }
 
   @media (max-width:860px) {
     .hero { grid-template-columns:1fr; gap:8px; }
-    .ring-stage { max-width:360px; margin:8px auto 18px; }
-    .tools { grid-template-columns:1fr; }
+    .ring-stage { max-width:360px; margin:8px auto 20px; }
+    .tools, .agents { grid-template-columns:1fr; }
   }
 </style>
 
 <nav class="nav">
   <div class="mark">
-    <span class="dots"><i style="background:var(--hq)"></i><i style="background:var(--lens)"></i><i style="background:var(--anvil)"></i><i style="background:var(--cortex)"></i><i style="background:var(--scout)"></i><i style="background:var(--recall)"></i></span>
+    <span class="dots"><i style="background:var(--hq)"></i><i style="background:var(--lens)"></i><i style="background:var(--anvil)"></i><i style="background:var(--cortex)"></i><i style="background:var(--scout)"></i><i style="background:var(--recall)"></i><i style="background:var(--iris)"></i></span>
     tools-for-agents
   </div>
   <div class="spacer"></div>
@@ -125,23 +141,56 @@
 <header class="wrap hero">
   <div class="hero-copy">
     <div class="eyebrow">an operating system for agents</div>
-    <h1>Six primitives.<br />One <span class="grad">agent loop.</span></h1>
-    <p class="lede">A toolkit an agent fully owns: <b>coordinate, read code, run safely, remember, read the web, recall.</b> Every tool is <b>zero-dependency</b>, <b>MCP-native</b>, and ships its own live web view.</p>
+    <h1>Seven primitives.<br />One <span class="grad">agent loop.</span></h1>
+    <p class="lede">A toolkit an agent fully owns: <b>coordinate, read code, run safely, remember, read the web, recall</b> — and <b>see what you built</b>. Every tool is <b>zero-dependency</b>, <b>MCP-native</b>, and ships its own live web view.</p>
     <div class="cta">
       <a class="primary" href="https://github.com/tools-for-agents" target="_blank" rel="noopener">Explore the toolkit</a>
-      <a class="ghost" href="#tools">See the six ↓</a>
+      <a class="ghost" href="#agents">Are you an agent? ↓</a>
     </div>
   </div>
   <div class="ring-stage">
-    <canvas id="ring" width="480" height="480" aria-label="The agent loop: six tools connected in a cycle"></canvas>
+    <canvas id="ring" width="480" height="480" aria-label="The agent loop: seven tools connected in a cycle"></canvas>
     <div class="ring-cap" id="ringcap">the loop, running</div>
   </div>
 </header>
 
 <section id="tools" class="wrap">
-  <div class="sec-h">the six</div>
+  <div class="sec-h">the seven</div>
   <h2 class="sec-t">Each tool owns one move in the loop</h2>
   <div class="tools" id="toolgrid"></div>
+</section>
+
+<section id="agents" class="wrap">
+  <div class="sec-h">for agents</div>
+  <h2 class="sec-t">
+    Findable by the thing that uses it
+    <span class="sub">A toolkit for agents that only a human can find is a toolkit with a bug. Three fetches, no cloning: the map, the manifest, the install.</span>
+  </h2>
+  <div class="agents">
+    <a class="card" href="/llms.txt">
+      <div class="p">/llms.txt <span class="badge">the map</span></div>
+      <p class="x">The curated index, in the <b>llmstxt.org</b> format: what the kit is, what each tool is for, and where to read more. Start here if you are a model.</p>
+    </a>
+    <a class="card" href="/tools.json">
+      <div class="p">/tools.json <span class="badge">the manifest</span></div>
+      <p class="x">All <b>67 MCP tools</b> — every name, every description, every install command — in <b>one fetch</b>. Generated by asking each server <code>tools/list</code>, so it cannot drift.</p>
+    </a>
+    <a class="card" href="/llms-full.txt">
+      <div class="p">/llms-full.txt <span class="badge">everything</span></div>
+      <p class="x">Every tool's full README concatenated, so a model can ingest <b>the entire kit in one request</b> instead of seven.</p>
+    </a>
+  </div>
+  <div class="terminal">
+    <div class="term-bar"><span class="b"></span><span class="b"></span><span class="b"></span><span class="t">install · zero dependencies · Node 22+</span></div>
+    <div class="term-body">
+<div class="ln"><span class="c"># clone the kit and hand all seven to your model</span></div>
+<div class="ln"><span class="p">$</span> for t in agent-hq lens anvil cortex scout recall iris; do</div>
+<div class="ln"><span class="p"> </span>    git clone https://github.com/tools-for-agents/$t.git</div>
+<div class="ln"><span class="p"> </span>    claude mcp add $t -s user -- node $PWD/$t/mcp/mcp-server.js</div>
+<div class="ln"><span class="p">$</span> done</div>
+<div class="ln"><span class="ok">✓ 67 tools registered</span> <span class="g">— nothing to npm install, nothing to break</span></div>
+    </div>
+  </div>
 </section>
 
 <section class="wrap">
@@ -158,9 +207,9 @@
   <h2 class="sec-t">The same discipline in every tool</h2>
   <div class="dna">
     <div class="cell"><div class="k">dependencies</div><div class="v spectrum">Zero</div><div class="d">Node standard library + built-in <code>node:sqlite</code>. Nothing to <code>npm install</code>, nothing to break.</div></div>
-    <div class="cell"><div class="k">interface</div><div class="v">MCP-native</div><div class="d">Every tool ships an MCP server over stdio, so any model can drive the whole kit.</div></div>
-    <div class="cell"><div class="k">web views</div><div class="v">6 / 6</div><div class="d">Each tool has a <code>serve</code> command — a live, self-contained dashboard for humans.</div></div>
-    <div class="cell"><div class="k">trust</div><div class="v">Local · auditable</div><div class="d">Runs on your machine. Every line is readable; every run is attributable and CI-green.</div></div>
+    <div class="cell"><div class="k">interface</div><div class="v">67 MCP tools</div><div class="d">Every tool ships an MCP server over stdio, so any model can drive the whole kit.</div></div>
+    <div class="cell"><div class="k">web views</div><div class="v">7 / 7</div><div class="d">Each tool has a <code>serve</code> command — a live, self-contained dashboard for humans.</div></div>
+    <div class="cell"><div class="k">design</div><div class="v">One system</div><div class="d">One type scale, one spacing grid, one palette — declared in <code>tokens.json</code> and enforced in CI by <code>iris</code>.</div></div>
   </div>
 </section>
 
@@ -169,7 +218,11 @@
     <div class="loop" id="footloop"></div>
     <div class="fbar">
       <span>tools-for-agents — an operating system for agents</span>
-      <a href="https://github.com/tools-for-agents" target="_blank" rel="noopener">github.com/tools-for-agents ↗</a>
+      <span class="links">
+        <a href="/llms.txt">llms.txt</a>
+        <a href="/tools.json">tools.json</a>
+        <a href="https://github.com/tools-for-agents" target="_blank" rel="noopener">github ↗</a>
+      </span>
     </div>
   </div>
 </footer>
@@ -177,7 +230,7 @@
 <script>
 (() => {
   "use strict";
-  // ── The six tools, in loop order ──────────────────────────────────────────
+  // ── The seven tools, in loop order ────────────────────────────────────────
   const TOOLS = [
     { key:'agent-hq', glyph:'🛰️', verb:'coordinate', color:'#6ea8fe',
       pitch:'Shared memory, a kanban board, an agent registry and a cost ledger — the company\'s work made visible.',
@@ -197,6 +250,9 @@
     { key:'recall', glyph:'◎', verb:'recall it all', color:'#ec4899',
       pitch:'One query, federated across every store — brain, team, reading and code — as one budgeted briefing.',
       view:'convergence console — four sources interleaved into one briefing.' },
+    { key:'iris', glyph:'👁', verb:'see', color:'#c792ea',
+      pitch:'The agent\'s eye. Renders what you built at real viewports and hands the pixels back to the model — so you stop designing blind.',
+      view:'the eye — screenshots, every defect a glance would catch, and the design system it broke.' },
   ];
   const N = TOOLS.length;
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -223,6 +279,7 @@
     { t:3, msg:'wrote note [[graph-tab]] · 2 broken links healed' },
     { t:4, msg:'read 3 pages · 87% lighter than the raw html' },
     { t:5, msg:'14 hits across brain · team · reading · code · ~478 tok' },
+    { t:6, msg:'looked · phone/tablet/desktop × dark/light · ✓ nothing broken' },
   ];
   const term = document.getElementById('termbody');
   term.innerHTML =
@@ -292,7 +349,7 @@
     if (coreLit) {
       ctx.font = `600 22px ${MONO}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
       ctx.fillStyle = '#e8ebf2'; ctx.fillText('◉', cx, cy + 1);
-      ctx.font = `10px ${MONO}`; ctx.fillStyle = '#565d6b';
+      ctx.font = `10px ${MONO}`; ctx.fillStyle = '#7b8391';
       ctx.fillText('agent', cx, cy + 20);
     }
 
@@ -328,7 +385,7 @@
         const dy = sa < -0.35 ? -14 : sa > 0.35 ? 14 : -5;
         ctx.font = `600 11px ${MONO}`; ctx.fillStyle = focus ? t.color : '#9098a8';
         ctx.fillText(t.key, lx, ly + dy);
-        ctx.font = `9px ${MONO}`; ctx.fillStyle = '#565d6b';
+        ctx.font = `9px ${MONO}`; ctx.fillStyle = '#7b8391';
         ctx.fillText(t.verb, lx, ly + dy + (sa > 0.35 ? 13 : 12));
       }
       ctx.globalAlpha = 1;

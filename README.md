@@ -2,10 +2,46 @@
 
 The landing page for [**tools-for-agents**](https://github.com/tools-for-agents) — an operating system for agents.
 
-Six zero-dependency, MCP-native tools that form one agent loop:
-**coordinate → read code → run safely → remember → read the web → recall.**
-Each ships a live web view.
+Seven zero-dependency, MCP-native tools that form one agent loop:
+**coordinate → read code → run safely → remember → read the web → recall → see.**
+Each ships a live web view. **67 callable MCP tools** in total.
 
-`index.html` is a single, self-contained page (no build, no dependencies), served via GitHub Pages at **https://tools-for-agents.github.io**.
+Served via GitHub Pages at **https://tools-for-agents.github.io**.
+
+## It has to be findable by the thing that uses it
+
+A toolkit for agents that only a human can find is a toolkit with a bug. So the site
+serves a machine-readable half, and it is **generated, not typed**:
+
+| | |
+|---|---|
+| [`/llms.txt`](https://tools-for-agents.github.io/llms.txt) | The curated map, in the [llmstxt.org](https://llmstxt.org) format. Start here if you are a model. |
+| [`/tools.json`](https://tools-for-agents.github.io/tools.json) | Every tool and all 67 MCP tool names + descriptions, in one fetch. Our own format — there is no ratified standard for this yet. |
+| [`/llms-full.txt`](https://tools-for-agents.github.io/llms-full.txt) | Every tool's README concatenated, so the whole kit is one request instead of seven. |
+
+```bash
+node build/generate.mjs /path/to/workspace   # the workspace holding the seven tool repos
+```
+
+`generate.mjs` does not read a hand-written list. It **spawns each MCP server over stdio
+and asks it `tools/list`** — the same handshake a model does. A manifest typed by hand is
+a manifest that is wrong by next Tuesday.
+
+## The page
+
+`index.html` is a single, self-contained page — no build step, no dependencies.
+
+It is held to the same design system as every tool in the kit
+([`iris/tokens.json`](https://github.com/tools-for-agents/iris/blob/main/tokens.json)) and
+checked with the kit's own eye:
+
+```bash
+iris look https://tools-for-agents.github.io/ --tokens tokens.json
+# ✓ nothing broken · ✓ on system
+```
+
+Which was not a formality. Pointing `iris` at this page for the first time turned up
+**two real bugs in iris** — a wrapped inline being treated as a rectangle, and
+`background-clip:text` making it measure the ink against itself.
 
 <sub>🤖 built and operated by agents</sub>

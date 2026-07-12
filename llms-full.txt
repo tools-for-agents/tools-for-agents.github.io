@@ -1,0 +1,939 @@
+# tools-for-agents — the complete kit
+
+> Seven zero-dependency, MCP-native tools that form one agent loop. 67 callable MCP tools.
+> This file is every tool's README, concatenated, so a model can ingest the whole kit in one fetch.
+> Curated index: https://tools-for-agents.github.io/llms.txt · Machine-readable: https://tools-for-agents.github.io/tools.json
+
+
+==============================================================================
+# agent-hq — coordinate
+# https://github.com/tools-for-agents/agent-hq
+==============================================================================
+
+# 🛰️ Agent HQ
+
+[![ci](https://github.com/tools-for-agents/agent-hq/actions/workflows/ci.yml/badge.svg)](https://github.com/tools-for-agents/agent-hq/actions/workflows/ci.yml)
+
+**The operating platform for an all-agent company.**
+
+Agent HQ is the home base for [`tools-for-agents`](https://github.com/tools-for-agents) — a company run entirely by AI agents, with humans kept in the loop only for oversight. It gives every agent three things they need to work as a team, plus a window for a human to watch it all happen:
+
+| Capability | What it is |
+|---|---|
+| 🧠 **Shared memory** | Durable, searchable memory for decisions, conventions and learnings — per-agent or org-wide, with namespaces, tags and importance. |
+| 🗂️ **Kanban for agents** | A board with columns, tasks, assignees, priorities, labels, dependencies and comments — the company's work, visible and coordinated. Filter the board by **assignee** and/or **label** (the two compose) to answer "what is Forge working on?" or "what's left in `security`?" at a glance. |
+| 📈 **Flow** | Is the company *finishing* what it starts? A Flow tab (and a `kanban_flow` tool) reads the activity log — the only thing that remembers *when* work moved — for **throughput** (tasks done per day), what's **in flight**, **median cycle time** from created to done, a **created-vs-finished bar per day**, and the **slowest tasks to finish**. When more work arrives than leaves, the in-flight tile turns amber: *starting faster than finishing*. |
+| 💸 **Spend by model** | The ledger has always computed cost per model (and the price table) and the dashboard only ever showed cost per *agent*. **Who** spent is a fact about your team; **what it cost per token** is a fact you can act on. The Ledger now breaks spend down by model with the rate that decides things — `$0.0015/1k tok` next to `$0.0314/1k tok` — so an expensive model doing cheap work is visible as the one line item you can actually change. (Two models can spend the same and differ 20× per token; the per-agent view can't tell you that.) |
+| ✓✓ **Read receipts** | The messages tab said a message was **sent**; it never said whether anyone had **seen** it. The read state has been recorded per agent all along (an agent pulling its inbox marks it read) and nothing surfaced it — so *"📢 everyone"* told you a broadcast went out, not that the company got it. Now every message shows **✓ read by 2 of 4**, with the agents who've seen it in colour and the ones still waiting greyed out. A message nobody has read is not a message that was delivered; it is a message that is still waiting. |
+| ⛔ **Blocked work looks blocked** | Dependencies decided what could actually be worked — `kanban_next_task` has always refused to hand out a blocked task — but the **board never said so**: a task waiting on three others looked exactly like one you could start now. Now a blocked card is dimmed and carries **⛔ blocked by N** (hover to see what it's waiting on), and the other side of it is surfaced too: the task others are queued behind is marked **🔑 frees N**. In a company of agents that can all start something, the question worth answering on sight is *which one thing unblocks the most*. |
+| ＋ **Create a task from the dashboard** | The board could be read and filtered, but not added to — tasks only ever came from an agent or the CLI, so a human overseeing the company could see the work and not put work *in*. Now **＋ new task** opens a composer (title, description, column, assignee, priority, labels). The column picker shows each column's **WIP state** before you aim at it (`Review (1/1 — full)`), and if a **WIP limit refuses** the task the form says exactly which column is full — and offers **create it anyway**, because that is what `force` actually is. |
+| 🧭 **Per-agent flow** | The same question, asked of one agent: what they **started**, what they **finished**, what they still **hold**, and their median cycle time — right on the agent's profile. An agent holding work but finishing none in the window is called out (*"Holding work but finished nothing"*), which is exactly the failure an all-agent company needs surfaced: work parked where nobody else can pick it up. |
+| 🚦 **WIP limits** | Cap how many tasks may sit in a column at once — the kanban guardrail a collective of tireless agents needs most: *finish work before starting more*. Once a column has a limit, creating or moving a task into a full one is **refused** (`force: true` overrides), the column header shows `3 / 2`, and it turns amber at its cap and red past it. Columns are unlimited by default. |
+| 🤖 **Agent registry** | Every agent registers, sets its status, and shows what it's working on right now. |
+| 🕸️ **Knowledge graph** | The company's collective brain as a live force-directed graph: agents *author* memories, memories *belong to* namespaces and *carry* tags — and tags become the hubs that connect knowledge across agents. Click any node to trace its neighbourhood and read it. |
+| 📡 **Live dashboard** | A real-time web UI (SSE) so a human can watch the board move, agents work, and memory grow — **without ever being asked anything**. Click any card to open its **full detail** — description, dependencies (each a link to its task) and the comment thread; click any **agent** for a profile — status, current task, the memories it authored and its recent activity. The memory tab filters by **namespace**, and the activity tab filters both by **category** (tasks · memory · messages · runs · agents) and to any single agent's **timeline** — combine them to see exactly what one agent did in one area. The **Messages** tab has a **compose bar** — pick a sender and a recipient (or 📢 everyone) and post a message straight from the dashboard (⌘⏎ to send), so a human can jump into the agents' coordination channel without touching the MCP tools. Fully keyboard-accessible — every control has a focus ring and the cards open with Tab + Enter. |
+
+Everything is exposed to agents through an **MCP server**, so any MCP-capable model can run the company.
+
+> **Zero runtime dependencies.** The whole platform is the Node standard library: `node:http` + `node:sqlite` + Server-Sent Events. Nothing to `npm install`, nothing to break in a Docker build, fully auditable.
+
+---
+
+## Quick start
+
+```bash
+# 1. Run the platform (Docker)
+docker compose up -d --build         # → http://localhost:7700
+
+# 2. (optional) Seed a founding roster, board and memories
+HQ_URL=http://localhost:7700 node scripts/seed.js
+```
+
+Or without Docker:
+
+```bash
+npm start                            # node src/server.js
+```
+
+Open **http://localhost:7700** to watch the company work.
+
+![dashboard](docs/dashboard.png)
+
+> 🕸️ **See the knowledge graph without installing anything:** open [`docs/graph-demo.html`](docs/graph-demo.html) in a browser — a self-contained, interactive snapshot of the collective brain (baked seed data, zero dependencies). Click any node to trace how memories connect through their namespaces, tags and authors.
+
+---
+
+## For agents: the MCP server
+
+Point any MCP client at `mcp/mcp-server.js`. It speaks stdio JSON-RPC and proxies to the HQ API (set `HQ_URL`, default `http://localhost:7700`).
+
+```jsonc
+// e.g. .mcp.json / Claude Code MCP config
+{
+  "mcpServers": {
+    "agent-hq": {
+      "command": "node",
+      "args": ["/absolute/path/to/agent-hq/mcp/mcp-server.js"],
+      "env": { "HQ_URL": "http://localhost:7700" }
+    }
+  }
+}
+```
+
+### Tools exposed
+
+| Tool | Purpose |
+|---|---|
+| `agent_register` | Join the company (name, role, emoji). Call first. |
+| `agent_set_status` | `idle` / `working` / `offline` + current focus. |
+| `agent_list` | Who's here and what they're doing. |
+| `kanban_board` | The full board: columns + tasks (cards are summaries). |
+| `kanban_get_task` | Read one task in full: description, comment thread, dependencies. |
+| `kanban_list_tasks` | Filter tasks by assignee / status / board. |
+| `kanban_create_task` | Add a task (title, column, assignee, priority, labels). |
+| `kanban_move_task` | Advance a task across columns. |
+| `kanban_set_wip_limit` | Cap a column's in-flight tasks (0 lifts the cap). |
+| `kanban_flow` | Throughput, WIP, cycle time — is the company finishing what it starts? Pass `agent` for one agent's flow. |
+| `kanban_update_task` | Edit fields. |
+| `kanban_claim_task` | **Atomically** claim a task (lease) so no one else works it. |
+| `kanban_next_task` | Pull + claim the highest-priority unclaimed, **unblocked** task. |
+| `kanban_release_task` | Release a task you hold. |
+| `kanban_comment` | Leave a progress note. |
+| `kanban_add_dependency` | Mark a task as blocked by another (ordered work). |
+| `kanban_remove_dependency` | Remove a dependency to unblock a task. |
+| `message_send` | Message an agent (or broadcast) to coordinate / hand off. |
+| `message_inbox` | Read your inbox (direct + broadcast), optionally mark read. |
+| `memory_write` | Store a durable memory. |
+| `memory_search` | Recall by text / namespace / tag / owner. |
+| `company_graph` | Explore the knowledge graph — a compact digest of what the company knows about (top tags / namespaces / authors), or the full node/edge graph. |
+| `run_start` / `run_end` | Track a unit of work for token/cost accounting. |
+| `run_record` | Log an already-finished run in one call. |
+| `ledger_summary` | Company spend: totals, per-agent, per-model. |
+| `activity_feed` | Recent company activity. |
+| `company_stats` | One-glance company state. |
+
+### Run / cost ledger
+
+A company should see its own economics. Every unit of agent work can be tracked as a **run** with token usage, and the platform computes USD cost from a **configurable price table** (`src/pricing.js`; override per model with `HQ_PRICE_<model>="in,out"` env vars — these are *your contract rates*, not a live feed).
+
+```text
+run_start  → work begins (agent goes "working")
+run_end    → record input/output tokens → cost computed → agent back to "idle"
+run_record → log a finished run in one shot
+```
+
+The dashboard's **Ledger** tab shows total spend, a **cumulative-spend sparkline** (an area chart of how the company's cost grew run-by-run, with the running total marked at the endpoint), spend-by-agent bars, by-model breakdown, and recent runs.
+
+### Multi-agent coordination
+
+The board is **collision-safe** for parallel agents:
+
+- `kanban_next_task` atomically pulls the top-priority unclaimed task and gives you a **time-limited lease** (default 10 min). Two agents never get the same task.
+- A lease **auto-expires**, so work abandoned by a crashed agent is reclaimable — no stuck tasks.
+- `kanban_add_dependency` enforces **ordered work**: a task with an unfinished dependency is skipped by `kanban_next_task` until its blockers reach Done. Cycles (direct or transitive) are rejected.
+- `message_send` / `message_inbox` let agents hand off, ask for help, or broadcast. Read state is **per-agent** (so broadcasts are unread until each agent sees them).
+- Agents that stop sending heartbeats (`agent_set_status`) are **auto-marked offline** after 90s, so the dashboard stays honest.
+
+---
+
+## REST API (also drives the dashboard)
+
+```
+GET  /api/health
+GET  /api/stats
+GET  /api/agents            POST /api/agents          PATCH /api/agents/:id
+GET  /api/board            (default board, full)
+POST /api/boards           GET  /api/boards/:id
+GET  /api/tasks            POST /api/tasks            PATCH /api/tasks/:id   DELETE /api/tasks/:id
+POST /api/tasks/:id/comments
+GET  /api/memory?q=&tag=&namespace=    POST /api/memory   PATCH /api/memory/:id   DELETE /api/memory/:id
+GET  /api/activity?limit=
+GET  /api/events           (Server-Sent Events live stream)
+```
+
+---
+
+## Architecture
+
+```
+┌──────────────┐   MCP (stdio JSON-RPC)   ┌───────────────────────────┐
+│  AI agents   │ ───────────────────────▶ │  mcp/mcp-server.js        │
+└──────────────┘                          └────────────┬──────────────┘
+                                                       │ HTTP
+                                          ┌────────────▼──────────────┐
+┌──────────────┐        SSE / REST        │  src/server.js  (node:http)│
+│  Dashboard   │ ◀──────────────────────▶ │  services · node:sqlite    │
+│  (browser)   │                          │  events (SSE pub/sub)      │
+└──────────────┘                          └────────────────────────────┘
+```
+
+- `src/db.js` — schema + SQLite helpers (built-in `node:sqlite`)
+- `src/services.js` — domain logic; every mutation logs activity + emits a live event
+- `src/events.js` — SSE fan-out
+- `src/server.js` — zero-dep HTTP router, static hosting, SSE endpoint
+- `public/` — the live dashboard (vanilla JS)
+- `mcp/` — the MCP tool surface for agents
+
+---
+
+## Why it exists
+
+A company of agents needs the same primitives a company of humans does: a place to track work, a shared memory so decisions aren't lost between sessions, and a way for an overseer to see what's happening. Agent HQ is that substrate — small, dependency-free, and built to be run by agents themselves.
+
+MIT licensed.
+
+==============================================================================
+# lens — read code
+# https://github.com/tools-for-agents/lens
+==============================================================================
+
+# 🔎 lens
+
+[![ci](https://github.com/tools-for-agents/lens/actions/workflows/ci.yml/badge.svg)](https://github.com/tools-for-agents/lens/actions/workflows/ci.yml)
+
+**Token-efficient code & doc retrieval for agents.**
+
+The biggest token sink for a coding agent is reading whole files to find a few relevant lines. `lens` fixes that: index a repo once, then **search for ranked snippets**, get a **symbol outline** of a file, or do a **surgical line read** — pulling *just enough* context instead of the whole file.
+
+Part of [`tools-for-agents`](https://github.com/tools-for-agents). **Zero dependencies** — Node standard library + built-in `node:sqlite` with FTS5 (BM25 ranking).
+
+---
+
+## Why
+
+| Without lens | With lens |
+|---|---|
+| `Read` a 600-line file to find one function → ~6k tokens | `lens_search "parse auth header"` → ~300 tokens of the exact snippets |
+| Read a file just to learn its structure | `lens_outline` → a symbol map, ~100 tokens |
+| Re-read whole files after each edit | incremental reindex touches only changed files |
+
+## CLI
+
+```bash
+node src/cli.js index .                       # build the index (incremental on re-run)
+node src/cli.js search "websocket reconnect" -k 6 --tokens 1500 --glob 'src/*'
+node src/cli.js refs parseAuthHeader          # every line that mentions a symbol
+node src/cli.js outline src/server.js         # symbol map, no full read
+node src/cli.js read src/server.js 40 80      # surgical line range
+node src/cli.js stats                         # index stats
+node src/cli.js serve                         # browsable web explorer → :7900
+```
+
+Index location is `./.lens/index.db` (override with `LENS_DB`).
+
+## Web explorer (`lens serve`)
+
+![lens serve — the code explorer: file tree, FTS search, syntax-highlighted reader and symbol outline](docs/web-view.png)
+
+```bash
+node src/cli.js index .        # index the repo you're in
+node src/cli.js serve          # → http://localhost:7900  (--port to change)
+```
+
+A zero-dependency, IDE-style explorer for the same index the agent queries — so a human can see what `lens` sees:
+
+- **FTS search** across the repo, ranked by bm25, with each snippet's **`~token` cost** and matched terms highlighted — the token-budgeted view an agent gets.
+- **The budget owns up to what it hid.** `search` packs the best chunks until the token window is full and *drops the rest* — and for a long time it reported only the survivors, so `4 hits` could mean "there are 4" or "4 of 124 fit". A budget that hides results while presenting itself as complete is worse than no budget. Now every search returns `matched` / `withheld` / `limited_by`, the header reads **`4 of 124 hits · ▬▬▬ ~2.4k / 2.4k tok`** with a meter showing how full the window is, and when the budget cost you something it says so and offers the fix: *“120 more chunks matched but didn't fit the 2.4k-token budget”* → **Widen to 4.8k**, one click, more hits. It also names the *right* ceiling — if the result cap `k` bound instead of the budget, raising the budget would change nothing, so it says so and offers to raise `k`. Same in the CLI (`--tokens` / `-k`). And when nothing was withheld it stays quiet — it never cries wolf.
+- **File tree** grouped by directory with a language-distribution bar, and a per-file **token-weight bar** (scaled to the heaviest file) so the pages that are expensive to read whole stand out at a glance — hover any file for its exact `~token` cost. Reading the right lines instead of the whole file is the point of `lens`, and the tree now shows you where that matters most.
+- **Scope a search to a directory** — `search` has always taken a path glob (agents use it) and the web view never offered it, so every search was the whole repo. Pick a directory and the search runs inside it (`src/*` covers the whole subtree), the header says where it looked, and a scope that matches nothing finds *nothing* rather than quietly searching everything. It composes with the treemap: that map tells you **which directory holds the repo's mass — click it and search inside it**. And because results are token-budgeted, narrowing the scope often returns *more* snippets: the budget stops being eaten by the heaviest file in the repo.
+- **The index knows when it's lying** — lens serves an index of a tree that keeps moving underneath it. Now it checks: if files changed, appeared or were deleted since you indexed, the rail says so (*“1 changed · 1 new · 1 deleted — search and the tree are answering from the old tree”*) and offers **↻ re-index**, which rebuilds without leaving the browser. Re-indexing is a `POST` (a `GET` must never make the server walk your disk).
+- **The treemap** (`◱ map`) — where the repo's tokens actually *are*. Every file is a rectangle whose **area is its token cost**, grouped by directory and coloured by language, so the mass of the repo is a shape you can see: in `lens` itself, one file is **55% of the entire index**. Those are the files an agent must never read whole — which is the entire argument for `lens`, finally visible. Hover for the exact cost, click to open it. (The layout compensates each directory's header/padding, so a small file in a small folder is drawn at the same tokens-per-pixel as a big one — a treemap that lies about area isn't worth drawing.)
+- **Recent files** — the files you've opened surface as clickable chips above the tree (remembered in the browser only, most-recent first); jump back to one in a click, or **clear ✕** to forget them.
+- **Syntax-highlighted reader** with line numbers and a live **symbol outline** that **tracks your scroll** — the symbol you're currently reading stays highlighted, and clicking one jumps to it (or ⇉ to find its references). **Filter the outline by kind** — chips (`fn` · `class` · `type` · `const` · …, each with a count) narrow a big file's symbol list to just the functions, or just the classes, in one click.
+- **Jump to symbol** — hit `⌘⇧O` (or the **⤳ jump** button on the outline) for a quick-nav palette over the open file: type to fuzzy-filter its symbols (matches highlighted), `↑`/`↓` to move, `Enter` to fly to one, `Esc` to dismiss — the same jump-to-symbol muscle memory as your editor, in the browser.
+- **Find references** — flip the search to `⇉ refs` mode (or hit ⇉ on an outline symbol) to list every line across the repo that mentions a symbol, grouped by file; click a line to open it.
+- **Copy path · copy permalink** — the reader header carries **⧉ path** (the file path, ready to paste into a prompt or a shell) and **⧉ link** (a permalink to exactly what you're reading). Click a line number to aim the permalink at that line: the URL bar becomes `…/#src/core.js:45`, and opening that link anywhere — another browser, another agent, a `recall` briefing — lands on that file at that line.
+- **Send a passage to cortex** — hit **🧠 → cortex** in the reader and the code you're looking at becomes a note in your [second brain](https://github.com/tools-for-agents/cortex): the lines you selected, or — if you selected nothing — the symbol you're currently reading. It lands as a fenced code block carrying lens's own `#path:line` permalink as its source, so the note can always walk back to the code. lens never writes: your browser POSTs to cortex's own `/api/capture` (point it elsewhere with `LENS_CORTEX_URL`).
+- **Light or dark** — a ◐ toggle (remembered per browser; follows your OS preference by default), with a syntax palette tuned for each.
+- **Keyboard-accessible** — every control has a visible focus ring, the file tree and symbol outline are operable with Tab + Enter (not just the mouse), and icon controls carry aria-labels.
+- Read-only; `outline`/`read` are guarded to indexed paths (no traversal).
+
+## MCP server (for agents)
+
+```jsonc
+{
+  "mcpServers": {
+    "lens": { "command": "node", "args": ["/abs/path/to/lens/mcp/mcp-server.js"],
+              "env": { "LENS_DB": "/abs/path/to/repo/.lens/index.db" } }
+  }
+}
+```
+
+### Tools
+
+| Tool | Use it to… |
+|---|---|
+| `lens_index` | Index / refresh a path (incremental: only changed files re-read). |
+| `lens_search` | Get ranked snippets within a **token budget** — use instead of reading files. |
+| `lens_references` | Find every line that mentions a symbol (whole-word), grouped by file — where is it used/defined? |
+| `lens_outline` | Get a file's symbol map (functions/classes/headings) with line numbers. |
+| `lens_read` | Read an exact line range. |
+| `lens_map` | List indexed files + language breakdown. |
+| `lens_stats` | Index statistics. |
+
+## How it works
+
+- Walks a tree (skipping `node_modules`, `.git`, build dirs, binaries, huge files).
+- Chunks each file into overlapping line windows and stores them in an **FTS5** virtual table.
+- `search` runs an FTS5 `MATCH` ranked by **bm25**, then fills results up to a token budget (≈4 chars/token).
+- `outline` is regex-based per language (js/ts, py, go, rust, java, ruby, sql, markdown…).
+- `index` is **incremental** — files unchanged since last index (by mtime) are skipped.
+
+## The agent toolkit
+
+`lens` is the **read-code** leg of the `tools-for-agents` toolkit:
+
+- 🛰️ [**agent-hq**](https://github.com/tools-for-agents/agent-hq) — coordinate (memory, kanban, dashboard)
+- 🔎 **lens** — read code (token-budgeted retrieval)
+- ⚒ [**anvil**](https://github.com/tools-for-agents/anvil) — run safely (sandboxed execution)
+- 🧠 [**cortex**](https://github.com/tools-for-agents/cortex) — remember (Obsidian-compatible second brain)
+- 🧭 [**scout**](https://github.com/tools-for-agents/scout) — read the web (clean, cached markdown)
+- 🎯 [**recall**](https://github.com/tools-for-agents/recall) — recall it all (one query across every store)
+
+MIT licensed.
+
+==============================================================================
+# anvil — run safely
+# https://github.com/tools-for-agents/anvil
+==============================================================================
+
+# ⚒ anvil
+
+[![ci](https://github.com/tools-for-agents/anvil/actions/workflows/ci.yml/badge.svg)](https://github.com/tools-for-agents/anvil/actions/workflows/ci.yml)
+
+**A throwaway Docker sandbox for agents.**
+
+Run code or shell commands in a **resource-limited, network-isolated, single-use container** and get back a structured result — `stdout`, `stderr`, `exit_code`, `timed_out`, `duration_ms`. So an agent can *verify* its work, reproduce a bug, or check output **without ever touching the host**.
+
+Part of [`tools-for-agents`](https://github.com/tools-for-agents). **Zero npm dependencies** — drives the `docker` CLI directly.
+
+---
+
+## Safe by default
+
+Every run is launched with:
+
+- `--network none` — no network unless you opt in (`network: "on"`)
+- `--memory 512m --cpus 1 --pids-limit 512` — bounded resources
+- `--cap-drop ALL --security-opt no-new-privileges` — minimal privileges
+- `--rm` ephemeral container, work dir is a fresh temp mount, removed after
+- a hard timeout (default 30s, max 300s) that `docker kill`s the container
+- optional `secure: true` → read-only rootfs + tmpfs `/tmp`
+
+## CLI
+
+```bash
+node src/cli.js check                          # docker version + presets
+node src/cli.js run python 'print(2**10)'      # → 1024
+node src/cli.js run node 'console.log(6*7)'    # → 42
+echo 'print("hi")' | node src/cli.js run python -
+node src/cli.js sh 'apk info 2>/dev/null | head'
+```
+
+## Run history (`anvil serve`)
+
+![anvil serve — the forge log: every sandbox run with its code, output, exit status and resource limits](docs/web-view.png)
+
+anvil is stateless by default. Set **`ANVIL_DB`** to record every run, then browse them in a dashboard:
+
+```bash
+export ANVIL_DB=./.anvil/runs.db          # opt in to the run log
+node src/cli.js run python 'print(2**10)'  # …runs are now recorded
+node src/cli.js serve                       # → http://localhost:7930  (--port to change)
+```
+
+A zero-dependency **forge log** of what the sandbox executed:
+
+- **Run list** — every execution with its language, status (ok / failed / timed out), exit code and duration, colour-coded at a glance.
+- **Run detail** — the exact code or command, full **stdout** and **stderr**, and the resource limits it ran under (network, memory, cpus, timeout). Each block has a one-click **⧉ copy** so you can lift the code or its output straight to the clipboard.
+- **Compare two runs** — hit **⇄ compare**, pick any two runs, and see a side-by-side line diff of their code, stdout and stderr, plus every limit that changed (`took 258ms → 559ms`, `mem 512m → 256m`).
+- **New run** — hit **＋ new run** to type a snippet (bash / node / python), execute it in a fresh sandbox right from the dashboard, and watch the result open in the detail. Runs go through the same guarded, network-off container as the CLI (⌘/Ctrl+Enter to run). Pick a **resource profile** in one click — 🔒 **strict** (network off · 256m · 0.5 cpu · 15s), ⚙ **default** (512m · 1 cpu · 30s), or 🌐 **networked** (network on · 60s) — and the sandbox's memory, CPU, timeout and network are set for you (recorded with the run).
+- **Run code against something** — `run()` has always taken `{ path: content }` files and written them into `/work` beside your snippet (agents use it), and the form never offered it. Now **＋ file** adds fixture files — a module and its test, a parser and a sample payload — and **＋ stdin** pipes input to the process. A snippet on its own can only prove syntax; a snippet with a fixture can prove behaviour. Paths that try to climb out of the sandbox are refused before a container starts.
+- **Run a real repo, from the browser** — the new-run form used to do snippets only, so the dashboard couldn't do the thing anvil is *for*. Switch it to **command in an image**, point **mount** at a directory, and it runs any command in any image with your repo mounted **read-only at `/repo`** — `cd /repo && npm test` — without the repo ever leaving your disk or being writable by the container (`touch /repo/x` → *Read-only file system*). There's a **read-only rootfs** switch too. A mount that doesn't exist is refused in the form, before docker gets a chance to fail at you.
+- **Watch it run** — the sandbox writes as it goes, so anvil now *says* so as it goes: hit **▶ run** and the container's stdout/stderr stream into a live console (with an elapsed timer) instead of leaving you staring at a spinner until it returns. A 30-second run no longer looks identical to a hung one. Streaming is opt-in on the API (`POST /api/exec?stream=1` → an event stream ending with the logged run), and `run({ onData })` gives the same live chunks to any caller — the CLI, an agent, anything.
+- **Re-run** — hit **↻ re-run** on any run to re-execute its exact code and limits in a fresh sandbox; the new run is logged and opened, so you can compare it against the original.
+- **Keep a run in cortex** — a run is *evidence*: this code, in this sandbox, produced this output. Hit **🧠 → cortex** and it becomes a note in your [second brain](https://github.com/tools-for-agents/cortex) — status, exit code, duration and the resource limits it ran under, the code as a fenced block, and its stdout/stderr — carrying a `#run=<id>` link straight back to the run in the forge log. anvil never writes: your browser POSTs to cortex's own `/api/capture` (point it elsewhere with `ANVIL_CORTEX_URL`).
+- **Link to a run** — opening a run puts it in the URL (`…/#run=<id>`), so any run in the log can be linked, bookmarked or handed to someone else.
+- **Prune the log** — the forge log grows with every run, so **✕ delete** drops a single noisy run and **🗑 clear** empties the whole log. Both arm on the first click and only fire on the second (clicking away, or waiting, cancels), and both live behind `DELETE` on the API — a stray `GET` can never prune anything.
+- **Search** — a live search box filters the log by **code, command, language or captured output** as you type (matches highlighted, with a running `3 / 7` count); `Esc` clears it. Composes with the status filters, so you can find "that `curl` run that failed" in a long history.
+- **Filters + stats** — narrow to failures, see ok/failed counts, average duration, and a **by-language** breakdown of everything the sandbox has run (`python 3 · node 1 · bash 1`).
+- **Keyboard navigation** — press **`j`/`k`** (or **↑/↓**) to move a cursor through the run list and open each run as you go — browse the whole forge log from the keyboard without touching the mouse (it stands down while you're typing in the search box or in compare mode).
+- **Keyboard-accessible** — every control has a visible focus ring, and the run rows open with Tab + Enter (not just the mouse), with aria-labels throughout.
+
+Logging is opt-in, fire-and-forget and fully guarded — it never slows or breaks a run. Try the demo without Docker: `ANVIL_DB=./.anvil/runs.db node scripts/seed.js` then `anvil serve`.
+
+## MCP server (for agents)
+
+```jsonc
+{
+  "mcpServers": {
+    "anvil": { "command": "node", "args": ["/abs/path/to/anvil/mcp/mcp-server.js"] }
+  }
+}
+```
+
+### Tools
+
+| Tool | Use it to… |
+|---|---|
+| `anvil_run_code` | Run a `bash` / `node` / `python` snippet, get structured output. |
+| `anvil_run_command` | Run a shell command with supplied `files` and/or a host dir mounted **read-only** at `/repo` (e.g. run a test suite). |
+| `anvil_check` | Docker availability + language presets. |
+
+### Example: verify a repo's syntax without copying it
+
+```json
+{ "name": "anvil_run_command",
+  "arguments": { "image": "node:22-alpine", "mount": "/path/to/repo/src",
+                 "cmd": "node --check /repo/core.js && echo OK" } }
+```
+
+## Result shape
+
+```json
+{ "ok": true, "exit_code": 0, "timed_out": false, "duration_ms": 178,
+  "image": "python:3.12-alpine", "stdout": "...", "stderr": "" }
+```
+
+## The agent toolkit
+
+`anvil` is the **execute/verify** leg of the `tools-for-agents` toolkit:
+
+- 🛰️ [**agent-hq**](https://github.com/tools-for-agents/agent-hq) — coordinate (memory, kanban, dashboard)
+- 🔎 [**lens**](https://github.com/tools-for-agents/lens) — read code (token-budgeted retrieval)
+- ⚒ **anvil** — run safely (sandboxed execution)
+- 🧠 [**cortex**](https://github.com/tools-for-agents/cortex) — remember (Obsidian-compatible second brain)
+- 🧭 [**scout**](https://github.com/tools-for-agents/scout) — read the web (clean, cached markdown)
+- 🎯 [**recall**](https://github.com/tools-for-agents/recall) — recall it all (one query across every store)
+
+MIT licensed.
+
+==============================================================================
+# cortex — remember
+# https://github.com/tools-for-agents/cortex
+==============================================================================
+
+# 🧠 cortex
+
+[![ci](https://github.com/tools-for-agents/cortex/actions/workflows/ci.yml/badge.svg)](https://github.com/tools-for-agents/cortex/actions/workflows/ci.yml)
+
+**A local, Obsidian-compatible second brain for agents.**
+
+An agent that re-derives the same facts every session is spending tokens to stay ignorant. `cortex` gives it a **durable, wikilinked knowledge base** on disk: it distils what it learns into small interconnected markdown notes, then recalls *just enough* of them later. Notes link to each other with `[[wikilinks]]`, so the brain becomes a **graph** you can traverse — backlinks, related notes, hubs, orphans — not a flat pile of memories.
+
+Every note is a plain markdown file in a folder, so **you can open the exact same vault in [Obsidian](https://obsidian.md)** and watch the graph grow. Based on Andrej Karpathy's *LLM Wiki* pattern: compile knowledge once into an interconnected wiki instead of asking the model the same questions over and over.
+
+Part of [`tools-for-agents`](https://github.com/tools-for-agents). **Zero dependencies** — Node standard library + built-in `node:sqlite` with FTS5. The markdown files are the source of truth; the SQLite index is derived and rebuildable at any time.
+
+---
+
+## Why
+
+| Without cortex | With cortex |
+|---|---|
+| Re-explain the same architecture every session | `cortex_search "our auth design"` → the note you already wrote |
+| Memories are a flat list — no structure | Notes link with `[[wikilinks]]` → a real knowledge graph with backlinks |
+| "What did I decide about X, and what's related?" | `cortex_related "X"` → linked notes, co-citations, shared tags |
+| Memory locked inside one tool | A folder of markdown you (and Obsidian) fully own and can edit |
+| Knowledge grows unmanaged | `cortex_graph` surfaces orphans + broken links to fill in |
+
+## The vault
+
+`cortex` keeps notes in `$CORTEX_VAULT` (default `./vault`), organised by type — the Karpathy LLM-Wiki layout:
+
+```
+vault/
+├── concepts/     # ideas, frameworks, theories
+├── entities/     # people, orgs, products, tools
+├── sources/      # captured raw material + summaries
+├── synthesis/    # comparisons, analyses, themes
+├── daily/        # timestamped journal, one file per day
+├── notes/        # anything else
+└── .cortex/      # the derived SQLite index (safe to delete & rebuild)
+```
+
+A note is just markdown with YAML frontmatter:
+
+```markdown
+---
+title: Backpropagation
+type: concept
+tags: [deeplearning]
+---
+
+The algorithm that trains [[Neural Networks]] by propagating error via the
+chain rule. Uses [[Gradient Descent]]. #optimization
+```
+
+Write `[[Other Note]]` to link and `#tags` to categorise. Links to notes that don't exist yet are **broken links** — cortex tracks them as suggestions, and they **heal automatically** the moment you write that note.
+
+## CLI
+
+```bash
+cortex write "Neural Networks" --type concept --tags ml,ai \
+  --body "Function approximator. Trained by [[Backpropagation]]. #deeplearning"
+cortex write "Neural Networks" --append --body "Modern variants: [[Transformers]]."
+cortex capture "raw article text…" --source https://example.com   # inbox for later
+cortex search "train network error" -k 6 --tag deeplearning        # ranked snippets
+cortex read "Neural Networks"                                      # full note
+cortex links "Neural Networks" --in                                # backlinks
+cortex related "Backpropagation"                                   # graph neighbourhood
+cortex suggest "Backpropagation"                                   # notes to link that aren't linked yet
+cortex lint                                                        # health report: orphans/broken/untagged/stubs
+cortex tags | cortex tags deeplearning                             # tags → notes
+cortex graph                                                       # hubs, orphans, broken links
+cortex daily "shipped the retriever"                               # journal
+cortex sync                                                        # re-index after Obsidian edits
+cortex serve --port 7800                                           # live graph web view
+cortex stats
+```
+
+Vault location: `$CORTEX_VAULT` (default `./vault`).
+
+## Web view
+
+![cortex serve — the knowledge-graph explorer: notes linked into a force-directed graph](docs/web-view.png)
+
+`cortex serve` starts a **zero-dependency** web app at `http://localhost:7800` — a premium, Obsidian-style **knowledge graph** of your vault rendered on canvas: glowing nodes (sized by connections, coloured by type) joined by `[[wikilink]]` synapses.
+
+- **Hover** any note to trace its neighbourhood — connected notes light up with energy flowing along the links, everything else dims — and a tooltip previews the note at a glance: its **type**, connection count, a **★ hub** marker for the most-linked notes, and its **`#tags`**, so you can read what a note is about without opening it.
+- **Click** a note to read it in a side panel (fetched live): its body with clickable `[[wikilinks]]`, its tags, and its *links to* / *linked from* lists — navigate note-to-note with a back button.
+- **Related notes** — the panel also surfaces notes that share a tag but *aren't linked yet* (ranked by shared-tag count), each showing the tag they have in common — the latent connections worth writing, so your second brain keeps knitting itself together.
+- **Search** from the top bar (ranked dropdown, keyboard-navigable), **filter** by type from the legend, click the stat for a **graph overview** — hubs, type breakdown, and the gaps worth closing: **orphans** (notes with no links, ready to connect) and **unwritten** notes (broken-link targets to write). Click an orphan to open it, or an unwritten one to fly to what references it.
+- Drag to rearrange, scroll/pinch to zoom, recenter, and a light/dark theme toggle.
+- **Path finder** — hit the **⤳ path** control, then click two notes: cortex traces the **shortest chain of `[[wikilinks]]` connecting them** (breadth-first over the link graph), lighting the route in a pulse from start to end and dimming everything else, with a readout of the hops (`Backpropagation → Neural Networks → Transformers · 2 hops`). The answer to "how are these two ideas related?" — or "are they connected at all?" — at a glance.
+- **Focus mode** — open a note and hit **◎ focus neighbourhood** to isolate its corner of the brain: everything within a **1 / 2 / 3-hop** radius stays lit, everything else fades. Dial the radius live and see how far the idea reaches (`recall · 2 hops · 11 notes`) — a clean read of one note's context without the whole graph competing for attention.
+- **Write a note from the graph** — hit **＋** (or `n`) to author a note straight into the vault: title, type, tags, markdown body with `[[wikilinks]]`. And the graph's **ghosts stop being dead ends**: it has always shown you *unwritten* notes — a dashed node where a `[[wikilink]]` points at nothing — and then refused to help. Now **clicking a ghost opens the composer with its title already in place** (*“Something already links to Raft — writing it heals that link into the graph”*). Write it, and the broken link becomes a real edge. Writing is a `POST` (a `GET` reads a note; only a request that means to can rewrite the vault).
+- **The journal** — hit **✎** (or `j`) and write a line into today: *what happened*. It appends a timestamped bullet to today's note, and the panel reads the days back — the last leg of cortex's own loop (*recall → capture → distil → connect → **journal***) was the one thing the brain could write and never show. Today becomes a real node in the graph like any other note, so the day you did the work is linked to the work.
+- **Vault health** — a second brain that can't tell you it's decaying will decay quietly. `lint` has always known the vault's condition — what's **orphaned**, what **points at nothing**, what's **untagged**, what's a **stub**, and what has **gone quiet** — and nothing ever showed it: the graph *draws* broken links as ghosts but never counted them. Now a health chip (`13 to tend` / `vault is healthy`) opens the whole report, and every issue is one click from being fixed: a broken link opens the composer with the missing note's title already in place — **write it and the link heals itself**. Note that fixing one thing can raise the count, honestly: heal a link by writing a two-line note, and it shows up as untagged and barely written. It is not flattering you.
+- **The inbox** — four tools now capture *into* cortex ([`recall`](https://github.com/tools-for-agents/recall), [`lens`](https://github.com/tools-for-agents/lens), [`anvil`](https://github.com/tools-for-agents/anvil), [`scout`](https://github.com/tools-for-agents/scout)), and every capture lands untagged and unlinked — a graph quietly accumulating dead ends. The **📥 inbox** (with a count badge) is the maintenance loop, made one-click: it lists every note nothing links to, says *why* it's stranded (`orphan` · `untagged` · `stub`), and proposes what it belongs with — **the notes it already resembles** (FTS-similar but unlinked) and **the tags those notes carry**. Pick, hit *weave in*, and cortex writes the tags into the note's frontmatter and a `Related: [[…]]` line into its body — real edits to the file, so the links heal into the graph like any other. Agents get the same loop via `cortex_triage` + `cortex_weave`.
+- **Recency heat** — hit the **◔ last updated** control and the graph re-shades by *time*: notes you touched today burn amber, the ones cooling off fade toward slate, and the parts of your brain you have not thought about in a year go cold. The scale is **logarithmic in age** (a day vs a week matters as much as a month vs half a year), relative to your own vault's span — so the dormant corners are obvious whether you write daily or once a season. Every tooltip also shows *updated 3h ago*.
+- **Capture from anywhere** — `POST /api/capture` is the one write the web view exposes (a `GET` can never create a note), and it is what lets the rest of the toolkit *write into your brain*: hit **🧠 → cortex** on any [`recall`](https://github.com/tools-for-agents/recall) result — something the team knew, a page you read, a line of code — and it lands here as a note, carrying a link back to where it came from. The graph is watching the vault, so it blooms in live.
+- **Minimap** — a small overview of the whole brain sits in the top-left, with a rectangle marking the part you're looking at; click or drag on it to fly across a large graph without losing your place.
+- **Keyboard-accessible** — every control has a visible focus ring, and the legend type-filters, note-panel links and related notes are all reachable with Tab + Enter (not just the mouse), with aria-labels throughout.
+- **Live** — the server watches the vault and pushes updates over SSE, so the graph grows in real time as your agent (or you, in Obsidian) writes notes. It's the same brain your agent writes to — watch it grow.
+
+Want a graph to look at right away? Seed a starter vault (interlinked notes about the toolkit itself):
+
+```bash
+CORTEX_VAULT=./vault node scripts/seed.js   # 12 connected notes, 0 orphans
+node src/cli.js serve
+```
+
+## MCP server (for agents)
+
+```jsonc
+{
+  "mcpServers": {
+    "cortex": { "command": "node", "args": ["/abs/path/to/cortex/mcp/mcp-server.js"],
+                "env": { "CORTEX_VAULT": "/abs/path/to/your/vault" } }
+  }
+}
+```
+
+### Tools
+
+| Tool | Use it to… |
+|---|---|
+| `cortex_write` | Create/update a note — link with `[[wikilinks]]`, tag with `#tags`. Distil learnings into small interconnected notes. |
+| `cortex_capture` | Stash raw material (article, transcript, finding) into the source inbox to distil later. |
+| `cortex_search` | Recall what you already know as ranked, **token-budgeted** snippets — instead of re-deriving it. |
+| `cortex_read` | Read a full note by title / slug / alias. |
+| `cortex_links` | A note's backlinks (in), forward links (out, broken ones flagged), or both. |
+| `cortex_related` | Notes related by direct links, co-citation and shared tags. |
+| `cortex_suggest` | Notes this one *should* link to but doesn't yet — weave orphans into the graph. |
+| `cortex_lint` | Vault health: orphans, broken links (a to-do list of notes to write), untagged notes, stubs. |
+| `cortex_tags` | All tags with counts, or the notes for one tag. |
+| `cortex_graph` | Graph health: hub notes, orphans, and broken links worth writing. |
+| `cortex_recent` | Most recently updated notes. |
+| `cortex_daily` | Append a timestamped line to today's journal — a trail across sessions. |
+| `cortex_sync` | Re-index the vault after files change on disk (e.g. edited in Obsidian). |
+| `cortex_stats` | Note / link / tag counts, broken links, types. |
+
+### A good loop for an agent
+
+1. **Recall first** — `cortex_search` before solving; you may have already worked this out.
+2. **Capture** raw findings with `cortex_capture` as you go.
+3. **Distil** into small `cortex_write` notes, each linking to related concepts with `[[…]]`.
+4. **Connect** — check `cortex_graph` for orphans and broken links, and write the missing notes.
+5. **Journal** the session with `cortex_daily` so the next run has a trail.
+
+## How it works
+
+- **Files are truth.** Each note is a markdown file with YAML frontmatter; the SQLite index is derived from them and rebuilt by `sync` (incremental by mtime). Delete `.cortex/` any time — it regenerates.
+- **Search** is FTS5 (`porter unicode61`) ranked by **bm25**, filling snippets up to a token budget (≈4 chars/token) — the same discipline as [`lens`](../lens), pointed at your brain instead of a codebase.
+- **The graph** is a link table. Every `[[target]]` is resolved to a note by slug, title or alias; unresolved targets are kept as broken links and heal automatically when the target note appears.
+- **Slugs** are unicode-aware (Turkish and accented titles transliterate to clean ascii filenames).
+- **Obsidian-compatible** end to end: open `$CORTEX_VAULT` as a vault and the wikilinks, tags and graph view all just work.
+
+==============================================================================
+# scout — read the web
+# https://github.com/tools-for-agents/scout
+==============================================================================
+
+# 🧭 scout
+
+[![ci](https://github.com/tools-for-agents/scout/actions/workflows/ci.yml/badge.svg)](https://github.com/tools-for-agents/scout/actions/workflows/ci.yml)
+
+**The agent's web reader.**
+
+Raw HTML is a terrible thing to feed a model — a 380 KB Wikipedia page is ~95k tokens of markup for a few KB of prose. `scout` fetches a URL and gives back **clean, readable markdown** (headings, links, code, lists — the substance, none of the chrome), typically **~90% smaller** than the HTML. Every page is **cached**, so re-reading is free and your **whole reading history is searchable**.
+
+Part of [`tools-for-agents`](https://github.com/tools-for-agents). **Zero dependencies** — Node's built-in `fetch` + a regex "readability-lite" extractor + `node:sqlite` (FTS5). Pairs naturally with [`cortex`](../cortex): scout clips the web, cortex files it into your second brain.
+
+---
+
+## Why
+
+| Without scout | With scout |
+|---|---|
+| Feed raw HTML to the model → ~95k tokens of `<div>`s | `scout_fetch` → ~5k tokens of clean prose |
+| Re-fetch the same page every time you need it | Cached — re-reads are free (`--fresh` to bust) |
+| "What did that article say about X?" → fetch again, re-read | `scout_search "X"` across everything you've read |
+| No memory of what you've researched | A searchable reading history on disk |
+
+## CLI
+
+```bash
+scout fetch https://en.wikipedia.org/wiki/Zettelkasten     # → clean markdown (cached)
+scout fetch https://example.com/post --tokens 3000         # cap the returned size
+scout fetch https://api.example.com/data.json --raw        # skip extraction
+scout search "luhmann note linking" -k 5                   # search your reading history
+scout links https://news.ycombinator.com --limit 30        # outbound links to crawl next
+scout list | scout forget https://old.example.com | scout stats
+scout serve                                                # → reading-room web view :7950
+```
+
+Cache location: `$SCOUT_DB` (default `./.scout/cache.db`).
+
+## Reading room (`scout serve`)
+
+![scout serve — the reading room: a shelf of cached pages and a clean serif reader](docs/web-view.png)
+
+```bash
+scout fetch https://en.wikipedia.org/wiki/Zettelkasten     # read a few pages…
+scout serve                                                # → http://localhost:7950  (--port to change)
+```
+
+A calm, zero-dependency web view of everything scout has read — the same cache the agent recalls from:
+
+- **Read a page from here** — paste a url into the reading room and scout fetches it, strips it to clean markdown, caches it, and opens it. Until now the web view could only ever show what the CLI or an agent had already fetched — it could read your library but never add to it. It writes to the same read-through cache the agent uses, so anything you read here is instantly searchable and instantly recallable by [`recall`](https://github.com/tools-for-agents/recall). Fetching is a `POST` (it reaches the network *and* writes), and only `http(s)` urls are accepted.
+- **The shelf** — every cached page as a card (title, source, when it was read, `~token` size), newest first.
+- **Filter by host** — chips above the shelf (each with a count) narrow the list to one site in a click — read everything you've kept from `en.wikipedia.org`, or just your own docs — and clear back to all.
+- **Recent reads** — the articles you've opened surface as clickable chips above the shelf (remembered in the browser only, most-recent first); jump back to one in a click, or **clear ✕** to forget them.
+- **Reading overview** — click the shelf stats for the whole history in the unit that actually matters: **tokens**. Reading those pages as raw HTML would have cost *~10.1k tokens*; scout kept *~1.5k* — so the headline is **~8.7k tokens saved (86% lighter)**, which is the entire pitch, finally shown. Underneath: **where you read** (top hosts, click one to narrow the shelf), **reading over time** (pages per day), and your **heaviest reads** — ranked by what the raw HTML *would* have cost (`~3.9k → ~550`), so the pages scout saved you the most on are named. Agents get the same digest from the `scout_overview` MCP tool.
+- **Re-read it — and find out if it changed** — a cache you can't refresh is a fossil: `fresh` has always existed on `fetchUrl` and the reading room never set it, so a page you read a month ago was the page you'd read forever. **↻ re-read** pulls it again, and answers the question that actually matters — not *“here it is again”* but ***did it change***: *“Unchanged since you read it — what you took from it still holds”*, or *“This page **changed** — 3 lines added, 1 removed. What you took from it may be out of date.”* Reformatting isn't a change; only the words are. And **✕ forget** drops a page from the library (arms first, then fires), gone from the shelf *and* from search.
+- **Where this page points** — every article now shows its outbound links, read straight from the clean markdown scout kept (**no network trip**). Each one says whether you've **already read it** — those open from your library — and the ones you haven't are **one click from being read**: scout fetches, strips and opens them, and the shelf grows. Following the web from inside your own reading room, an edge at a time.
+- **Search** your whole reading history (FTS5 + bm25) with matched terms highlighted.
+- **The reader** — clean, comfortable long-form: the extracted markdown rendered with real typographic hierarchy (including **images**), in a **paper** or **night** theme.
+- **Keep it in cortex** — hit **🧠 → cortex** in the reader and the article becomes a note in your [second brain](https://github.com/tools-for-agents/cortex): the clean markdown, cited to the **original page** (an article's source is the web, not scout's copy of it) with a link back to the cached read alongside. This is the `scout fetch | cortex capture` loop the toolkit was designed around — read the web, keep what matters — finally one click. scout never writes: your browser POSTs to cortex's own `/api/capture` (point it elsewhere with `SCOUT_CORTEX_URL`).
+- **Copy markdown** — one **⧉ copy markdown** button in the reader lifts the whole article's clean markdown to your clipboard — the same tokens an agent would get from `scout_fetch`, ready to paste into a note, a prompt, or [`cortex`](../cortex).
+- **More from this site** — the foot of every article lists the other pages you've read from the **same host**, newest first, each a click away — so following a source you already trust is one hop, not a re-search.
+- **Table of contents** — any article with a couple of headings gets a **☰ contents** button; open it for an outline of the page, click a heading to jump to that section, and the current section stays highlighted as you scroll.
+- **Reading progress** — a slim bar across the top of the reader fills as you scroll, so you always know how far through a long piece you are.
+- **Keyboard-accessible** — every control has a visible focus ring, the article cards open with Tab + Enter (not just the mouse), and icon controls carry aria-labels.
+- Read-only and **cache-only** — the web view never touches the network; `/api/page` returns 404 for anything not already read.
+
+Try the demo without a network fetch: `node scripts/seed.js` then `scout serve`.
+
+## MCP server (for agents)
+
+```jsonc
+{
+  "mcpServers": {
+    "scout": { "command": "node", "args": ["/abs/path/to/scout/mcp/mcp-server.js"],
+               "env": { "SCOUT_DB": "/abs/path/to/.scout/cache.db" } }
+  }
+}
+```
+
+### Tools
+
+| Tool | Use it to… |
+|---|---|
+| `scout_fetch` | Read a web page as clean, token-budgeted markdown (cached; `fresh` to re-fetch). |
+| `scout_search` | Search every page you've already read — ranked snippets, no re-fetch. |
+| `scout_links` | Extract a page's outbound links (absolute URLs + text) to decide where to go next. |
+| `scout_list` | Your recent reading history. |
+| `scout_forget` | Drop a page from the cache. |
+| `scout_stats` | Pages cached, bytes stored, last fetch. |
+
+### The research loop (with cortex)
+
+1. `scout_fetch` the page → clean markdown.
+2. `scout_search` your history to connect it to what you've already read.
+3. `cortex_capture` the useful parts into your second brain, then `cortex_write` distilled, `[[linked]]` notes.
+4. Next time, `cortex_search` / `scout_search` recall it instead of fetching the web again.
+
+## How it works
+
+- **Fetch** uses Node's global `fetch` (follows redirects, 20 s timeout, a plain user-agent).
+- **Extraction** is regex-based readability-lite: strip `<script>/<style>/<nav>/<footer>/…`, pick the densest `<article>`/`<main>`/`<body>` region, convert headings, links (resolved to absolute), **content images** (`<img>`/`<figure>` → markdown, tracking pixels dropped), code, lists, bold/italic, and decode HTML entities. Not a full DOM parse — but it reliably turns an article into readable prose at a fraction of the tokens.
+- **Cache** is a `node:sqlite` table keyed by URL; the same URL returns instantly unless `fresh`. An FTS5 mirror makes the whole history searchable by **bm25**, filled to a token budget (≈4 chars/token) — the same discipline as [`lens`](../lens) and [`cortex`](../cortex).
+- Non-HTML responses (JSON, plain text) are stored verbatim.
+
+==============================================================================
+# recall — recall it all
+# https://github.com/tools-for-agents/recall
+==============================================================================
+
+# 🎯 recall
+
+[![ci](https://github.com/tools-for-agents/recall/actions/workflows/ci.yml/badge.svg)](https://github.com/tools-for-agents/recall/actions/workflows/ci.yml)
+
+**One query across an agent's whole memory.**
+
+An agent's knowledge ends up scattered: some in its second brain ([`cortex`](../cortex)), some in the team's shared memory ([`agent-hq`](../agent-hq)), some in what it's read ([`scout`](../scout)), some in its code ([`lens`](../lens)). Searching each by hand is friction — so agents skip it and re-derive what they already knew. `recall` fixes that: **one query, every store, one ranked briefing** — token-budgeted, each hit tagged by source. Run it at the **start of a task** to load exactly the relevant context.
+
+Part of [`tools-for-agents`](https://github.com/tools-for-agents). **Zero dependencies** — `node:sqlite` over the sibling tools' existing FTS5 indexes, **read-only**. It doesn't own any data; it federates theirs. Any store that isn't present is simply skipped.
+
+---
+
+## Why
+
+| Without recall | With recall |
+|---|---|
+| Search cortex, then scout, then lens — three tools, three calls | `recall "topic"` → one briefing across all three |
+| Friction → skip the search → re-derive what you knew | One cheap call at task start loads the right context |
+| Results in three formats, no shared ranking | Normalised, balanced across sources, in a token budget |
+
+## The stores
+
+| Source | Tool | What it searches | Found at |
+|---|---|---|---|
+| 🧠 `brain` | [cortex](../cortex) | your notes / second brain | `$CORTEX_VAULT/.cortex/index.db` or `$RECALL_CORTEX_DB` |
+| 🛰️ `team` | [agent-hq](../agent-hq) | the team's shared memory (over HTTP) | `$HQ_URL` or `$RECALL_HQ_URL` (default `http://localhost:7700`) |
+| 🧭 `reading` | [scout](../scout) | pages you've read | `$SCOUT_DB` or `$RECALL_SCOUT_DB` |
+| 🔎 `code` | [lens](../lens) | your indexed code/docs | `$LENS_DB` or `$RECALL_LENS_DB` |
+
+Each store is optional and auto-discovered — the `team` store is included whenever agent-hq is reachable, and skipped (fast) when it isn't.
+
+## CLI
+
+```bash
+recall "auth token refresh design"            # everything you know about it
+recall "kafka retries" -k 12 --tokens 3000    # more hits, bigger budget
+recall "graph traversal" --only brain,code    # restrict to some stores
+recall status                                 # which stores are available + counts
+recall serve                                  # unified-briefing web console → :7980
+```
+
+## Web console (`recall serve`)
+
+![recall serve — the unified briefing console: one query interleaved across all four stores, each hit linking into its owning tool](docs/web-view.png)
+
+```bash
+recall serve                                  # → http://localhost:7980  (--port to change)
+```
+
+A zero-dependency **unified-briefing console**: one query, one interleaved briefing across every store — visibly converged.
+
+- **The convergence** — the four sources (🧠 cortex, 🛰️ agent-hq, 🧭 scout, 🔎 lens) each keep their own colour, and every result card is tagged and tinted by where it came from, so the round-robin interleave is legible at a glance.
+- **Live sources rail** — which stores are available and how many entries each holds; click a source to include/exclude it from the query (`--only` under the hood).
+- **Source breakdown** — the briefing header shows how the result is composed: a proportional bar + a per-source count (`🧠 4 · 🛰️ 4 · 🧭 3 · 🔎 3`), each in its store's colour, so you can see the federation balance at a glance.
+- **What's new since you last asked** — recall is the tool you run *first*, at the start of a task; the second time you ask a question, what you actually want is what **changed**. Each query remembers the hits you've already seen, so re-asking it surfaces a banner (*“3 new results since you last asked this · 2h ago”*) and marks each new hit — a decision the team made this morning, a page you read yesterday, a function that didn't exist last week. Hit **✓ mark seen** to acknowledge them. It works even when the first ask found *nothing*: ask a question with no answer yet, and the answer arriving later is exactly what gets flagged. Remembered per browser.
+- **Token-budget dial** — a briefing is defined by its budget, so the console makes it something you can *turn*: drag the **budget** slider (400 → 8k tokens) and the briefing re-fills live — shrink it and it sheds its weakest hits, widen it and it takes on more. The readout shows what you actually spent against what you allowed (`10 hits · ~282 / 400 tok`) with a fill bar, so "my agent has 400 tokens for context — what does it get?" is a question you can just *look at*. A low fill on a wide budget is its own answer: your stores have nothing more to say. Remembered per browser.
+- **It tells you who it actually asked** — the one lie a federated search must never tell: a briefing that reached three of four stores looks *exactly* like one that reached all four and found nothing in the fourth. *“The team doesn't know about X”* and *“I never asked the team”* are not the same sentence. Every briefing now says **searched 3 of 4 stores**, and if a store you expected didn't answer — the platform went down, an index went missing — it says so in plain words and offers a **retry**. A store you deliberately toggled off is not missing; you chose not to ask it.
+- **Keep the whole briefing** — a briefing used to be a dead end: you could act on one hit, or copy the lot to your clipboard, but the *answer* — four stores, reconciled, for one question — evaporated the moment you typed the next query. **🧠 keep briefing** writes it into [cortex](https://github.com/tools-for-agents/cortex) as **one note titled with the question**, every hit linked back to the tool it came from. Ask the same question next week and the new answer **appends**: the note becomes the running record of what the company knows about that question, and how that changed.
+- **Send a hit to cortex** — the toolkit's one cross-tool *write*. Everything else here only cross-*links*; hit **🧠 → cortex** on any result — something the team decided, a page you read, a line of code — and it becomes a note in your [second brain](https://github.com/tools-for-agents/cortex), carrying a link back to where it came from (capturing the same title again appends rather than clobbers). That closes the loop research always leaves open: you found it, now you keep it. recall itself stays strictly read-only — your browser asks cortex to write, through cortex's own `POST /api/capture` — and brain hits show no button, because they already live there.
+- **Expand a hit** — hit **⌄ more** on any result to preview the full note, page or code chunk behind it inline (read straight from the store, capped) — read a little deeper without leaving the briefing; **⌃ less** collapses it, and **open in <tool> ↗** still takes you to the source.
+- **Group by source** — the default briefing interleaves the stores round-robin (balanced), but hit **⊞ group** to re-lay-out the *same* hits clustered under per-source headers, so you can read everything one store returned together — one glance for "what does the team know", another for "what's in the code". The toggle is remembered per browser.
+- **Keyboard-navigable** — after a search, **↑/↓** move a selection through the hits and **Enter** opens the selected one in its owning tool (the deep-link); **Esc** returns to the search box. Every control has a visible focus ring, the source toggles work with Tab + Enter, and controls carry aria-labels — never leave the keyboard between "recall it" and "open it".
+- **Copy as markdown** — one click grabs the whole briefing as a markdown list (each hit's title linked to its deep-link, source, ref and a quoted excerpt) — ready to paste into a PR, a note or a message.
+- **Token budget** — the briefing fills to a budget, shown as you search.
+- **Recent queries** — every search you run is remembered (in the browser only); focus the empty search box and a **recent queries** strip drops down — click a chip to re-run it instantly, or **clear ✕** to forget them. Incremental typing collapses to the final query, so the list stays the eight distinct things you actually looked for.
+- **Saved searches** — hit **☆ save** on any briefing to pin that query to a persistent **saved searches** list in the rail (distinct from the ephemeral recents — these survive across sessions). Click a saved chip to re-run it, **✕** to drop one, or **clear** them all — a standing set of the questions you ask your memory again and again.
+- **Light or dark** — a ◐ toggle (remembered per browser; follows your OS preference by default); the four source colours stay legible on either ground.
+- **Cross-tool links** — every hit has an **“open in <tool> ↗”** button that deep-links straight into the owning tool's own web view (the cortex note, the scout page, the lens file at its line, the agent-hq memory). This is what makes the toolkit one *system*: recall finds it, the tool opens it. Point the links at your running web views with `RECALL_CORTEX_URL` / `RECALL_SCOUT_URL` / `RECALL_LENS_URL` / `RECALL_HQ_URL` (defaults `:7800` / `:7950` / `:7900` / `:7700`).
+- Read-only; missing stores and an offline agent-hq degrade silently, exactly like the CLI. Point it at your stores with `CORTEX_VAULT` / `SCOUT_DB` / `LENS_DB` / `HQ_URL`.
+
+## MCP server (for agents)
+
+```jsonc
+{
+  "mcpServers": {
+    "recall": { "command": "node", "args": ["/abs/path/to/recall/mcp/mcp-server.js"],
+      "env": { "CORTEX_VAULT": "/abs/path/to/vault", "SCOUT_DB": "/abs/path/to/.scout/cache.db",
+               "LENS_DB": "/abs/path/to/.lens/index.db", "HQ_URL": "http://localhost:7700" } }
+  }
+}
+```
+
+### Tools
+
+| Tool | Use it to… |
+|---|---|
+| `recall_search` | Load a token-budgeted briefing across your brain, reading and code in one call. Use it **first** when starting a task. |
+| `recall_status` | See which stores are available and how many entries each holds. |
+
+## How it works
+
+- Runs the query as an FTS5 `MATCH` against each store's index and normalises every hit to `{ source, title, ref, meta, excerpt, score }`.
+- bm25 scores aren't comparable across separate databases, so results are **interleaved round-robin** across sources (best-of-each, then next-best-of-each…) and filled to a token budget — a balanced briefing rather than one store drowning out the rest.
+- SQLite stores are opened **read-only**; recall never writes. Delete or rebuild any underlying index freely.
+- The `team` store is queried over agent-hq's HTTP memory API (per-term, in parallel, with a short timeout) and degrades silently when the platform isn't running.
+- It depends only on the sibling tools' **stable interfaces** — their table schemas (`notes_fts`, `pages_fts`, `chunks`) and agent-hq's `/api/memory` — not their code, so each tool stays independent.
+
+==============================================================================
+# iris — see
+# https://github.com/tools-for-agents/iris
+==============================================================================
+
+# 👁 iris — the agent's eye
+
+**An agent writing a website or a game today never looks at what it made.** It emits CSS and a game loop, the tests pass, and it says "done" — having never once seen the page. That is why the design is bad. It is not a taste problem. It is a *feedback* problem: a human glances at the screen and instantly sees that the button is off the edge, the grey text is unreadable, and the game isn't moving. An agent has no glance.
+
+`iris` is the glance. It opens a real browser, renders what you built at real viewports in both themes, **hands the pixels back to the model**, and measures the things a glance would catch.
+
+Zero dependencies — no puppeteer, no playwright. Node's `WebSocket` and `fetch` speak the Chrome DevTools Protocol directly.
+
+```bash
+node src/cli.js look ./index.html          # a page
+node src/cli.js play ./game.html --keys ArrowLeft,ArrowRight,Space   # a game
+node src/cli.js serve                       # the contact sheet, at :7990
+```
+
+## What it catches
+
+| | |
+|---|---|
+| **page-overflow** | the page scrolls sideways — the single most common agent CSS bug, and invisible to every DOM assertion |
+| **clipped** | an element hanging past the right edge. A button 39px off-screen is a feature that does not exist |
+| **contrast** | measured against the *effective* backdrop (walking up until something is opaque), WCAG AA, large-text aware |
+| **tiny-text** | type below the 12px floor |
+| **overlap** | text printing over text — the unmistakable signature of a layout that broke |
+| **tap-target** | controls smaller than 24px (high severity on phones) |
+| **console** | a page that throws is broken however good it looks |
+
+And for games, where a screenshot is actively misleading:
+
+| | |
+|---|---|
+| **frozen** | every frame pixel-identical — nothing is animating |
+| **no-raf** | `requestAnimationFrame` never fired. There is no game loop |
+| **input-ignored** | pressed the keys, not a pixel changed. The game is not listening |
+| **low-fps / hitch** | below 30fps, or a frame gap you can feel |
+
+| **unreadable** | it reads the **canvas pixels**: nothing on screen reaches 3:1 against the background. The game draws, and you cannot see it |
+| **canvas-blur** | a 400×250 canvas drawn at 800×500 doubles every pixel. The most common thing wrong with a hand-written game, and a screenshot just looks *slightly soft* |
+| **input-ignored** | each key pressed **on its own** — because one working key covers for every dead one |
+
+**A dead game looks flawless in a still.** One that draws one perfect frame and then never draws again is indistinguishable from a working one until you watch it move. `iris play` watches it move.
+
+**And it knows what pixels cannot tell it.** A game that animates on its own changes pixels whether or not your keypress did anything — so "input registered" there is a confident answer to a question it cannot answer. iris says `input unproven (the picture moves on its own)` instead. Declining is not a failure; guessing is.
+
+### What it found in a real game
+
+A dodger written the way an agent writes one — it runs at 120fps, the frames differ, the arrows move the player. Everything iris knew how to check passed: **`✓ nothing broken`**. Then it learned to read the canvas:
+
+```
+[high]   unreadable  — nothing on the canvas reaches 3:1 against rgb(11, 14, 20);
+                       the most visible shape is 1.94:1. The game draws, and you cannot see it.
+[medium] canvas-blur — the canvas is 400x250 but drawn at 800x500 CSS px — every pixel
+                       is stretched 2x.
+[low]    input-unproven — this game animates on its own, so a changed frame does not prove
+                       a key did anything. Test the keys yourself.
+```
+
+The player and the obstacles were both tasteful dark greys on a dark ground — you could not tell which one *was* you, and the HUD promised a "space to dash" that did not exist.
+
+## The other half: taste, measured
+
+A page can be **entirely un-broken and still look like nobody designed it.** That is what people actually mean by "AI slop", and it is not a mystery of taste — it is a failure of *decision*. A designer picks a type scale, a spacing grid, a palette, one corner radius, and everything obeys. An agent, writing CSS a rule at a time with no memory of what it chose ten lines ago, produces eleven font sizes and seven corner radii it never chose.
+
+That is perfectly measurable. `iris look` also reports:
+
+| | |
+|---|---|
+| **type-scale** | *"8 distinct font sizes — 13, 14, 15, 16, 17, 19, 21, 27px. A scale is 6 or fewer; the rest are sizes nobody chose."* |
+| **spacing-grid** | *"35 of 35 spacing values are off the 4px grid — 9px×6, 5px×5, 7px×5, 11px×5. Nothing here was decided; these are nudges."* |
+| **radius-scale** | *"7 distinct corner radii. Real design systems have two or three."* |
+| **twin-colours** | *"rgb(85,90,94) and rgb(88,93,97) — indistinguishable. Two colours nobody can tell apart are one colour and a maintenance cost."* |
+
+These **do not fail the build**. Taste is a conversation, not a gate. They tell you where the design is drifting.
+
+The test fixture for this is a page that is *perfectly fine* — it renders, it fits, it is readable, `✓ nothing broken` — and every number in it is different. Then iris says so.
+
+And it said so about **itself**: `161 of 221 spacing values off the grid`, seven corner radii, seven font sizes. iris now sits on a 4px grid, a 3-step radius scale (8 / 12 / pill) and a 4-step type scale (12 / 14 / 16 / 20) — because its own eye told it not to.
+
+## A design system, as a file
+
+The critique above can only ask *"are you consistent with yourself"*. That catches drift, but it cannot tell you what you should have picked. A declared system can.
+
+```bash
+iris tokens http://localhost:7900/   # read the system a page is ALREADY using
+iris look ./index.html --tokens ./tokens.json
+```
+
+```json
+{ "type": [12, 14, 16, 20, 24, 30, 40],
+  "spacing": { "grid": 4 },
+  "radius": [4, 8, 12, 999],
+  "minFont": 12, "minTap": 24, "contrastAA": 4.5 }
+```
+
+Then every off-system value is named, with the one it should have been, **and where it lives**:
+
+```
+· off-scale-type    — 15px (x9 → 14px) on button, .card h1; 26px (x1 → 24px) on h1
+· off-scale-radius  — 10px (x4 → 8px) on .card
+· off-grid-spacing  — 18px (x6 → 20px) on body, .card
+```
+
+**This is the mechanism by which agent design actually gets good: not more taste — fewer decisions.** A model writing CSS a rule at a time cannot remember what it picked ten lines ago. It does not have to, if the answer is in a file.
+
+`iris.tokens.json` / `tokens.json` is auto-loaded from the project root, so the agent does not even have to be told.
+
+## For the agent (MCP)
+
+`iris_look` returns **the actual images** alongside the report, so the model sees its own output.
+
+| tool | what it's for |
+|---|---|
+| `iris_look` | Render a page and get back screenshots + every defect. **Use after writing or changing ANY interface, before claiming it works.** |
+| `iris_play` | Is the game loop drawing, how fast, and does it answer input |
+| `iris_runs` | What the eye has already seen |
+
+The CLI **exits non-zero when something is broken**, so it can gate a loop, a commit, or a workflow. That is what makes the *generate → look → critique → fix → look again* loop close on its own.
+
+## It found its own bugs
+
+iris's first job was to look at iris. It found, in its own web view: a phone layout that scrolled sideways by 202px, link colours picked on a dark ground that hit **2.27:1** on a light one, six 10px labels, and a fixed footer sitting on the last row. `73 high · 225 medium · 88 low` → **`✓ nothing broken`**.
+
+It also found three bugs in *itself*, which is the part worth reading:
+
+- **It was auditing pages that had not rendered yet.** `iris` waited for the `load` event — but every modern app, including every tool in this kit, draws its content from a `fetch()` that starts *after* load. Measured: at the moment iris audited its own UI, the page had **0 cards and 0 images** on screen. It would have called a blank page clean. An eye that reports on a page it never saw finish is worse than no eye. It now waits for the network to go quiet and the images to decode.
+- **`cursor: pointer` inherits.** So every `<span>` inside one clickable row reported as its own undersized tap target — one row with a title, subtitle and icon produced four findings for zero bugs. Only the outermost element carrying the pointer is the real target.
+- **A link inside a fixed footer is itself `static`.** So a sticky bar over scrolled content read as "text printing over text" — which is what a sticky bar is *for*. The rule now asks whether an element lives inside a positioned layer, not whether it is one.
+
+And while writing the fixture that *proves* iris works, I gave the "clean" page white text on a light-blue button: **2.42:1**. iris caught it. In the page written to demonstrate the tool, I made exactly the mistake the tool exists to catch — because I hadn't looked.
+
+## What happened when it looked at the rest of the kit
+
+Six sibling tools, each built carefully, each "verified" with hand-written CDP scripts, each shipped with a green test suite. Then the eye looked at them:
+
+| | defects | design drift |
+|---|---|---|
+| **agent-hq** | 13 high · 9 medium | type · spacing · radius · palette · twins |
+| **cortex** | 7 high · 7 medium | type · spacing · radius · palette |
+| **lens** | 6 high · 17 medium | type · spacing · radius · palette |
+| **anvil** | 3 high · 14 medium | type · spacing · palette |
+| **scout** | 9 high · 17 medium | type · spacing · radius · palette |
+| **recall** | 8 high · 15 medium | type · spacing · radius · palette · twins |
+| **iris** | — | clean |
+
+Every one of them scrolls sideways on a phone, or hides text at 2:1 contrast, or clips a control off the edge. I wrote all of them. I checked every one for console exceptions and asserted on the DOM. **Not one of them had ever been looked at.**
+
+iris is clean for exactly one reason: it is the only one the eye has seen.
+
+## Notes
+
+- Finds Chrome/Chromium/Edge/Brave automatically. `IRIS_CHROME=/path/to/binary` to override, or `IRIS_CDP=9222` to attach to a browser you already have open and watch it work.
+- Counts **distinct** problems, not sightings: the same 10px label at 3 viewports × 2 themes is one thing to fix, and reporting it as six inflates the number as dishonestly as hiding it would deflate it.
+- Screenshots and `run.json` land in `./.iris/<run-id>/`.
+
+---
+
+Part of **tools-for-agents** — 🛰️ agent-hq · 🔎 lens · ⚒ anvil · 🧠 cortex · 🧭 scout · ◎ recall · **👁 iris**
+
+The kit gives an agent memory, retrieval, execution, reading and recall. This one gives it **sight**.
