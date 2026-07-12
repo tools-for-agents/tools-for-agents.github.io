@@ -54,6 +54,20 @@ jobs:
       - name: re-derive the manifest — and prove a fresh clone still works
         run: node build/generate.mjs "$PWD/_tools"
 
+      # LISTING A TOOL IS NOT THE SAME AS HAVING ONE.
+      #
+      # `tools/list` is a literal in the source. A server can advertise twenty-eight
+      # tools and fail every single call, and the handshake above will not notice, and
+      # the first thing to find out is a model in the middle of a task.
+      #
+      # /tools.json tells agents "here are 67 tools you can call". So call one.
+      - name: and prove the tools are CALLABLE, not just listed
+        run: |
+          # agent-hq's tools are a skin over its HTTP API, so it needs the service up.
+          (cd _tools/agent-hq && PORT=7700 HQ_DB_PATH=/tmp/smoke.db node src/server.js &)
+          for i in $(seq 30); do curl -sf http://localhost:7700/api/health >/dev/null && break; sleep 1; done
+          node build/smoke.mjs "$PWD/_tools"
+
       - name: is what we publish still true?
         id: drift
         run: |
