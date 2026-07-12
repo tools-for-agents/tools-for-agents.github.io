@@ -80,7 +80,24 @@ function interrogate(tool) {
       buf = lines.pop();
       for (const line of lines) {
         if (!line.trim()) continue;
-        let m; try { m = JSON.parse(line); } catch { continue; }
+        let m;
+        try { m = JSON.parse(line); } catch {
+          // STDOUT IS THE PROTOCOL.
+          //
+          // An MCP server speaks newline-delimited JSON-RPC on stdout, and nothing else.
+          // ONE console.log anywhere in a code path a tool touches — a leftover debug
+          // line, a library that chats — puts a line on that stream that is not a
+          // message, and the client desyncs. It does not fail loudly. The tool call just
+          // never comes back, or comes back as the wrong reply to the wrong request, and
+          // the agent is left holding a session that has quietly stopped working.
+          //
+          // This loop used to `catch { continue; }` — it would have skipped the poison
+          // and passed. A checker that tolerates the exact failure it is watching for is
+          // not watching for anything.
+          unrouted.push(`(stdout is not JSON-RPC: ${JSON.stringify(line.slice(0, 60))} — one stray print corrupts every session)`);
+          clearTimeout(timer);
+          return done();
+        }
 
         if (m.id === 2 && m.result?.tools) {
           // A tool with no `annotations` is not neutral. The MCP spec's defaults are
