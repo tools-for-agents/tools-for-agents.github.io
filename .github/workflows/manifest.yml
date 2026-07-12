@@ -68,6 +68,16 @@ jobs:
           for i in $(seq 30); do curl -sf http://localhost:7700/api/health >/dev/null && break; sleep 1; done
           node build/smoke.mjs "$PWD/_tools"
 
+      # And then call ALL of them. tools/list and the dispatcher are two lists in the
+      # same file with nothing keeping them in step, so an advertised tool whose handler
+      # is missing crashes from the inside rather than 404ing — and /tools.json goes on
+      # promising it to every agent that reads it.
+      #
+      # Safe only because _tools is throwaway: calling 67 tools with no arguments writes
+      # a daily note and indexes whatever it can find. Fine in a runner, rude anywhere else.
+      - name: call all 67, and demand none of them crash
+        run: node build/routable.mjs "$PWD/_tools"
+
       - name: is what we publish still true?
         id: drift
         run: |
