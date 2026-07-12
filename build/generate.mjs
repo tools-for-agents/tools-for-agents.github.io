@@ -98,13 +98,19 @@ const tools = [];
 for (const t of TOOLS) {
   const mcpTools = await askServer(t.id);
   const pkg = JSON.parse(await readFile(join(ROOT, t.id, "package.json"), "utf8"));
+  // A server that fails to answer returns [] — and an empty list is not a fact, it is a
+  // failed handshake wearing the costume of one. Publishing "lens: 0 tools" because a
+  // spawn died is worse than publishing nothing: it is a confident, wrong answer.
+  if (mcpTools.length === 0) {
+    throw new Error(`${t.id}: the MCP server answered with no tools. That is a broken handshake, `
+      + `not a tool with nothing to offer — refusing to write a manifest that says so.`);
+  }
   console.log(`  ${t.glyph} ${t.id.padEnd(9)} ${String(mcpTools.length).padStart(2)} MCP tools`);
   tools.push({ ...t, package: pkg.name, version: pkg.version, mcpTools });
 }
 
 const total = tools.reduce((n, t) => n + t.mcpTools.length, 0);
 console.log(`  ${"".padEnd(11)} ${total} total\n`);
-if (total === 0) throw new Error("no MCP tools discovered — refusing to publish an empty manifest");
 
 /* ── tools.json ─────────────────────────────────────────────────────────── */
 const manifest = {
@@ -141,7 +147,22 @@ const manifest = {
     whenToUse: t.use,
     repository: `${GH}/${t.id}`,
     readme: `${RAW}/${t.id}/main/README.md`,
-    mcpServer: { command: "node", args: [`${t.id}/mcp/mcp-server.js`], transport: "stdio" },
+    npmPackage: t.package,
+    version: t.version,
+    // The name this server is published under in the official MCP registry
+    // (registry.modelcontextprotocol.io). Mirrors each repo's server.json.
+    mcpRegistryName: `io.github.tools-for-agents/${t.id}`,
+    mcpServer: {
+      transport: "stdio",
+      // From a clone:
+      command: "node",
+      args: [`${t.id}/mcp/mcp-server.js`],
+      // Once on npm — `npx <pkg>` runs the bin named after the package, which for the
+      // six CLI tools is the CLI, so the server is reached through its `mcp` subcommand.
+      npx: t.id === "agent-hq"
+        ? ["npx", "-y", t.package]
+        : ["npx", "-y", t.package, "mcp"],
+    },
     webView: { command: `${t.id} serve`, url: `http://localhost:${t.port}` },
     mcpTools: t.mcpTools,
   })),

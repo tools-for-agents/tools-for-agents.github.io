@@ -1,0 +1,84 @@
+# The manifest has to stay TRUE, and nothing about a static site makes it so.
+#
+# /tools.json and /llms.txt are what an agent reads to find out what it can call.
+# The moment a tool gains or renames an MCP tool, they become a confident lie — and
+# nobody notices, because a stale JSON file serves a 200 exactly like a fresh one.
+#
+# We already know this happens: the hand-written root README claimed agent-hq had 21
+# MCP tools, lens 6, cortex 14. The real numbers were 28, 7 and 16. It drifted for
+# months in a file people actually read.
+#
+# So: re-derive the manifest from the seven live repos on every push and every day,
+# by SPAWNING EACH MCP SERVER and asking it `tools/list`. On a push, drift is a
+# failure. On the daily run, drift is fixed and committed — the tools change on their
+# own schedule, and the site should follow without anyone remembering to make it.
+#
+# Needs no services: `tools/list` is static, so no Docker, no Chrome, no running HQ.
+name: manifest
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: '17 6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write   # the scheduled run commits the refreshed manifest
+
+jobs:
+  manifest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24        # built-in node:sqlite
+
+      - name: check out the seven tools
+        run: |
+          mkdir -p _tools
+          for t in agent-hq lens anvil cortex scout recall iris; do
+            git clone --depth 1 -q "https://github.com/tools-for-agents/$t.git" "_tools/$t"
+          done
+
+      - name: re-derive the manifest by asking each MCP server what it can do
+        run: node build/generate.mjs "$PWD/_tools"
+
+      - name: is what we publish still true?
+        id: drift
+        run: |
+          rm -rf _tools
+          if git diff --quiet -- llms.txt llms-full.txt tools.json; then
+            echo "drifted=false" >> "$GITHUB_OUTPUT"
+            echo "✓ the manifest matches the seven servers" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "drifted=true" >> "$GITHUB_OUTPUT"
+            {
+              echo "### The published manifest no longer matches the tools"
+              echo '```diff'
+              git --no-pager diff --stat -- llms.txt llms-full.txt tools.json
+              git --no-pager diff -- tools.json | head -80
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      # On a push or PR: drift means someone changed a tool and did not regenerate.
+      # Say so, and show them the diff — do not quietly serve the old answer.
+      - name: fail on drift (push / PR)
+        if: steps.drift.outputs.drifted == 'true' && github.event_name != 'schedule'
+        run: |
+          echo "::error::/tools.json and /llms.txt are stale. Run: node build/generate.mjs <workspace>"
+          git --no-pager diff -- llms.txt llms-full.txt tools.json
+          exit 1
+
+      # On the daily run: the tools moved on their own. Follow them.
+      - name: heal on drift (scheduled)
+        if: steps.drift.outputs.drifted == 'true' && github.event_name == 'schedule'
+        run: |
+          git config user.name  "manifest bot"
+          git config user.email "actions@github.com"
+          git add llms.txt llms-full.txt tools.json
+          git commit -m "chore: the tools moved — re-derived the manifest from tools/list"
+          git push

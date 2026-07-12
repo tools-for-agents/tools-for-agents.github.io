@@ -27,6 +27,24 @@ node build/generate.mjs /path/to/workspace   # the workspace holding the seven t
 and asks it `tools/list`** — the same handshake a model does. A manifest typed by hand is
 a manifest that is wrong by next Tuesday.
 
+### …and it is a CI gate, because a stale JSON file serves a 200 exactly like a fresh one
+
+We know this drifts, because it already did: the hand-written root README claimed
+agent-hq had **21** MCP tools, lens **6**, cortex **14**. The real numbers were **28, 7
+and 16**. It was wrong for months, in a file people actually read.
+
+So [`manifest.yml`](.github/workflows/manifest.yml) re-derives the manifest from the seven
+live repos — on every push, and again every morning:
+
+- **on a push**, drift is a **failure**, with the diff. Somebody changed a tool and did not regenerate.
+- **on the daily run**, drift is **fixed and committed**. The tools change on their own schedule; the site should follow without anyone remembering to make it.
+
+It needs no services — `tools/list` is static, so no Docker, no Chrome, no running HQ.
+
+The generator also **refuses to write a manifest in which any server reported zero tools**.
+An empty list is not a fact; it is a failed handshake wearing the costume of one, and
+publishing "lens: 0 tools" because a spawn died is worse than publishing nothing.
+
 ## The page
 
 `index.html` is a single, self-contained page — no build step, no dependencies.

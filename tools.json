@@ -98,12 +98,20 @@
       "whenToUse": "Use when more than one agent is working, or when work must outlive a single session.",
       "repository": "https://github.com/tools-for-agents/agent-hq",
       "readme": "https://raw.githubusercontent.com/tools-for-agents/agent-hq/main/README.md",
+      "npmPackage": "@tools-for-agents/agent-hq",
+      "version": "0.1.0",
+      "mcpRegistryName": "io.github.tools-for-agents/agent-hq",
       "mcpServer": {
+        "transport": "stdio",
         "command": "node",
         "args": [
           "agent-hq/mcp/mcp-server.js"
         ],
-        "transport": "stdio"
+        "npx": [
+          "npx",
+          "-y",
+          "@tools-for-agents/agent-hq"
+        ]
       },
       "webView": {
         "command": "agent-hq serve",
@@ -232,12 +240,21 @@
       "whenToUse": "Use INSTEAD of opening whole files. Run `lens index <path>` once, then search.",
       "repository": "https://github.com/tools-for-agents/lens",
       "readme": "https://raw.githubusercontent.com/tools-for-agents/lens/main/README.md",
+      "npmPackage": "@tools-for-agents/lens",
+      "version": "0.1.0",
+      "mcpRegistryName": "io.github.tools-for-agents/lens",
       "mcpServer": {
+        "transport": "stdio",
         "command": "node",
         "args": [
           "lens/mcp/mcp-server.js"
         ],
-        "transport": "stdio"
+        "npx": [
+          "npx",
+          "-y",
+          "@tools-for-agents/lens",
+          "mcp"
+        ]
       },
       "webView": {
         "command": "lens serve",
@@ -282,12 +299,21 @@
       "whenToUse": "Use to execute untrusted or unverified code. Mount a repo read-only at /repo to test it for real.",
       "repository": "https://github.com/tools-for-agents/anvil",
       "readme": "https://raw.githubusercontent.com/tools-for-agents/anvil/main/README.md",
+      "npmPackage": "@tools-for-agents/anvil",
+      "version": "0.1.0",
+      "mcpRegistryName": "io.github.tools-for-agents/anvil",
       "mcpServer": {
+        "transport": "stdio",
         "command": "node",
         "args": [
           "anvil/mcp/mcp-server.js"
         ],
-        "transport": "stdio"
+        "npx": [
+          "npx",
+          "-y",
+          "@tools-for-agents/anvil",
+          "mcp"
+        ]
       },
       "webView": {
         "command": "anvil serve",
@@ -316,12 +342,21 @@
       "whenToUse": "Use to keep what you learned. Files are the truth; the index is rebuildable.",
       "repository": "https://github.com/tools-for-agents/cortex",
       "readme": "https://raw.githubusercontent.com/tools-for-agents/cortex/main/README.md",
+      "npmPackage": "@tools-for-agents/cortex",
+      "version": "0.1.0",
+      "mcpRegistryName": "io.github.tools-for-agents/cortex",
       "mcpServer": {
+        "transport": "stdio",
         "command": "node",
         "args": [
           "cortex/mcp/mcp-server.js"
         ],
-        "transport": "stdio"
+        "npx": [
+          "npx",
+          "-y",
+          "@tools-for-agents/cortex",
+          "mcp"
+        ]
       },
       "webView": {
         "command": "cortex serve",
@@ -402,12 +437,21 @@
       "whenToUse": "Use instead of fetching raw HTML into your context.",
       "repository": "https://github.com/tools-for-agents/scout",
       "readme": "https://raw.githubusercontent.com/tools-for-agents/scout/main/README.md",
+      "npmPackage": "@tools-for-agents/scout",
+      "version": "0.1.0",
+      "mcpRegistryName": "io.github.tools-for-agents/scout",
       "mcpServer": {
+        "transport": "stdio",
         "command": "node",
         "args": [
           "scout/mcp/mcp-server.js"
         ],
-        "transport": "stdio"
+        "npx": [
+          "npx",
+          "-y",
+          "@tools-for-agents/scout",
+          "mcp"
+        ]
       },
       "webView": {
         "command": "scout serve",
@@ -452,12 +496,21 @@
       "whenToUse": "Use FIRST, at the start of a task, before you search anything individually.",
       "repository": "https://github.com/tools-for-agents/recall",
       "readme": "https://raw.githubusercontent.com/tools-for-agents/recall/main/README.md",
+      "npmPackage": "@tools-for-agents/recall",
+      "version": "0.1.0",
+      "mcpRegistryName": "io.github.tools-for-agents/recall",
       "mcpServer": {
+        "transport": "stdio",
         "command": "node",
         "args": [
           "recall/mcp/mcp-server.js"
         ],
-        "transport": "stdio"
+        "npx": [
+          "npx",
+          "-y",
+          "@tools-for-agents/recall",
+          "mcp"
+        ]
       },
       "webView": {
         "command": "recall serve",
@@ -482,12 +535,21 @@
       "whenToUse": "Use after writing or changing ANY interface, BEFORE you say it works. An agent that never looks is designing blind.",
       "repository": "https://github.com/tools-for-agents/iris",
       "readme": "https://raw.githubusercontent.com/tools-for-agents/iris/main/README.md",
+      "npmPackage": "@tools-for-agents/iris",
+      "version": "0.1.0",
+      "mcpRegistryName": "io.github.tools-for-agents/iris",
       "mcpServer": {
+        "transport": "stdio",
         "command": "node",
         "args": [
           "iris/mcp/mcp-server.js"
         ],
-        "transport": "stdio"
+        "npx": [
+          "npx",
+          "-y",
+          "@tools-for-agents/iris",
+          "mcp"
+        ]
       },
       "webView": {
         "command": "iris serve",
