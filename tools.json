@@ -317,7 +317,7 @@
       },
       "webView": {
         "command": "anvil serve",
-        "url": "http://localhost:7950"
+        "url": "http://localhost:7930"
       },
       "mcpTools": [
         {
@@ -455,7 +455,7 @@
       },
       "webView": {
         "command": "scout serve",
-        "url": "http://localhost:7960"
+        "url": "http://localhost:7950"
       },
       "mcpTools": [
         {

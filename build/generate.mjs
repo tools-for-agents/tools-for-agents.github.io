@@ -26,31 +26,31 @@ const RAW = "https://raw.githubusercontent.com/tools-for-agents";
 
 /** The kit, in loop order. Everything else is derived. */
 const TOOLS = [
-  { id: "agent-hq", glyph: "🛰️", verb: "coordinate", color: "#6ea8fe", port: 7700,
+  { id: "agent-hq", glyph: "🛰️", verb: "coordinate", color: "#6ea8fe",
     tagline: "The company's work, made visible.",
     blurb: "Shared memory, a kanban board an agent can claim work from, an agent registry, messaging and a cost ledger.",
     use: "Use when more than one agent is working, or when work must outlive a single session." },
-  { id: "lens", glyph: "🔎", verb: "read code", color: "#4fd6be", port: 7900,
+  { id: "lens", glyph: "🔎", verb: "read code", color: "#4fd6be",
     tagline: "Read code without reading files.",
     blurb: "Token-efficient retrieval: FTS5 search, symbol outlines and surgical line-range reads.",
     use: "Use INSTEAD of opening whole files. Run `lens index <path>` once, then search." },
-  { id: "anvil", glyph: "⚒", verb: "run safely", color: "#ff6a1a", port: 7950,
+  { id: "anvil", glyph: "⚒", verb: "run safely", color: "#ff6a1a",
     tagline: "Run it before you claim it works.",
     blurb: "A throwaway Docker sandbox — network off, memory capped, caps dropped, hard timeout, structured result.",
     use: "Use to execute untrusted or unverified code. Mount a repo read-only at /repo to test it for real." },
-  { id: "cortex", glyph: "🧠", verb: "remember", color: "#a78bfa", port: 7800,
+  { id: "cortex", glyph: "🧠", verb: "remember", color: "#a78bfa",
     tagline: "A second brain that outlives the context window.",
     blurb: "An Obsidian-compatible vault: markdown notes, [[wikilinks]], a knowledge graph, FTS5 search. Broken links heal themselves.",
     use: "Use to keep what you learned. Files are the truth; the index is rebuildable." },
-  { id: "scout", glyph: "🧭", verb: "read the web", color: "#e0a24e", port: 7960,
+  { id: "scout", glyph: "🧭", verb: "read the web", color: "#e0a24e",
     tagline: "The web, ~90% lighter.",
     blurb: "A URL becomes clean, cached, full-text-searchable markdown. Re-reads are free; the reading history is a corpus.",
     use: "Use instead of fetching raw HTML into your context." },
-  { id: "recall", glyph: "◎", verb: "recall it all", color: "#ec4899", port: 7980,
+  { id: "recall", glyph: "◎", verb: "recall it all", color: "#ec4899",
     tagline: "One query. Every store you have.",
     blurb: "Federated search across cortex (brain), agent-hq (team), scout (reading) and lens (code) — one token-budgeted briefing.",
     use: "Use FIRST, at the start of a task, before you search anything individually." },
-  { id: "iris", glyph: "👁", verb: "see", color: "#c792ea", port: 7990,
+  { id: "iris", glyph: "👁", verb: "see", color: "#c792ea",
     tagline: "Look at what you built.",
     blurb: "Renders your page or game at real viewports and themes and hands the PIXELS back to the model — overflow, clipping, contrast, unreadable type, collisions, dead game loops, design drift.",
     use: "Use after writing or changing ANY interface, BEFORE you say it works. An agent that never looks is designing blind." },
@@ -94,10 +94,29 @@ function askServer(dir) {
   });
 }
 
+/**
+ * The port each tool's web view actually runs on.
+ *
+ * This was hand-typed in the table above, and two of the seven were WRONG — anvil and
+ * scout each advertised a port nothing was listening on. Which is the whole thesis of
+ * this file arriving to collect: any fact a human types is a fact that is wrong later,
+ * and the drift gate cannot catch it, because it is not derived from anything.
+ *
+ * So derive it from the one place the port is PROVEN: each repo's CI serves the tool on
+ * it and then points iris at it. If the port were wrong, that build would already be red.
+ */
+async function servedPort(id) {
+  const ci = await readFile(join(ROOT, id, ".github", "workflows", "ci.yml"), "utf8");
+  const m = ci.match(/http:\/\/localhost:(\d+)/);
+  if (!m) throw new Error(`${id}: no served URL in ci.yml — cannot publish a port nobody proved`);
+  return +m[1];
+}
+
 const tools = [];
 for (const t of TOOLS) {
   const mcpTools = await askServer(t.id);
   const pkg = JSON.parse(await readFile(join(ROOT, t.id, "package.json"), "utf8"));
+  t.port = await servedPort(t.id);
   // A server that fails to answer returns [] — and an empty list is not a fact, it is a
   // failed handshake wearing the costume of one. Publishing "lens: 0 tools" because a
   // spawn died is worse than publishing nothing: it is a confident, wrong answer.
