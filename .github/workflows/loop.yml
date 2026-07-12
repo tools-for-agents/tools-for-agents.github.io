@@ -1,0 +1,67 @@
+# THE LOOP, PROVEN — on every push, and again every morning.
+#
+# The headline claim of this kit is that these are not seven tools, they are ONE LOOP:
+# coordinate → read code → run safely → remember → read the web → recall → see.
+#
+# Every tool was tested alone. Every server was handshaken; all 67 tools called. The
+# LOOP had never been run — the largest claim we make and the least examined one.
+#
+# This runs it: one agent, one task, start to finish, entirely over MCP — the same wire
+# a model uses, not the library underneath it. Against FRESH CLONES, with nothing
+# installed, exactly as an agent following /tools.json would get them.
+#
+# Step 6 is the one that can actually fail. recall is the only step that depends on all
+# the others having really happened, and it names the stores it needs rather than
+# counting them: brain (the note cortex wrote), reading (the page scout cached), code
+# (the index lens built). If any one of them is silent, the loop did not close — and the
+# error says WHICH tool's work went missing.
+#
+# Proven to fail, not assumed to pass: hiding scout's cache from recall turns step 6 red
+# with "reading did not answer — what scout just did is not visible from here", while
+# scout's own step still reports success. That gap is the whole difference between a
+# list of tools and a loop.
+name: loop
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: '41 6 * * *'
+  workflow_dispatch:
+
+jobs:
+  loop:
+    runs-on: ubuntu-latest    # has Docker, which anvil needs
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24    # built-in node:sqlite
+
+      # iris drives a real browser. The whole point of it is that it LOOKS.
+      - uses: browser-actions/setup-chrome@v1
+        id: chrome
+
+      - name: check out the seven tools
+        run: |
+          mkdir -p _tools
+          for t in agent-hq lens anvil cortex scout recall iris; do
+            git clone --depth 1 -q "https://github.com/tools-for-agents/$t.git" "_tools/$t"
+          done
+
+      - name: agent-hq is a service — the other six talk to it over HTTP
+        run: |
+          (cd _tools/agent-hq && PORT=7700 HQ_DB_PATH=/tmp/loop.db node src/server.js &)
+          for i in $(seq 30); do curl -sf http://localhost:7700/api/health >/dev/null && break; sleep 1; done
+          curl -sf http://localhost:7700/api/health
+
+      - name: run the loop
+        env:
+          IRIS_CHROME: ${{ steps.chrome.outputs.chrome-path }}
+          HQ_URL: http://localhost:7700
+        run: |
+          node build/loop.mjs "$PWD/_tools" | tee "$RUNNER_TEMP/loop.txt"
+          code=${PIPESTATUS[0]}
+          { echo '### 🔁 the loop'; echo '```'; cat "$RUNNER_TEMP/loop.txt"; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+          exit $code
