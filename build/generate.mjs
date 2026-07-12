@@ -214,6 +214,33 @@ const manifest = {
       ])),
     },
   },
+  // What a tool owes an agent. A model cannot see the screen, cannot check the
+  // filesystem, and cannot tell that a tool was misconfigured — it has only what the tool
+  // said. So the one thing a tool must never do is sound sure. Each of these is enforced
+  // by a gate that has been WATCHED TO FAIL; a gate nobody has seen fail is a gate you are
+  // trusting on faith.
+  guarantees: {
+    neverAConfidentWrongAnswer:
+      "An empty result carries the size of the haystack. '0 hits of 0 notes' is a misconfigured path; "
+      + "'0 hits of 500 notes' is a real answer. 'Nothing is indexed' and 'your code does not contain that' "
+      + "are the same sentence to a caller, and could not be more different.",
+    aTypoIsNotAnEmptySet:
+      "Columns, agents and namespaces are finite, known sets. A filter naming something outside the set is a "
+      + "MISTAKE, not a query with no results — and the error lists the values that do exist.",
+    aReadCreatesNothing:
+      "Ask a question in any directory and nothing is left behind. Opening a store used to create it, so the "
+      + "empty store the tool had just made then answered the question — the tool invented the evidence for its own answer.",
+    everyErrorIsActionable:
+      "'fetch failed' is not an error message. Every error names what went wrong, where it looked, and the command that fixes it.",
+    everyToolDeclaresWhatItDoes:
+      "MCP tool annotations on all " + total + ": " + tools.reduce((n, t) => n + t.mcpTools.filter((m) => m.annotations?.readOnlyHint).length, 0)
+      + " read-only, " + tools.reduce((n, t) => n + t.mcpTools.filter((m) => m.annotations?.destructiveHint).length, 0)
+      + " destructive, " + tools.reduce((n, t) => n + t.mcpTools.filter((m) => m.annotations?.openWorldHint).length, 0)
+      + " open-world. A client can tell a search from a delete without calling either.",
+    everyClaimIsGated:
+      "The whole loop runs on every push from fresh clones; all " + total + " tools are called; the UI is looked at "
+      + "with data ugly enough to break it; a skipped test is a failed test.",
+  },
   // Say where things actually stand, rather than leaving an agent to discover it by
   // running a command that fails. Checked against npm and the MCP registry at build
   // time — this block is derived, not asserted.
@@ -285,6 +312,17 @@ Requirements: Node 22+ (built-in \`node:sqlite\`), Docker for \`anvil\`, Chrome 
 ## The seven tools
 
 ${tools.map((t) => `- [${t.id}](${RAW}/${t.id}/main/README.md): ${t.verb} — ${t.blurb} ${t.mcpTools.length} MCP tools: \`${t.mcpTools.map((m) => m.name).join("`, `")}\`.`).join("\n")}
+
+## What these tools guarantee
+
+A model cannot see your screen, cannot check your filesystem, and cannot tell that a tool was misconfigured. It has only what the tool said. So the one thing a tool must never do is **sound sure**.
+
+- **Never a confident wrong answer.** An empty result carries the size of the haystack: \`0 hits of 0 notes\` is a misconfigured path, \`0 hits of 500 notes\` is a real answer. *"Nothing is indexed"* and *"your code does not contain that"* are the same sentence to a caller, and could not be more different.
+- **A typo is not an empty set.** Columns, agents and namespaces are finite, known sets — a filter naming something outside the set is a mistake, and the error lists the values that do exist.
+- **A read creates nothing.** Ask a question in any directory and nothing is left behind.
+- **Every error is actionable** — it names what went wrong, where it looked, and the command that fixes it.
+- **Every tool declares what it does to the world** (MCP annotations), so a client can tell a search from a delete without calling either.
+- **Every claim is gated**, and every gate has been watched to fail.
 
 ## Machine-readable
 

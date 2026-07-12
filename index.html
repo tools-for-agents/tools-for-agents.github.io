@@ -193,6 +193,55 @@
   </div>
 </section>
 
+<section id="honesty" class="wrap">
+  <div class="sec-h">what a tool owes an agent</div>
+  <h2 class="sec-t">
+    Never a confident wrong answer
+    <span class="sub">A model cannot see your screen, cannot check your filesystem, and cannot tell that a tool
+    was misconfigured. It has only what the tool said. So the one thing a tool must never do is sound sure.</span>
+  </h2>
+
+  <div class="agents">
+    <div class="card">
+      <div class="p">“0 results” <span class="badge">is not an answer</span></div>
+      <p class="x"><b>“Nothing is indexed” and “your code does not contain that” are the same sentence to a caller</b>
+      — and could not be more different. An empty store says it is empty, and says how big the haystack was:
+      <code>0 hits of 0 notes</code> is a misconfigured path; <code>0 hits of 500 notes</code> is a real answer.</p>
+    </div>
+    <div class="card">
+      <div class="p">A typo <span class="badge">is not an empty set</span></div>
+      <p class="x"><code>status: "In Progres"</code> — one letter short — used to return <code>[]</code>. An agent asks
+      what is in progress, is told <b>nothing is</b>, and starts work someone else is already doing. Columns, agents
+      and namespaces are <b>finite, known sets</b>: a filter outside the set is a mistake, and the error lists the
+      real values.</p>
+    </div>
+    <div class="card">
+      <div class="p">A read <span class="badge">creates nothing</span></div>
+      <p class="x">Ask a question in any directory and <b>nothing is left behind</b>. Opening a store used to
+      <i>create</i> it — so the empty store the tool had just made then answered the question, and the tool
+      <b>invented the evidence for its own answer</b>.</p>
+    </div>
+    <div class="card">
+      <div class="p">Every error <span class="badge">is actionable</span></div>
+      <p class="x"><code>fetch failed</code> is not an error message. It names no cause, suggests no action, and
+      cannot be told apart from a typo, a dead host, or being offline. Every error here names <b>what went wrong,
+      where it looked, and the command that fixes it</b>.</p>
+    </div>
+    <div class="card">
+      <div class="p">Every tool <span class="badge">declares what it does</span></div>
+      <p class="x">MCP tool annotations, on all 67: <b>37 read-only · 7 destructive · 10 open-world</b>. A client can
+      tell a search from a delete <b>without calling either</b>. (The spec's defaults are pessimistic — say nothing,
+      and you have declared yourself destructive.)</p>
+    </div>
+    <div class="card">
+      <div class="p">Every claim <span class="badge">is gated</span></div>
+      <p class="x">The whole loop runs on every push, from fresh clones. All 67 tools are called. The UI is
+      <b>looked at</b>, with data ugly enough to break it. <b>A skipped test is a failed test.</b> And every gate has
+      been <b>watched to fail</b> — a gate nobody has seen fail is a gate you are trusting on faith.</p>
+    </div>
+  </div>
+</section>
+
 <section class="wrap">
   <div class="sec-h">one loop, one run</div>
   <h2 class="sec-t">What a single turn looks like</h2>
@@ -374,19 +423,32 @@
       // glyph
       ctx.font = `${r * 0.95}px ${SANS}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
       ctx.fillText(t.glyph, x, y + 1);
-      // label — anchored so it radiates outward from the ring and never clips
+      // The label sat ON TOP OF THE NODE. `R + 16 - 10` puts it six pixels outside the
+      // ring — and the node disc reaches twenty. So "read code" was printed across the
+      // lens circle, "run safely" across anvil, "recall it all" across recall. The
+      // comment on that line claimed it stopped the labels clipping; what it did was
+      // shove them into the thing they were labelling.
+      //
+      // NOTHING IN THIS KIT COULD SEE IT. A canvas is one element with one colour as far
+      // as the DOM knows, so the overlap check, the contrast check and the design system
+      // are all structurally blind here. It was found by looking at the picture — which
+      // is the entire argument iris exists to make, arriving to collect on its own page.
+      //
+      // Labels now go ABOVE or BELOW the node, never beside it: there is no horizontal
+      // room to run out of, and they clear the disc by construction.
       if (bootT > 0.85) {
         ctx.globalAlpha = (dim ? 0.4 : 1) * Math.min(1, (bootT - 0.85) / 0.15);
-        const ang = nodeAngle(i), ca = Math.cos(ang), sa = Math.sin(ang);
-        const off = R + 16 - (Math.abs(ca) > 0.7 ? 10 : 0);   // pull side labels in so they don't clip
-        const lx = cx + off * ca, ly = cy + off * sa;
-        ctx.textAlign = Math.abs(ca) < 0.35 ? 'center' : (ca > 0 ? 'left' : 'right');
-        ctx.textBaseline = sa < -0.35 ? 'bottom' : sa > 0.35 ? 'top' : 'middle';
-        const dy = sa < -0.35 ? -14 : sa > 0.35 ? 14 : -5;
+        const above = Math.sin(nodeAngle(i)) < 0;          // upper half of the ring
+        const gap = r + 12;                                // always clear of the disc
+        ctx.textAlign = 'center';
+        ctx.textBaseline = above ? 'bottom' : 'top';
+        // The NAME reads first, above or below. Putting the key nearest the node would be
+        // radially tidy and read backwards on the top half — "coordinate / agent-hq".
+        const ky = y + (above ? -gap : gap);
         ctx.font = `600 11px ${MONO}`; ctx.fillStyle = focus ? t.color : '#9098a8';
-        ctx.fillText(t.key, lx, ly + dy);
+        ctx.fillText(t.key, x, ky + (above ? -13 : 0));
         ctx.font = `9px ${MONO}`; ctx.fillStyle = '#7b8391';
-        ctx.fillText(t.verb, lx, ly + dy + (sa > 0.35 ? 13 : 12));
+        ctx.fillText(t.verb, x, ky + (above ? 0 : 13));
       }
       ctx.globalAlpha = 1;
     }

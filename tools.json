@@ -89,6 +89,14 @@
       }
     }
   },
+  "guarantees": {
+    "neverAConfidentWrongAnswer": "An empty result carries the size of the haystack. '0 hits of 0 notes' is a misconfigured path; '0 hits of 500 notes' is a real answer. 'Nothing is indexed' and 'your code does not contain that' are the same sentence to a caller, and could not be more different.",
+    "aTypoIsNotAnEmptySet": "Columns, agents and namespaces are finite, known sets. A filter naming something outside the set is a MISTAKE, not a query with no results — and the error lists the values that do exist.",
+    "aReadCreatesNothing": "Ask a question in any directory and nothing is left behind. Opening a store used to create it, so the empty store the tool had just made then answered the question — the tool invented the evidence for its own answer.",
+    "everyErrorIsActionable": "'fetch failed' is not an error message. Every error names what went wrong, where it looked, and the command that fixes it.",
+    "everyToolDeclaresWhatItDoes": "MCP tool annotations on all 67: 37 read-only, 7 destructive, 10 open-world. A client can tell a search from a delete without calling either.",
+    "everyClaimIsGated": "The whole loop runs on every push from fresh clones; all 67 tools are called; the UI is looked at with data ugly enough to break it; a skipped test is a failed test."
+  },
   "publication": {
     "npm": {
       "published": false,
