@@ -1,0 +1,30 @@
+# The front door was the last surface the eye had never seen.
+#
+# When we finally pointed iris at this page it reported four defects — and all four
+# turned out to be bugs in iris (a wrapped inline treated as a rectangle; a
+# background-clip:text gradient measured against itself). The page had also quietly
+# accumulated 11 font sizes and 6 radii nobody chose.
+#
+# strict: true, because this page IS on the kit's design system now, and the only
+# thing that keeps drift from creeping back is a gate. `tokens: kit` grades against
+# iris/tokens.json — the one file, not a copy of it.
+name: look
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  look:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: tools-for-agents/iris@main
+        with:
+          url: index.html
+          viewports: phone,tablet,desktop
+          themes: dark,light
+          name: site
+          tokens: kit
+          strict: true
