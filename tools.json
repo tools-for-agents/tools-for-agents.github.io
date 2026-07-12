@@ -125,115 +125,263 @@
       "mcpTools": [
         {
           "name": "agent_register",
-          "description": "Register (or update) yourself as an agent in the company. Call this first so your work is attributed and visible on the dashboard."
+          "description": "Register (or update) yourself as an agent in the company. Call this first so your work is attributed and visible on the dashboard.",
+          "annotations": {
+            "readOnlyHint": false,
+            "destructiveHint": false,
+            "idempotentHint": true,
+            "openWorldHint": false
+          }
         },
         {
           "name": "agent_set_status",
-          "description": "Update your status (idle | working | offline) and optionally what you are currently working on."
+          "description": "Update your status (idle | working | offline) and optionally what you are currently working on.",
+          "annotations": {
+            "readOnlyHint": false,
+            "destructiveHint": false,
+            "idempotentHint": true,
+            "openWorldHint": false
+          }
         },
         {
           "name": "agent_list",
-          "description": "List all agents in the company with their status and current task."
+          "description": "List all agents in the company with their status and current task.",
+          "annotations": {
+            "readOnlyHint": true,
+            "openWorldHint": false
+          }
         },
         {
           "name": "kanban_board",
-          "description": "Get the full company kanban board: columns and the tasks in each. Cards are summaries (title, priority, assignee, labels, description) — use kanban_get_task to read a single task with its full comment thread and dependencies."
+          "description": "Get the full company kanban board: columns and the tasks in each. Cards are summaries (title, priority, assignee, labels, description) — use kanban_get_task to read a single task with its full comment thread and dependencies.",
+          "annotations": {
+            "readOnlyHint": true,
+            "openWorldHint": false
+          }
         },
         {
           "name": "kanban_get_task",
-          "description": "Read one task in full: description, the complete comment thread, and dependencies. Read-only — does not claim or modify the task. Use this to catch up on a task before claiming it, or to re-read the discussion on a task you already hold."
+          "description": "Read one task in full: description, the complete comment thread, and dependencies. Read-only — does not claim or modify the task. Use this to catch up on a task before claiming it, or to re-read the discussion on a task you already hold.",
+          "annotations": {
+            "readOnlyHint": true,
+            "openWorldHint": false
+          }
         },
         {
           "name": "kanban_list_tasks",
-          "description": "List tasks filtered by assignee, status (column name like \"In Progress\"), or board. The right way to answer \"what am I assigned to?\" or \"what is in Review?\" without pulling the entire board."
+          "description": "List tasks filtered by assignee, status (column name like \"In Progress\"), or board. The right way to answer \"what am I assigned to?\" or \"what is in Review?\" without pulling the entire board.",
+          "annotations": {
+            "readOnlyHint": true,
+            "openWorldHint": false
+          }
         },
         {
           "name": "kanban_create_task",
-          "description": "Create a task on the kanban board."
+          "description": "Create a task on the kanban board.",
+          "annotations": {
+            "readOnlyHint": false,
+            "destructiveHint": false,
+            "idempotentHint": false,
+            "openWorldHint": false
+          }
         },
         {
           "name": "kanban_move_task",
-          "description": "Move a task to another column (e.g. advance \"In Progress\" → \"Review\" → \"Done\")."
+          "description": "Move a task to another column (e.g. advance \"In Progress\" → \"Review\" → \"Done\").",
+          "annotations": {
+            "readOnlyHint": false,
+            "destructiveHint": false,
+            "idempotentHint": true,
+            "openWorldHint": false
+          }
         },
         {
           "name": "kanban_flow",
-          "description": "Is the company finishing what it starts? Throughput (tasks done per day), how much work is in flight, median cycle time from created to done, created-vs-done per day, and the slowest tasks to finish."
+          "description": "Is the company finishing what it starts? Throughput (tasks done per day), how much work is in flight, median cycle time from created to done, created-vs-done per day, and the slowest tasks to finish.",
+          "annotations": {
+            "readOnlyHint": true,
+            "openWorldHint": false
+          }
         },
         {
           "name": "kanban_set_wip_limit",
-          "description": "Cap how many tasks may sit in a column at once (the kanban guardrail: finish work before starting more). Once set, creating or moving a task into a full column is refused — pass force:true to override. Omit wip_limit (or pass 0) to lift the cap."
+          "description": "Cap how many tasks may sit in a column at once (the kanban guardrail: finish work before starting more). Once set, creating or moving a task into a full column is refused — pass force:true to override. Omit wip_limit (or pass 0) to lift the cap.",
+          "annotations": {
+            "readOnlyHint": false,
+            "destructiveHint": false,
+            "idempotentHint": true,
+            "openWorldHint": false
+          }
         },
         {
           "name": "kanban_update_task",
-          "description": "Update task fields: title, description, assignee, priority, labels."
+          "description": "Update task fields: title, description, assignee, priority, labels.",
+          "annotations": {
+            "readOnlyHint": false,
+            "destructiveHint": true,
+            "idempotentHint": true,
+            "openWorldHint": false
+          }
         },
         {
           "name": "kanban_claim_task",
-          "description": "Atomically claim a task so no other agent works it in parallel. Sets you as assignee with a time-limited lease (auto-released if it expires). Returns ok:false if already held by someone else."
+          "description": "Atomically claim a task so no other agent works it in parallel. Sets you as assignee with a time-limited lease (auto-released if it expires). Returns ok:false if already held by someone else.",
+          "annotations": {
+            "readOnlyHint": false,
+            "destructiveHint": false,
+            "idempotentHint": true,
+            "openWorldHint": false
+          }
         },
         {
           "name": "kanban_next_task",
-          "description": "Pull and atomically claim the highest-priority unclaimed task that is not Done. The right way to ask \"what should I work on next?\" without colliding with other agents."
+          "description": "Pull and atomically claim the highest-priority unclaimed task that is not Done. The right way to ask \"what should I work on next?\" without colliding with other agents.",
+          "annotations": {
+            "readOnlyHint": false,
+            "destructiveHint": false,
+            "idempotentHint": false,
+            "openWorldHint": false
+          }
         },
         {
           "name": "kanban_release_task",
-          "description": "Release a task you hold so another agent can pick it up (e.g. you are blocked or done with your part)."
+          "description": "Release a task you hold so another agent can pick it up (e.g. you are blocked or done with your part).",
+          "annotations": {
+            "readOnlyHint": false,
+            "destructiveHint": false,
+            "idempotentHint": true,
+            "openWorldHint": false
+          }
         },
         {
           "name": "message_send",
-          "description": "Send a message to another agent (to_agent = their id) or broadcast to everyone (omit to_agent). Use to coordinate, hand off, or ask for help."
+          "description": "Send a message to another agent (to_agent = their id) or broadcast to everyone (omit to_agent). Use to coordinate, hand off, or ask for help.",
+          "annotations": {
+            "readOnlyHint": false,
+            "destructiveHint": false,
+            "idempotentHint": false,
+            "openWorldHint": false
+          }
         },
         {
           "name": "message_inbox",
-          "description": "Read your inbox: direct messages to you plus broadcasts. Optionally only unread, and optionally mark them read."
+          "description": "Read your inbox: direct messages to you plus broadcasts. Optionally only unread, and optionally mark them read.",
+          "annotations": {
+            "readOnlyHint": false,
+            "destructiveHint": false,
+            "idempotentHint": true,
+            "openWorldHint": false
+          }
         },
         {
           "name": "kanban_comment",
-          "description": "Add a comment / progress note to a task."
+          "description": "Add a comment / progress note to a task.",
+          "annotations": {
+            "readOnlyHint": false,
+            "destructiveHint": false,
+            "idempotentHint": false,
+            "openWorldHint": false
+          }
         },
         {
           "name": "kanban_add_dependency",
-          "description": "Declare that one task is blocked by another: task_id depends on depends_on. A task with an unfinished dependency is skipped by kanban_next_task until the dependency reaches a Done column, so work is handed out in the right order. Use when breaking work into ordered steps."
+          "description": "Declare that one task is blocked by another: task_id depends on depends_on. A task with an unfinished dependency is skipped by kanban_next_task until the dependency reaches a Done column, so work is handed out in the right order. Use when breaking work into ordered steps.",
+          "annotations": {
+            "readOnlyHint": false,
+            "destructiveHint": false,
+            "idempotentHint": true,
+            "openWorldHint": false
+          }
         },
         {
           "name": "kanban_remove_dependency",
-          "description": "Remove a dependency previously added with kanban_add_dependency (task_id no longer depends on depends_on). Use to unblock a task whose dependency was wrong or no longer applies."
+          "description": "Remove a dependency previously added with kanban_add_dependency (task_id no longer depends on depends_on). Use to unblock a task whose dependency was wrong or no longer applies.",
+          "annotations": {
+            "readOnlyHint": false,
+            "destructiveHint": true,
+            "idempotentHint": true,
+            "openWorldHint": false
+          }
         },
         {
           "name": "memory_write",
-          "description": "Store a durable memory in the shared company memory. Use for decisions, facts, conventions, and learnings worth keeping."
+          "description": "Store a durable memory in the shared company memory. Use for decisions, facts, conventions, and learnings worth keeping.",
+          "annotations": {
+            "readOnlyHint": false,
+            "destructiveHint": false,
+            "idempotentHint": false,
+            "openWorldHint": false
+          }
         },
         {
           "name": "memory_search",
-          "description": "Search the shared memory by text, namespace, tag, or owning agent."
+          "description": "Search the shared memory by text, namespace, tag, or owning agent.",
+          "annotations": {
+            "readOnlyHint": true,
+            "openWorldHint": false
+          }
         },
         {
           "name": "activity_feed",
-          "description": "Read the recent company activity feed (who did what)."
+          "description": "Read the recent company activity feed (who did what).",
+          "annotations": {
+            "readOnlyHint": true,
+            "openWorldHint": false
+          }
         },
         {
           "name": "run_start",
-          "description": "Begin a tracked unit of work (a \"run\") for cost/token accounting. Sets you to working. Returns a run id to pass to run_end. Use run_record instead if the work is already finished."
+          "description": "Begin a tracked unit of work (a \"run\") for cost/token accounting. Sets you to working. Returns a run id to pass to run_end. Use run_record instead if the work is already finished.",
+          "annotations": {
+            "readOnlyHint": false,
+            "destructiveHint": false,
+            "idempotentHint": false,
+            "openWorldHint": false
+          }
         },
         {
           "name": "run_end",
-          "description": "Finish a tracked run, recording token usage. Cost is computed from the model price table (or pass cost_usd to override). Sets you back to idle."
+          "description": "Finish a tracked run, recording token usage. Cost is computed from the model price table (or pass cost_usd to override). Sets you back to idle.",
+          "annotations": {
+            "readOnlyHint": false,
+            "destructiveHint": false,
+            "idempotentHint": true,
+            "openWorldHint": false
+          }
         },
         {
           "name": "run_record",
-          "description": "Record an already-completed run in one call (token usage + cost). Use this to log work after the fact."
+          "description": "Record an already-completed run in one call (token usage + cost). Use this to log work after the fact.",
+          "annotations": {
+            "readOnlyHint": false,
+            "destructiveHint": false,
+            "idempotentHint": false,
+            "openWorldHint": false
+          }
         },
         {
           "name": "ledger_summary",
-          "description": "Get the company cost/token ledger: totals, spend per agent, and spend per model."
+          "description": "Get the company cost/token ledger: totals, spend per agent, and spend per model.",
+          "annotations": {
+            "readOnlyHint": true,
+            "openWorldHint": false
+          }
         },
         {
           "name": "company_stats",
-          "description": "Get a summary of company state: agent counts, task counts per column, memory count."
+          "description": "Get a summary of company state: agent counts, task counts per column, memory count.",
+          "annotations": {
+            "readOnlyHint": true,
+            "openWorldHint": false
+          }
         },
         {
           "name": "company_graph",
-          "description": "Explore the company knowledge graph — how shared memories connect through their namespaces, tags and authors. By default returns a compact digest (top tags/namespaces/authors by memory count) to answer \"what does the company know about?\". Pass full=true for the raw node/edge graph."
+          "description": "Explore the company knowledge graph — how shared memories connect through their namespaces, tags and authors. By default returns a compact digest (top tags/namespaces/authors by memory count) to answer \"what does the company know about?\". Pass full=true for the raw node/edge graph.",
+          "annotations": {
+            "readOnlyHint": true,
+            "openWorldHint": false
+          }
         }
       ]
     },
@@ -260,31 +408,61 @@
       "mcpTools": [
         {
           "name": "lens_index",
-          "description": "Index (or incrementally refresh) a file or directory so it can be searched. Run once per repo, then again after edits (only changed files are re-read)."
+          "description": "Index (or incrementally refresh) a file or directory so it can be searched. Run once per repo, then again after edits (only changed files are re-read).",
+          "annotations": {
+            "readOnlyHint": false,
+            "destructiveHint": false,
+            "idempotentHint": true,
+            "openWorldHint": false
+          }
         },
         {
           "name": "lens_search",
-          "description": "Search the indexed codebase and get back the most relevant code snippets (ranked, with file:line), within a token budget. Use this INSTEAD of reading whole files — it is far cheaper."
+          "description": "Search the indexed codebase and get back the most relevant code snippets (ranked, with file:line), within a token budget. Use this INSTEAD of reading whole files — it is far cheaper.",
+          "annotations": {
+            "readOnlyHint": true,
+            "openWorldHint": false
+          }
         },
         {
           "name": "lens_references",
-          "description": "Find every line across the index that mentions a symbol (whole-word), grouped by file with line numbers. Use to see where a function/variable/class is used or defined before editing it."
+          "description": "Find every line across the index that mentions a symbol (whole-word), grouped by file with line numbers. Use to see where a function/variable/class is used or defined before editing it.",
+          "annotations": {
+            "readOnlyHint": true,
+            "openWorldHint": false
+          }
         },
         {
           "name": "lens_outline",
-          "description": "Get a compact symbol map (functions, classes, headings) of a file with line numbers — understand structure without reading the whole file."
+          "description": "Get a compact symbol map (functions, classes, headings) of a file with line numbers — understand structure without reading the whole file.",
+          "annotations": {
+            "readOnlyHint": true,
+            "openWorldHint": false
+          }
         },
         {
           "name": "lens_read",
-          "description": "Read an exact line range of a file (surgical). Pair with lens_search / lens_outline to pull only the lines you need."
+          "description": "Read an exact line range of a file (surgical). Pair with lens_search / lens_outline to pull only the lines you need.",
+          "annotations": {
+            "readOnlyHint": true,
+            "openWorldHint": false
+          }
         },
         {
           "name": "lens_map",
-          "description": "List the indexed files and language breakdown — a quick map of the repo."
+          "description": "List the indexed files and language breakdown — a quick map of the repo.",
+          "annotations": {
+            "readOnlyHint": true,
+            "openWorldHint": false
+          }
         },
         {
           "name": "lens_stats",
-          "description": "Index statistics: file/chunk/line counts and languages."
+          "description": "Index statistics: file/chunk/line counts and languages.",
+          "annotations": {
+            "readOnlyHint": true,
+            "openWorldHint": false
+          }
         }
       ]
     },
@@ -311,15 +489,31 @@
       "mcpTools": [
         {
           "name": "anvil_run_code",
-          "description": "Run a code snippet in a throwaway, sandboxed Docker container and get stdout/stderr/exit code. Use to verify logic, reproduce a bug, or check output — safely, without touching the host. Network is OFF by default."
+          "description": "Run a code snippet in a throwaway, sandboxed Docker container and get stdout/stderr/exit code. Use to verify logic, reproduce a bug, or check output — safely, without touching the host. Network is OFF by default.",
+          "annotations": {
+            "readOnlyHint": false,
+            "destructiveHint": true,
+            "idempotentHint": false,
+            "openWorldHint": true
+          }
         },
         {
           "name": "anvil_run_command",
-          "description": "Run a shell command inside a container, optionally with files you supply and/or a host directory mounted read-only at /repo (e.g. run a test suite). Returns structured result."
+          "description": "Run a shell command inside a container, optionally with files you supply and/or a host directory mounted read-only at /repo (e.g. run a test suite). Returns structured result.",
+          "annotations": {
+            "readOnlyHint": false,
+            "destructiveHint": true,
+            "idempotentHint": false,
+            "openWorldHint": true
+          }
         },
         {
           "name": "anvil_check",
-          "description": "Check Docker availability and list language presets."
+          "description": "Check Docker availability and list language presets.",
+          "annotations": {
+            "readOnlyHint": true,
+            "openWorldHint": false
+          }
         }
       ]
     },
@@ -346,67 +540,141 @@
       "mcpTools": [
         {
           "name": "cortex_write",
-          "description": "Create or update a note in your second brain. Body is markdown — link to other notes with [[Wikilinks]] and add #tags to grow the knowledge graph. Distil what you learn into small, interconnected notes (concept / entity / source / synthesis) instead of one big dump. Re-writing the same title updates it; use append:true to add to it."
+          "description": "Create or update a note in your second brain. Body is markdown — link to other notes with [[Wikilinks]] and add #tags to grow the knowledge graph. Distil what you learn into small, interconnected notes (concept / entity / source / synthesis) instead of one big dump. Re-writing the same title updates it; use append:true to add to it.",
+          "annotations": {
+            "readOnlyHint": false,
+            "destructiveHint": true,
+            "idempotentHint": true,
+            "openWorldHint": false
+          }
         },
         {
           "name": "cortex_capture",
-          "description": "Stash raw material (an article, transcript, finding, snippet) into the source inbox to distil into proper notes later. Cheap inbox write — use cortex_write to turn captures into interconnected concept/entity notes."
+          "description": "Stash raw material (an article, transcript, finding, snippet) into the source inbox to distil into proper notes later. Cheap inbox write — use cortex_write to turn captures into interconnected concept/entity notes.",
+          "annotations": {
+            "readOnlyHint": false,
+            "destructiveHint": false,
+            "idempotentHint": false,
+            "openWorldHint": false
+          }
         },
         {
           "name": "cortex_search",
-          "description": "Search the brain and get back ranked, token-budgeted snippets (bm25). Use this to recall what you already know INSTEAD of re-deriving it. Filter by tag or type."
+          "description": "Search the brain and get back ranked, token-budgeted snippets (bm25). Use this to recall what you already know INSTEAD of re-deriving it. Filter by tag or type.",
+          "annotations": {
+            "readOnlyHint": true,
+            "openWorldHint": false
+          }
         },
         {
           "name": "cortex_read",
-          "description": "Read a full note by title, slug or alias. Returns its markdown body, tags and backlink count."
+          "description": "Read a full note by title, slug or alias. Returns its markdown body, tags and backlink count.",
+          "annotations": {
+            "readOnlyHint": true,
+            "openWorldHint": false
+          }
         },
         {
           "name": "cortex_links",
-          "description": "Get a note's connections: backlinks (notes pointing here), forward links (notes it points to, with broken ones flagged), or both."
+          "description": "Get a note's connections: backlinks (notes pointing here), forward links (notes it points to, with broken ones flagged), or both.",
+          "annotations": {
+            "readOnlyHint": true,
+            "openWorldHint": false
+          }
         },
         {
           "name": "cortex_related",
-          "description": "Find notes related to this one, ranked by direct links, shared citations and shared tags — surface relevant context you might have forgotten."
+          "description": "Find notes related to this one, ranked by direct links, shared citations and shared tags — surface relevant context you might have forgotten.",
+          "annotations": {
+            "readOnlyHint": true,
+            "openWorldHint": false
+          }
         },
         {
           "name": "cortex_suggest",
-          "description": "Suggest existing notes this one should probably link to but doesn't yet — ranked by textual similarity, excluding notes already connected. Use it to weave orphans into the graph and densify your brain."
+          "description": "Suggest existing notes this one should probably link to but doesn't yet — ranked by textual similarity, excluding notes already connected. Use it to weave orphans into the graph and densify your brain.",
+          "annotations": {
+            "readOnlyHint": true,
+            "openWorldHint": false
+          }
         },
         {
           "name": "cortex_lint",
-          "description": "Health report for the vault: orphan notes (unconnected), broken links (a to-do list of notes to write), untagged notes and stubs. Run it to keep the second brain well-maintained."
+          "description": "Health report for the vault: orphan notes (unconnected), broken links (a to-do list of notes to write), untagged notes and stubs. Run it to keep the second brain well-maintained.",
+          "annotations": {
+            "readOnlyHint": true,
+            "openWorldHint": false
+          }
         },
         {
           "name": "cortex_tags",
-          "description": "List every tag with counts, or (with a name) the notes carrying that tag."
+          "description": "List every tag with counts, or (with a name) the notes carrying that tag.",
+          "annotations": {
+            "readOnlyHint": true,
+            "openWorldHint": false
+          }
         },
         {
           "name": "cortex_graph",
-          "description": "Knowledge-graph health: note/link counts, hub notes (most backlinks), orphan notes (unconnected), and broken links (wikilinks to notes that don't exist yet — good candidates to write)."
+          "description": "Knowledge-graph health: note/link counts, hub notes (most backlinks), orphan notes (unconnected), and broken links (wikilinks to notes that don't exist yet — good candidates to write).",
+          "annotations": {
+            "readOnlyHint": true,
+            "openWorldHint": false
+          }
         },
         {
           "name": "cortex_recent",
-          "description": "Most recently updated notes — a quick sense of what the brain has been working on."
+          "description": "Most recently updated notes — a quick sense of what the brain has been working on.",
+          "annotations": {
+            "readOnlyHint": true,
+            "openWorldHint": false
+          }
         },
         {
           "name": "cortex_daily",
-          "description": "Append a timestamped line to today's daily note — a running journal of what happened. Use it to leave a durable trail across sessions."
+          "description": "Append a timestamped line to today's daily note — a running journal of what happened. Use it to leave a durable trail across sessions.",
+          "annotations": {
+            "readOnlyHint": false,
+            "destructiveHint": false,
+            "idempotentHint": false,
+            "openWorldHint": false
+          }
         },
         {
           "name": "cortex_sync",
-          "description": "Rescan the vault folder into the index (incremental by mtime). Run after files were added or edited outside cortex (e.g. in Obsidian or by hand)."
+          "description": "Rescan the vault folder into the index (incremental by mtime). Run after files were added or edited outside cortex (e.g. in Obsidian or by hand).",
+          "annotations": {
+            "readOnlyHint": false,
+            "destructiveHint": false,
+            "idempotentHint": true,
+            "openWorldHint": false
+          }
         },
         {
           "name": "cortex_stats",
-          "description": "Vault statistics: note/link/tag counts, broken links, note types, last update."
+          "description": "Vault statistics: note/link/tag counts, broken links, note types, last update.",
+          "annotations": {
+            "readOnlyHint": true,
+            "openWorldHint": false
+          }
         },
         {
           "name": "cortex_triage",
-          "description": "The vault inbox: notes that were captured but never woven in — orphans (nothing links to them), untagged, or stubs. For each, says why it needs attention and proposes what to weave it with: links to the notes it already resembles, and the tags those notes carry. Run this after capturing, then cortex_weave to act on it."
+          "description": "The vault inbox: notes that were captured but never woven in — orphans (nothing links to them), untagged, or stubs. For each, says why it needs attention and proposes what to weave it with: links to the notes it already resembles, and the tags those notes carry. Run this after capturing, then cortex_weave to act on it.",
+          "annotations": {
+            "readOnlyHint": true,
+            "openWorldHint": false
+          }
         },
         {
           "name": "cortex_weave",
-          "description": "Weave a note into the graph: adopt tags and link it to related notes. Writes the note file (frontmatter tags + a Related line of [[wikilinks]]), so the links heal into the graph like any other."
+          "description": "Weave a note into the graph: adopt tags and link it to related notes. Writes the note file (frontmatter tags + a Related line of [[wikilinks]]), so the links heal into the graph like any other.",
+          "annotations": {
+            "readOnlyHint": false,
+            "destructiveHint": true,
+            "idempotentHint": true,
+            "openWorldHint": false
+          }
         }
       ]
     },
@@ -433,31 +701,63 @@
       "mcpTools": [
         {
           "name": "scout_fetch",
-          "description": "Fetch a web page and get back clean, readable markdown (headings, links, code, lists) instead of raw HTML — far cheaper in tokens. The page is cached, so fetching the same URL again is free (pass fresh:true to bypass). Big pages are truncated to a token budget; use scout_search to find within them."
+          "description": "Fetch a web page and get back clean, readable markdown (headings, links, code, lists) instead of raw HTML — far cheaper in tokens. The page is cached, so fetching the same URL again is free (pass fresh:true to bypass). Big pages are truncated to a token budget; use scout_search to find within them.",
+          "annotations": {
+            "readOnlyHint": false,
+            "destructiveHint": false,
+            "idempotentHint": true,
+            "openWorldHint": true
+          }
         },
         {
           "name": "scout_search",
-          "description": "Search across every page you have already fetched — ranked, token-budgeted snippets. Recall something you read earlier without re-fetching it."
+          "description": "Search across every page you have already fetched — ranked, token-budgeted snippets. Recall something you read earlier without re-fetching it.",
+          "annotations": {
+            "readOnlyHint": true,
+            "openWorldHint": true
+          }
         },
         {
           "name": "scout_links",
-          "description": "Extract the outbound links (absolute URLs + anchor text) from a page — use it to decide where to navigate or crawl next."
+          "description": "Extract the outbound links (absolute URLs + anchor text) from a page — use it to decide where to navigate or crawl next.",
+          "annotations": {
+            "readOnlyHint": true,
+            "openWorldHint": true
+          }
         },
         {
           "name": "scout_list",
-          "description": "List recently fetched pages (your reading history)."
+          "description": "List recently fetched pages (your reading history).",
+          "annotations": {
+            "readOnlyHint": true,
+            "openWorldHint": true
+          }
         },
         {
           "name": "scout_forget",
-          "description": "Remove a page from the cache."
+          "description": "Remove a page from the cache.",
+          "annotations": {
+            "readOnlyHint": false,
+            "destructiveHint": true,
+            "idempotentHint": true,
+            "openWorldHint": false
+          }
         },
         {
           "name": "scout_stats",
-          "description": "Cache statistics: pages cached, bytes stored, last fetch."
+          "description": "Cache statistics: pages cached, bytes stored, last fetch.",
+          "annotations": {
+            "readOnlyHint": true,
+            "openWorldHint": false
+          }
         },
         {
           "name": "scout_overview",
-          "description": "A digest of everything scout has read: how many tokens the raw HTML would have cost vs the clean markdown kept (and the tokens saved), the top hosts read from, reading volume per day, and the heaviest pages."
+          "description": "A digest of everything scout has read: how many tokens the raw HTML would have cost vs the clean markdown kept (and the tokens saved), the top hosts read from, reading volume per day, and the heaviest pages.",
+          "annotations": {
+            "readOnlyHint": true,
+            "openWorldHint": true
+          }
         }
       ]
     },
@@ -484,11 +784,19 @@
       "mcpTools": [
         {
           "name": "recall_search",
-          "description": "Recall everything relevant to a query across ALL your knowledge at once: your second brain (cortex notes), the team's shared memory (agent-hq), your reading history (scout pages) and your code (lens). Returns one ranked, token-budgeted briefing with each hit tagged by source. Use this FIRST when starting a task — it loads the right context so you don't re-derive what you already know or re-read the web."
+          "description": "Recall everything relevant to a query across ALL your knowledge at once: your second brain (cortex notes), the team's shared memory (agent-hq), your reading history (scout pages) and your code (lens). Returns one ranked, token-budgeted briefing with each hit tagged by source. Use this FIRST when starting a task — it loads the right context so you don't re-derive what you already know or re-read the web.",
+          "annotations": {
+            "readOnlyHint": true,
+            "openWorldHint": true
+          }
         },
         {
           "name": "recall_status",
-          "description": "Show which knowledge stores are available and how many entries each holds (cortex / agent-hq / scout / lens)."
+          "description": "Show which knowledge stores are available and how many entries each holds (cortex / agent-hq / scout / lens).",
+          "annotations": {
+            "readOnlyHint": true,
+            "openWorldHint": false
+          }
         }
       ]
     },
@@ -515,19 +823,39 @@
       "mcpTools": [
         {
           "name": "iris_look",
-          "description": "LOOK at a web page you built — a URL or a local .html file — and get back the actual screenshots plus every defect a glance would catch: the page scrolling sideways, an element clipped off the right edge, unreadable contrast, type too small to read, text printing over text, tap targets too small, and any console exception. Use this after writing or changing ANY user interface, before you claim it works. Renders at real viewports (phone, tablet, desktop) and in both light and dark themes, because that is where layouts actually break."
+          "description": "LOOK at a web page you built — a URL or a local .html file — and get back the actual screenshots plus every defect a glance would catch: the page scrolling sideways, an element clipped off the right edge, unreadable contrast, type too small to read, text printing over text, tap targets too small, and any console exception. Use this after writing or changing ANY user interface, before you claim it works. Renders at real viewports (phone, tablet, desktop) and in both light and dark themes, because that is where layouts actually break.",
+          "annotations": {
+            "readOnlyHint": false,
+            "destructiveHint": false,
+            "idempotentHint": false,
+            "openWorldHint": true
+          }
         },
         {
           "name": "iris_play",
-          "description": "For GAMES and anything animated. A screenshot cannot tell you a game is dead — a game that renders one perfect frame and then never draws again looks flawless in a still. This drives the real thing: counts frames over several seconds, measures fps and the worst stutter, checks the frames actually differ, and presses keys to see whether the game answers. Catches: a loop that never runs, a frozen canvas, input that is ignored, sub-30fps."
+          "description": "For GAMES and anything animated. A screenshot cannot tell you a game is dead — a game that renders one perfect frame and then never draws again looks flawless in a still. This drives the real thing: counts frames over several seconds, measures fps and the worst stutter, checks the frames actually differ, and presses keys to see whether the game answers. Catches: a loop that never runs, a frozen canvas, input that is ignored, sub-30fps.",
+          "annotations": {
+            "readOnlyHint": false,
+            "destructiveHint": false,
+            "idempotentHint": false,
+            "openWorldHint": true
+          }
         },
         {
           "name": "iris_runs",
-          "description": "What the eye has already looked at — past runs, with their verdicts."
+          "description": "What the eye has already looked at — past runs, with their verdicts.",
+          "annotations": {
+            "readOnlyHint": true,
+            "openWorldHint": false
+          }
         },
         {
           "name": "iris_stats",
-          "description": "Where the browser is, where the images land, and how many runs passed."
+          "description": "Where the browser is, where the images land, and how many runs passed.",
+          "annotations": {
+            "readOnlyHint": true,
+            "openWorldHint": false
+          }
         }
       ]
     }

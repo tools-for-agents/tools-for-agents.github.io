@@ -83,6 +83,13 @@ function interrogate(tool) {
         let m; try { m = JSON.parse(line); } catch { continue; }
 
         if (m.id === 2 && m.result?.tools) {
+          // A tool with no `annotations` is not neutral. The MCP spec's defaults are
+          // pessimistic: with none, a tool is DECLARED destructive and open-world, and a
+          // conformant client should warn the user before calling it. Silence is the
+          // loudest possible answer here — and it is the wrong one for a read.
+          for (const t of m.result.tools) {
+            if (!t.annotations) unrouted.push(`${t.name} (no annotations = spec-default destructive)`);
+          }
           names = m.result.tools.map((t) => t.name);
           names.forEach((n, i) => {
             pending.set(100 + i, n);

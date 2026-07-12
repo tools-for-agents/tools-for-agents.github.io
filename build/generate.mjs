@@ -78,6 +78,10 @@ function askServer(dir) {
           done(msg.result.tools.map((t) => ({
             name: t.name,
             description: (t.description || "").replace(/\s+/g, " ").trim(),
+            // What the tool does to the world (MCP tool annotations). An agent reading
+            // this manifest should be able to tell a search from a delete WITHOUT
+            // calling either of them.
+            ...(t.annotations ? { annotations: t.annotations } : {}),
           })));
         }
       }
