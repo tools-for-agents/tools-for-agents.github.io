@@ -152,3 +152,40 @@ jobs:
           done
       - name: every readOnlyHint:true must be TRUE
         run: node build/honest.mjs --root "$PWD/_tools"
+
+  # IS `openWorldHint: false` TRUE?
+  #
+  # The companion to `honest`. That one asks whether a tool that says it does not WRITE really
+  # does not write. This one asks whether a tool that says it does not REACH THE OUTSIDE WORLD
+  # really does not reach it.
+  #
+  # 10 of the 67 declare openWorldHint:true — they talk to the internet, and the client is told
+  # so. The other 57 declare that they do NOT. That is a promise about where your data can go,
+  # and a "closed" tool that quietly fetches a URL is an exfiltration path with a reassuring
+  # label on it.
+  #
+  #     A TOOL THAT SAYS IT STAYS HOME MUST STAY HOME.
+  #
+  # THE WALL MUST BE PROVEN TO BLOCK, or this is a check that cannot fail — it would bless every
+  # tool in the kit, including the ones that spend all day on the internet. So it first calls
+  # scout_fetch (openWorldHint:true, needs the internet by definition) and DEMANDS it is stopped
+  # at the border. Only then does it let the closed-world tools loose against the same wall.
+  #
+  # Loopback is allowed: agent-hq's 28 tools are a skin over its own HTTP API on localhost, and
+  # a program talking to itself is not "interacting with external entities".
+  sealed:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - uses: browser-actions/setup-chrome@v1
+      - name: check out the seven tools
+        run: |
+          mkdir -p _tools
+          for t in agent-hq lens anvil cortex scout recall iris; do
+            git clone --depth 1 -q "https://github.com/tools-for-agents/$t.git" "_tools/$t"
+          done
+      - name: every openWorldHint:false must stay home
+        run: node build/sealed.mjs --root "$PWD/_tools"
