@@ -212,7 +212,7 @@ async function withServer(repo, env, fn) {
   } finally { await close(); }
 }
 
-let failed = 0, checked = 0;
+let failed = 0, checked = 0, wrote = 0;
 for (const s of SERVERS) {
   if (ONLY.length && !ONLY.includes(s.name)) continue;
   const repo = resolve(ROOT, s.name);
@@ -248,6 +248,18 @@ for (const s of SERVERS) {
       // IS. An empty store makes every tool bail early and this whole check pass on an empty
       // room — the exact fault that let seven UI gates audit blank pages for months. So seed
       // it, and then DEMAND it is not empty before believing a single pass.
+      // FINGERPRINT THE REPO BEFORE ANYTHING RUNS — including the seed.
+      //
+      // I planted a tool that drops a LITTER.txt into the working directory, and this check
+      // waved it through. The seed script calls the very same write() path, so the litter was
+      // already there when the "before" snapshot was taken, and it cancelled itself out of the
+      // diff. A file that exists in both snapshots is invisible, however wrong it is.
+      //
+      // Nothing here has any business writing into the repo — not the tools, and not the seed,
+      // which writes to the STORE. So the baseline is the repo as it was found, before a single
+      // line of this ran.
+      const repoAtStart = fingerprint(repo);
+
       s.setup?.(repo, env, store);
       if (s.nonEmpty && !s.nonEmpty(repo, env, store)) {
         throw new Error('the store is EMPTY after seeding — every read-only tool would bail early '
@@ -271,8 +283,39 @@ for (const s of SERVERS) {
         for (const c of [...dRepo.map((x) => `  repo  ${x}`), ...dStore.map((x) => `  store ${x}`)].slice(0, 20)) console.error(c);
         console.error('  A read-only tool that writes is not a wrong label — it is a tool that walked');
         console.error('  through the one gate standing between it and the user\'s data.');
+        return;
+      }
+      console.log(`✓ ${s.name}: ${ro.length} read-only tools ran, and not one byte moved`);
+
+      // ── PHASE 2: THE WRITERS MAY WRITE — BUT ONLY WHERE THEY SAID THEY WOULD ────────────
+      //
+      // A tool has a store, and the user has a working directory, and the two are not the same
+      // place. cortex used to leave a vault/ in whatever directory you happened to ask it a
+      // question in; lens left a .lens/, scout a .scout/. Cycle 16 stopped the READS from doing
+      // that. NOBODY EVER CHECKED THE WRITES.
+      //
+      // So call the other 30 tools — the ones that are supposed to write — and demand the
+      // writing lands in the STORE and nowhere else. The repo (standing in for the user's cwd)
+      // must come back byte-identical.
+      // Phase 1 CLOSED the server (the checkpoint on close is what makes a WAL write visible),
+      // so the writers need a server of their own. Same wall, fresh process.
+      const writers = tools.filter((t) => t.annotations?.readOnlyHint !== true);
+      await withServer(repo, env, async (call2, close2) => {
+        for (const t of writers) {
+          await call2('tools/call', { name: t.name, arguments: argsFor(t) });
+          wrote++;
+        }
+        await close2();
+      });
+      const litter = diff(repoAtStart, fingerprint(repo));
+      if (litter.length) {
+        failed++;
+        console.error(`\n✗ ${s.name}: ${writers.length} writing tools LITTERED THE WORKING DIRECTORY:`);
+        for (const c of litter.slice(0, 15)) console.error(`    ${c}`);
+        console.error('  A tool has a store, and the user has a working directory, and they are not');
+        console.error('  the same place. Write to yours.');
       } else {
-        console.log(`✓ ${s.name}: ${ro.length} read-only tools ran, and not one byte moved`);
+        console.log(`✓ ${s.name}: ${writers.length} writing tools ran, and left the working directory alone`);
       }
     });
   } catch (e) {
@@ -284,7 +327,7 @@ for (const s of SERVERS) {
   }
 }
 
-console.log(`\n${checked} read-only tools called across the kit.`);
+console.log(`\n${checked} read-only tools called (nothing moved) · ${wrote} writing tools called (no litter).`);
 if (failed) { console.error(`${failed} server(s) broke their own promise.`); process.exit(1); }
 // AND ZERO IS NOT A PASS.
 if (!checked) { console.error('NOTHING WAS CHECKED. That is not a clean bill of health.'); process.exit(1); }
