@@ -82,7 +82,7 @@ jobs:
         id: drift
         run: |
           rm -rf _tools
-          if git diff --quiet -- llms.txt llms-full.txt tools.json; then
+          if git diff --quiet -- llms.txt llms-full.txt tools.json index.html; then
             echo "drifted=false" >> "$GITHUB_OUTPUT"
             echo "✓ the manifest matches the seven servers" >> "$GITHUB_STEP_SUMMARY"
           else
@@ -90,7 +90,7 @@ jobs:
             {
               echo "### The published manifest no longer matches the tools"
               echo '```diff'
-              git --no-pager diff --stat -- llms.txt llms-full.txt tools.json
+              git --no-pager diff --stat -- llms.txt llms-full.txt tools.json index.html
               git --no-pager diff -- tools.json | head -80
               echo '```'
             } >> "$GITHUB_STEP_SUMMARY"
@@ -102,7 +102,7 @@ jobs:
         if: steps.drift.outputs.drifted == 'true' && github.event_name != 'schedule'
         run: |
           echo "::error::/tools.json and /llms.txt are stale. Run: node build/generate.mjs <workspace>"
-          git --no-pager diff -- llms.txt llms-full.txt tools.json
+          git --no-pager diff -- llms.txt llms-full.txt tools.json index.html
           exit 1
 
       # On the daily run: the tools moved on their own. Follow them.
@@ -111,7 +111,7 @@ jobs:
         run: |
           git config user.name  "manifest bot"
           git config user.email "actions@github.com"
-          git add llms.txt llms-full.txt tools.json
+          git add llms.txt llms-full.txt tools.json index.html
           git commit -m "chore: the tools moved — re-derived the manifest from tools/list"
           git push
 
