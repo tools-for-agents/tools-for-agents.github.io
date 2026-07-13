@@ -114,3 +114,41 @@ jobs:
           git add llms.txt llms-full.txt tools.json
           git commit -m "chore: the tools moved — re-derived the manifest from tools/list"
           git push
+
+  # IS `readOnlyHint: true` TRUE?
+  #
+  # 37 of the 67 tools declare themselves read-only. `routable.mjs` (above) checks the
+  # annotations EXIST — because under the spec's pessimistic defaults, silence means
+  # DESTRUCTIVE, and a tool that declares nothing declares the worst.
+  #
+  # NOBODY HAD EVER CHECKED THEY WERE TRUE.
+  #
+  # readOnlyHint is not decoration. It is a PROMISE TO THE CLIENT, and a conformant client
+  # ACTS on it — it may call the tool without stopping to ask the user, because we said it
+  # touches nothing. A "read-only" tool that writes has not merely got a wrong label; it has
+  # walked through the one gate standing between it and the user's data.
+  #
+  #     A PROMISE NOBODY CHECKS IS A PROMISE YOU HAVE ONLY MADE TO YOURSELF.
+  #
+  # So: seed each store, ASSERT it is not empty (a read-only tool with nothing to read writes
+  # nothing, for the most useless reason there is), call every read-only tool with arguments
+  # good enough to make it actually work, close the server so SQLite checkpoints, and demand
+  # not one byte moved.
+  #
+  # Proven to bite: plant an INSERT inside cortex_search and this goes red, naming the file.
+  honest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - uses: browser-actions/setup-chrome@v1   # iris needs a real browser to make a run to read
+      - name: check out the seven tools
+        run: |
+          mkdir -p _tools
+          for t in agent-hq lens anvil cortex scout recall iris; do
+            git clone --depth 1 -q "https://github.com/tools-for-agents/$t.git" "_tools/$t"
+          done
+      - name: every readOnlyHint:true must be TRUE
+        run: node build/honest.mjs --root "$PWD/_tools"
