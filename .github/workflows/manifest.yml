@@ -276,3 +276,33 @@ jobs:
           done
       - name: every published package must install clean and serve its tools
         run: node build/packaged.mjs --root "$PWD/_tools"
+
+  # DO THE SEVEN REPOS STILL AGREE ON WHAT MUST BE IDENTICAL?
+  #
+  # The kit is seven repos that ship as ONE thing, evolving in parallel — exactly the shape where a
+  # fix lands in six and misses the seventh. It has happened: iris's serveStatic kept the weak path
+  # guard a full cycle after the other six were hardened; the mutants-gate timeout bug was latent in
+  # all seven at once. The behavioural gates prove each SERVER is right; this proves the repos AGREE.
+  #
+  # Only invariants with NO legitimate per-repo exception: version, node engine, mcpName namespace,
+  # the core files (server.json, mutants.mjs, publish.yml), the no-exception CI gates, node version,
+  # and tokens:kit. (refused-write is deliberately excluded — four write-primary tools have it, three
+  # read-primary ones don't; a check that flags an intended difference is the trap this avoids.)
+  #
+  # Proven to bite: bump one repo's version and it names the odd one out. Its first job is to catch a
+  # PARTIAL RELEASE — the day someone tags v0.2.0 in six repos and forgets the seventh.
+  consistent:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: check out the seven tools
+        run: |
+          mkdir -p _tools
+          for t in agent-hq lens anvil cortex scout recall iris; do
+            git clone --depth 1 -q "https://github.com/tools-for-agents/$t.git" "_tools/$t"
+          done
+      - name: the seven repos must agree on every shared invariant
+        run: node build/consistent.mjs --root "$PWD/_tools"
