@@ -248,3 +248,31 @@ jobs:
           done
       - name: every idempotentHint:true tool must be safe to retry
         run: node build/idempotent.mjs --root "$PWD/_tools"
+
+  # DOES THE PACKAGE WE WOULD PUBLISH ACTUALLY WORK?
+  #
+  # The manifest job handshakes each server from a fresh CLONE — but a clone is not what an agent
+  # installs. A clone has every file in git; a published package has only what package.json's `files`
+  # field lets npm include. Drop `mcp` or `src` from that list and the clone test stays green while
+  # `npx @tools-for-agents/<tool>` installs a package with no server in it.
+  #
+  # So this does the whole round trip a user does: npm pack each repo → install the tarball into a
+  # clean dir → run the PUBLISHED BIN → initialize + tools/list over stdio → demand real tools on a
+  # clean stdout. The strongest publication check there is, run before the tag that would publish.
+  #
+  # Proven to bite: remove `mcp` from a repo's `files` and this goes red naming the missing tarball file.
+  packaged:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: check out the seven tools
+        run: |
+          mkdir -p _tools
+          for t in agent-hq lens anvil cortex scout recall iris; do
+            git clone --depth 1 -q "https://github.com/tools-for-agents/$t.git" "_tools/$t"
+          done
+      - name: every published package must install clean and serve its tools
+        run: node build/packaged.mjs --root "$PWD/_tools"
