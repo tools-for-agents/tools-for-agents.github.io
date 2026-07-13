@@ -189,3 +189,33 @@ jobs:
           done
       - name: every openWorldHint:false must stay home
         run: node build/sealed.mjs --root "$PWD/_tools"
+
+  # IS `destructiveHint: false` TRUE? — the third leg of the annotation trilogy.
+  #
+  # honest.mjs proves a readOnly tool writes nothing. sealed.mjs proves a closed-world tool stays
+  # off the network. This proves a NON-DESTRUCTIVE tool is genuinely additive: it may ADD records,
+  # but it must never DELETE one the user already had. destructiveHint:false is a promise the client
+  # acts on — such a tool may be called WITHOUT warning the user, because we said it cannot lose
+  # their data. A non-destructive tool that deletes a note is data loss with a reassuring label.
+  #
+  # It snapshots the SET of primary keys before, calls each additive tool, and demands every key is
+  # still there. Not row count (a delete+insert nets zero and fooled that — I proved it), not row
+  # equality (an UPDATE to a lifecycle field would misfire). Identity: only a real deletion trips it.
+  #
+  # Proven to bite: plant a DELETE into cortex_capture and this goes red, naming the tool.
+  additive:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - uses: browser-actions/setup-chrome@v1
+      - name: check out the seven tools
+        run: |
+          mkdir -p _tools
+          for t in agent-hq lens anvil cortex scout recall iris; do
+            git clone --depth 1 -q "https://github.com/tools-for-agents/$t.git" "_tools/$t"
+          done
+      - name: every destructiveHint:false tool must only add
+        run: node build/additive.mjs --root "$PWD/_tools"
