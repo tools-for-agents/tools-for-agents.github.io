@@ -219,3 +219,32 @@ jobs:
           done
       - name: every destructiveHint:false tool must only add
         run: node build/additive.mjs --root "$PWD/_tools"
+
+  # IS `idempotentHint: true` TRUE? — the fourth and last annotation.
+  #
+  # honest/sealed/additive cover the safety hints (writes? destroys? phones home?). This covers the
+  # RETRY hint: idempotentHint:true says calling again with the same args has no additional effect,
+  # so a client may safely retry after a dropped response. A tool that claims it and creates a NEW
+  # record every call is a slow-motion data bug — retry logic quietly floods the store with dupes.
+  #
+  # Calls each idempotent+writing tool ONCE, snapshots the primary-key set, calls it AGAIN with the
+  # same args, and demands the second call created no new key. (An idempotent re-write bumps
+  # updated_at; identity, not byte-equality, is the right lens.)
+  #
+  # Proven to bite: make cortex_write mint a fresh slug per call and this goes red, naming the tool.
+  idempotent:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - uses: browser-actions/setup-chrome@v1
+      - name: check out the seven tools
+        run: |
+          mkdir -p _tools
+          for t in agent-hq lens anvil cortex scout recall iris; do
+            git clone --depth 1 -q "https://github.com/tools-for-agents/$t.git" "_tools/$t"
+          done
+      - name: every idempotentHint:true tool must be safe to retry
+        run: node build/idempotent.mjs --root "$PWD/_tools"
