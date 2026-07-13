@@ -104,8 +104,24 @@ function interrogate(tool) {
           // pessimistic: with none, a tool is DECLARED destructive and open-world, and a
           // conformant client should warn the user before calling it. Silence is the
           // loudest possible answer here — and it is the wrong one for a read.
+          //
+          // But "has SOME annotations" is not enough. Which hints a tool must declare depends on
+          // what it is: every tool states readOnlyHint and openWorldHint (do I write? do I reach
+          // the network?). A WRITE tool (readOnlyHint:false) must ALSO state destructiveHint and
+          // idempotentHint — omit either and it defaults to the pessimistic value, and a client
+          // needlessly warns on every call or refuses to retry a dropped one. For a READ tool
+          // those two are meaningless (a read cannot destroy or need dedup), so it correctly omits
+          // them. This locks in the completeness the four annotation gates (honest/sealed/additive/
+          // idempotent) rely on: each only checks the tools that DECLARE its hint, so a hint left
+          // undeclared is a tool those gates never see.
           for (const t of m.result.tools) {
-            if (!t.annotations) unrouted.push(`${t.name} (no annotations = spec-default destructive)`);
+            const a = t.annotations;
+            if (!a) { unrouted.push(`${t.name} (no annotations = spec-default destructive)`); continue; }
+            const need = a.readOnlyHint === true
+              ? ["readOnlyHint", "openWorldHint"]
+              : ["readOnlyHint", "openWorldHint", "destructiveHint", "idempotentHint"];
+            const gaps = need.filter((h) => !(h in a));
+            if (gaps.length) unrouted.push(`${t.name} (${a.readOnlyHint === true ? "read" : "write"} tool missing ${gaps.join(", ")} → defaults to the pessimistic value)`);
           }
           names = m.result.tools.map((t) => t.name);
           names.forEach((n, i) => {
