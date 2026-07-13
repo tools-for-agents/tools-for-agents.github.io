@@ -214,7 +214,11 @@ try {
   // ── 7. see ───────────────────────────────────────────────────────────────────
   await step(7, "iris      see", async () => {
     const f = join(WORK, "built.html");
-    writeFileSync(f, `<!doctype html><html><head><meta charset="utf-8"><title>built</title>
+    // The viewport meta is not optional: without it a phone lays this out at 980px and scales it
+    // down, and iris now (correctly) flags that at the phone viewport. The loop was quietly
+    // building a page with the most common mobile bug there is and calling it "closed".
+    writeFileSync(f, `<!doctype html><html><head><meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1"><title>built</title>
       <style>body{margin:0;background:#0a0b0e;color:#e8ebf2;font:16px/1.6 system-ui,sans-serif;padding:24px}
       h1{font-size:24px;margin:0 0 16px}p{color:#9aa3b5;margin:0;max-width:60ch}</style></head>
       <body><h1>The loop closed</h1><p>Seven tools, one task, one pass.</p></body></html>`);
