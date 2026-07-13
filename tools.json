@@ -12,7 +12,7 @@
   "github": "https://github.com/tools-for-agents",
   "license": "MIT",
   "toolCount": 7,
-  "mcpToolCount": 67,
+  "mcpToolCount": 68,
   "loop": [
     "coordinate",
     "read code",
@@ -94,8 +94,8 @@
     "aTypoIsNotAnEmptySet": "Columns, agents and namespaces are finite, known sets. A filter naming something outside the set is a MISTAKE, not a query with no results — and the error lists the values that do exist.",
     "aReadCreatesNothing": "Ask a question in any directory and nothing is left behind. Opening a store used to create it, so the empty store the tool had just made then answered the question — the tool invented the evidence for its own answer.",
     "everyErrorIsActionable": "'fetch failed' is not an error message. Every error names what went wrong, where it looked, and the command that fixes it.",
-    "everyToolDeclaresWhatItDoes": "MCP tool annotations on all 67: 37 read-only, 7 destructive, 10 open-world. A client can tell a search from a delete without calling either.",
-    "everyClaimIsGated": "The whole loop runs on every push from fresh clones; all 67 tools are called; the UI is looked at with data ugly enough to break it; a skipped test is a failed test."
+    "everyToolDeclaresWhatItDoes": "MCP tool annotations on all 68: 38 read-only, 7 destructive, 11 open-world. A client can tell a search from a delete without calling either.",
+    "everyClaimIsGated": "The whole loop runs on every push from fresh clones; all 68 tools are called; the UI is looked at with data ugly enough to break it; a skipped test is a failed test."
   },
   "publication": {
     "npm": {
@@ -793,6 +793,14 @@
         {
           "name": "recall_search",
           "description": "Recall everything relevant to a query across ALL your knowledge at once: your second brain (cortex notes), the team's shared memory (agent-hq), your reading history (scout pages) and your code (lens). Returns one ranked, token-budgeted briefing with each hit tagged by source. Use this FIRST when starting a task — it loads the right context so you don't re-derive what you already know or re-read the web.",
+          "annotations": {
+            "readOnlyHint": true,
+            "openWorldHint": true
+          }
+        },
+        {
+          "name": "recall_expand",
+          "description": "Get the FULLER context behind a single recall_search hit — the whole note, page or code chunk it came from, read straight from the source store (capped). A recall_search excerpt is a preview; when one hit is the one you need, expand it here instead of switching to cortex_read / scout_fetch / lens_read and having to know which store it lives in. Pass the hit's `source` and `ref` exactly as recall_search returned them.",
           "annotations": {
             "readOnlyHint": true,
             "openWorldHint": true

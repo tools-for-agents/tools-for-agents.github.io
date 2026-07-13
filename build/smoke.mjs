@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * /tools.json tells an agent "here are 67 tools you can call".
+ * /tools.json tells an agent "here are 68 tools you can call".
  *
  * The install test proves each server ANSWERS `tools/list`. But tools/list is STATIC —
  * it is a literal in the source. A server can advertise twenty-eight tools and fail
@@ -93,5 +93,5 @@ for (const [tool, spec] of Object.entries(SMOKE)) {
 
 console.log(bad
   ? `\n✗ ${bad}/${Object.keys(SMOKE).length} servers list tools they cannot run`
-  : `\n✓ every server answered a real tools/call — the 67 tools are callable, not just listed`);
+  : `\n✓ every server answered a real tools/call — the 68 tools are callable, not just listed`);
 process.exitCode = bad ? 1 : 0;

@@ -8,7 +8,7 @@
  *     coordinate → read code → run safely → remember → read the web → recall → see
  *
  * Every tool has been tested alone. Every server has been handshaken, every one of the
- * 67 tools called. The LOOP has never been run. It is the largest claim we make and the
+ * 68 tools called. The LOOP has never been run. It is the largest claim we make and the
  * least examined one, which is roughly how these things always go.
  *
  * So run it. One agent, one task, start to finish, entirely through MCP — the same wire
@@ -208,7 +208,27 @@ try {
         + `What ${absent.map((s) => ({ brain: "cortex", team: "agent-hq", reading: "scout", code: "lens" }[s])).join(" and ")} `
         + `just did is not visible from here. Answered: ${[...sources].join(", ") || "nothing"}`);
     }
-    return `${r.results.length} hits from ${sources.size} stores at once: ${[...sources].join(" · ")}`;
+
+    // recall_search matches through the FTS tables (notes_fts, pages_fts, chunks). recall_EXPAND
+    // reads the CONTENT columns directly — SELECT body FROM notes, SELECT markdown FROM pages,
+    // SELECT body FROM chunks — so it couples to each sibling's schema in a way search does not.
+    // If cortex renamed notes.body, search would still work and expand would silently return
+    // nothing. So expand one hit from each LOCAL store, against the real stores the siblings just
+    // built, and demand the full content comes back. (team expands over HTTP — a different path,
+    // covered by search already.)
+    for (const src of ["brain", "reading", "code"]) {
+      const hit = (r.results || []).find((x) => x.source === src);
+      if (!hit) continue;
+      const e = await recall.call("recall_expand", { source: src, ref: hit.ref });
+      if (!e || !e.text || !String(e.text).trim()) {
+        throw new Error(`recall_expand("${src}", "${hit.ref}") came back empty — recall's SQL no longer `
+          + `matches ${({ brain: "cortex", reading: "scout", code: "lens" }[src])}'s schema. `
+          + `A column it reads (body / markdown) was renamed or dropped; search still works because it `
+          + `goes through the FTS table, so this is the only place the drift shows.`);
+      }
+    }
+
+    return `${r.results.length} hits from ${sources.size} stores, and expand read the full content back`;
   });
 
   // ── 7. see ───────────────────────────────────────────────────────────────────

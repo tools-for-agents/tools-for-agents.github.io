@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // honest.mjs — IS `readOnlyHint: true` TRUE?
 //
-// Cycle 11 gave all 67 tools MCP annotations: 37 read-only, 7 destructive, 10 open-world.
+// Cycle 11 gave all 68 tools MCP annotations: 37 read-only, 7 destructive, 10 open-world.
 // `routable.mjs` checks the annotations EXIST — because silence means "destructive" under the
 // spec's pessimistic defaults, and a tool that declares nothing declares the worst.
 //
