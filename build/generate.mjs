@@ -354,4 +354,19 @@ await writeFile(join(OUT, "llms-full.txt"),
   `> Curated index: ${SITE}/llms.txt · Machine-readable: ${SITE}/tools.json\n` +
   readmes.join("") + "\n");
 
+// The landing page states the tool count in prose ("All 67 MCP tools…") — and one of those very
+// sentences claims the manifest "cannot drift". The claim was true of tools.json and a lie about the
+// number sitting next to it: index.html is hand-written, so every tool added drifted it. Derive it
+// here too. Rewrite every "<n> MCP tools" / "<n> tools registered" / "All <n> tools" to the real
+// count, so the page cannot say a number the servers disagree with.
+try {
+  const idx = join(OUT, "index.html");
+  const before = await readFile(idx, "utf8");
+  const after = before
+    .replace(/\b\d+ MCP tools\b/g, `${total} MCP tools`)
+    .replace(/\b\d+ tools registered\b/g, `${total} tools registered`)
+    .replace(/\ball \d+ tools\b/gi, (m) => m.replace(/\d+/, total));
+  if (after !== before) { await writeFile(idx, after); console.log(`  index.html: tool count → ${total}`); }
+} catch { /* no index.html in this checkout — the manifest files above are the source of truth */ }
+
 console.log(`✓ tools.json · llms.txt · llms-full.txt  (${tools.length} tools, ${total} MCP tools)`);
