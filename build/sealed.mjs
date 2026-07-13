@@ -5,7 +5,7 @@
 // does not write. This one asks whether a tool that says it does not REACH THE OUTSIDE WORLD
 // really does not reach it.
 //
-// Of the 69 tools, 10 declare `openWorldHint: true` — they talk to the internet, and the client
+// Of the 70 tools, 10 declare `openWorldHint: true` — they talk to the internet, and the client
 // is told so. The other 57 say, by declaring `openWorldHint: false`, that they do NOT. That is a
 // promise about where your data can go: a "closed" tool that quietly fetches a URL is an
 // exfiltration path with a reassuring label on it.

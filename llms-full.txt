@@ -1,6 +1,6 @@
 # tools-for-agents — the complete kit
 
-> Seven zero-dependency, MCP-native tools that form one agent loop. 69 callable MCP tools.
+> Seven zero-dependency, MCP-native tools that form one agent loop. 70 callable MCP tools.
 > This file is every tool's README, concatenated, so a model can ingest the whole kit in one fetch.
 > Curated index: https://tools-for-agents.github.io/llms.txt · Machine-readable: https://tools-for-agents.github.io/tools.json
 

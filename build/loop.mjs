@@ -8,7 +8,7 @@
  *     coordinate → read code → run safely → remember → read the web → recall → see
  *
  * Every tool has been tested alone. Every server has been handshaken, every one of the
- * 69 tools called. The LOOP has never been run. It is the largest claim we make and the
+ * 70 tools called. The LOOP has never been run. It is the largest claim we make and the
  * least examined one, which is roughly how these things always go.
  *
  * So run it. One agent, one task, start to finish, entirely through MCP — the same wire

@@ -12,7 +12,7 @@
   "github": "https://github.com/tools-for-agents",
   "license": "MIT",
   "toolCount": 7,
-  "mcpToolCount": 69,
+  "mcpToolCount": 70,
   "loop": [
     "coordinate",
     "read code",
@@ -94,8 +94,8 @@
     "aTypoIsNotAnEmptySet": "Columns, agents and namespaces are finite, known sets. A filter naming something outside the set is a MISTAKE, not a query with no results — and the error lists the values that do exist.",
     "aReadCreatesNothing": "Ask a question in any directory and nothing is left behind. Opening a store used to create it, so the empty store the tool had just made then answered the question — the tool invented the evidence for its own answer.",
     "everyErrorIsActionable": "'fetch failed' is not an error message. Every error names what went wrong, where it looked, and the command that fixes it.",
-    "everyToolDeclaresWhatItDoes": "MCP tool annotations on all 69: 38 read-only, 7 destructive, 12 open-world. A client can tell a search from a delete without calling either.",
-    "everyClaimIsGated": "The whole loop runs on every push from fresh clones; all 69 tools are called; the UI is looked at with data ugly enough to break it; a skipped test is a failed test."
+    "everyToolDeclaresWhatItDoes": "MCP tool annotations on all 70: 39 read-only, 7 destructive, 12 open-world. A client can tell a search from a delete without calling either.",
+    "everyClaimIsGated": "The whole loop runs on every push from fresh clones; all 70 tools are called; the UI is looked at with data ugly enough to break it; a skipped test is a failed test."
   },
   "publication": {
     "npm": {
@@ -459,6 +459,14 @@
         {
           "name": "lens_map",
           "description": "List the indexed files and language breakdown — a quick map of the repo.",
+          "annotations": {
+            "readOnlyHint": true,
+            "openWorldHint": false
+          }
+        },
+        {
+          "name": "lens_freshness",
+          "description": "Is the index STALE? Compares the code on disk now against what was indexed, and reports which files changed, were added, or were removed since. Check this before you trust a lens_search on a repo you indexed earlier — a search answers from the index, so if the code moved on you get yesterday's answer with no warning. If stale is non-zero, run lens_index again.",
           "annotations": {
             "readOnlyHint": true,
             "openWorldHint": false
