@@ -100,11 +100,18 @@ const codeMask = (line) => {
 
 const files = execSync(`git -C ${repo} ls-files 'src/*.js' 'mcp/*.js' 'scripts/*.js'`, { encoding: 'utf8' })
   .trim().split('\n').filter(Boolean)
-  .filter((f) => !only || f.includes(only));
+  // --only matches the BASENAME exactly. `.includes(only)` matched 'server.js' against
+  // 'mcp/mcp-server.js' too, so a sweep meant for one file rampaged across two and left mutants
+  // in the extra one when it was killed. The basename is the file you named.
+  .filter((f) => !only || f.split('/').pop() === only || f === only);
 
 const dirty = new Map(); // path -> original text
 const restore = () => { for (const [p, t] of dirty) writeFileSync(p, t); dirty.clear(); };
-process.on('SIGINT', () => { restore(); process.exit(130); });
+// Restore on EVERY way out, not just SIGINT: a SIGTERM (what `pkill` sends by default) or an
+// uncaught throw used to leave a mutant in the tree. `git status` after a sweep is still the
+// backstop, but the harness should clean up after itself first.
+for (const sig of ['SIGINT', 'SIGTERM', 'SIGHUP']) process.on(sig, () => { restore(); process.exit(130); });
+process.on('uncaughtException', (e) => { restore(); console.error(e); process.exit(1); });
 process.on('exit', restore);
 
 const runTests = () => {
