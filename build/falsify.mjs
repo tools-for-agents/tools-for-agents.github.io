@@ -39,7 +39,7 @@
 //   node build/falsify.mjs <repo-dir> [--only <file.js>] [--limit N]
 //
 import { readFileSync, writeFileSync } from 'node:fs';
-import { execSync, spawnSync } from 'node:child_process';
+import { execSync, spawn } from 'node:child_process';
 import { resolve, relative } from 'node:path';
 
 const repo = resolve(process.argv[2]);
@@ -114,18 +114,28 @@ for (const sig of ['SIGINT', 'SIGTERM', 'SIGHUP']) process.on(sig, () => { resto
 process.on('uncaughtException', (e) => { restore(); console.error(e); process.exit(1); });
 process.on('exit', restore);
 
-const runTests = () => {
-  const r = spawnSync('npm', ['test'], { cwd: repo, encoding: 'utf8', timeout: 180_000 });
-  const out = (r.stdout || '') + (r.stderr || '');
-  // A SKIPPED test is a failed test (cycle 13) — a mutant that only skips tests survived.
-  const skipped = +(out.match(/# skip (\d+)/)?.[1] ?? out.match(/skipped (\d+)/)?.[1] ?? 0);
-  return { red: r.status !== 0, skipped, out };
-};
+// ASYNC on purpose. spawnSync BLOCKS the event loop for the whole test run, so a SIGTERM that
+// arrives mid-run (the common case — a run is ~seconds to minutes) cannot be handled until the run
+// finishes, and a hard kill in that window leaves a mutant in the tree. spawn + await keeps the loop
+// live, so the signal handler below fires immediately and restores. (I shipped the handler first and
+// it did not actually work during a run — this is what makes the claim true.)
+const runTests = () => new Promise((resolveRun) => {
+  const child = spawn('npm', ['test'], { cwd: repo });
+  let out = '';
+  child.stdout.on('data', (d) => { out += d; });
+  child.stderr.on('data', (d) => { out += d; });
+  const timer = setTimeout(() => { child.kill('SIGKILL'); }, 180_000);
+  child.on('close', (code) => {
+    clearTimeout(timer);
+    const skipped = +(out.match(/# skip (\d+)/)?.[1] ?? out.match(/skipped (\d+)/)?.[1] ?? 0);
+    resolveRun({ red: code !== 0, skipped, out });
+  });
+});
 
 console.log(`\n### falsify ${relative(process.cwd(), repo)} — ${files.length} files`);
 
 // 0. The suite must be GREEN before we start, or every mutant "dies" for free.
-const base = runTests();
+const base = await runTests();
 if (base.red) { console.log('BASELINE IS RED — nothing to prove here.\n' + base.out.slice(-2000)); process.exit(1); }
 console.log(`baseline: green${base.skipped ? `, but ${base.skipped} SKIPPED` : ''}\n`);
 
@@ -164,7 +174,7 @@ for (const rel of files) {
       writeFileSync(path, mutant);
       tried++;
 
-      const { red, skipped } = runTests();
+      const { red, skipped } = await runTests();
       writeFileSync(path, orig); dirty.delete(path);
 
       if (red) { killed++; process.stdout.write('.'); }
