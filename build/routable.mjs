@@ -8,7 +8,7 @@
  * the unit tests (which test the core, never the MCP adapter) nor the handshake
  * (which only reads the list) will ever say a word about it.
  *
- * 68 tools are advertised. Before this, seven had ever been invoked.
+ * 69 tools are advertised. Before this, seven had ever been invoked.
  *
  * So: call every single one. We do not care whether it succeeds — called with no
  * arguments, most of them SHOULD complain, and "query is required" is a tool working.
@@ -17,7 +17,7 @@
  * adapter promising something it cannot do.
  *
  * Run it against throwaway clones (the manifest job's `_tools`), never a real
- * workspace: calling 68 tools with no arguments will write a daily note and index
+ * workspace: calling 69 tools with no arguments will write a daily note and index
  * whatever it can find, and that is fine in a runner and rude anywhere else.
  *
  *   node build/routable.mjs /path/to/throwaway/clones
@@ -32,7 +32,7 @@ const TOOLS = ["agent-hq", "lens", "anvil", "cortex", "scout", "recall", "iris"]
 /**
  * Is this response a BROKEN tool, or a tool complaining correctly?
  *
- * We call all 68 with no arguments, so most of them SHOULD complain — "query is
+ * We call all 69 with no arguments, so most of them SHOULD complain — "query is
  * required" is the tool working. What we are hunting is an advertised tool the server
  * cannot actually run.
  *

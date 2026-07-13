@@ -12,7 +12,7 @@
   "github": "https://github.com/tools-for-agents",
   "license": "MIT",
   "toolCount": 7,
-  "mcpToolCount": 68,
+  "mcpToolCount": 69,
   "loop": [
     "coordinate",
     "read code",
@@ -94,8 +94,8 @@
     "aTypoIsNotAnEmptySet": "Columns, agents and namespaces are finite, known sets. A filter naming something outside the set is a MISTAKE, not a query with no results — and the error lists the values that do exist.",
     "aReadCreatesNothing": "Ask a question in any directory and nothing is left behind. Opening a store used to create it, so the empty store the tool had just made then answered the question — the tool invented the evidence for its own answer.",
     "everyErrorIsActionable": "'fetch failed' is not an error message. Every error names what went wrong, where it looked, and the command that fixes it.",
-    "everyToolDeclaresWhatItDoes": "MCP tool annotations on all 68: 38 read-only, 7 destructive, 11 open-world. A client can tell a search from a delete without calling either.",
-    "everyClaimIsGated": "The whole loop runs on every push from fresh clones; all 68 tools are called; the UI is looked at with data ugly enough to break it; a skipped test is a failed test."
+    "everyToolDeclaresWhatItDoes": "MCP tool annotations on all 69: 38 read-only, 7 destructive, 12 open-world. A client can tell a search from a delete without calling either.",
+    "everyClaimIsGated": "The whole loop runs on every push from fresh clones; all 69 tools are called; the UI is looked at with data ugly enough to break it; a skipped test is a failed test."
   },
   "publication": {
     "npm": {
@@ -738,6 +738,16 @@
           "description": "List recently fetched pages (your reading history).",
           "annotations": {
             "readOnlyHint": true,
+            "openWorldHint": true
+          }
+        },
+        {
+          "name": "scout_reread",
+          "description": "Has a page changed since you last read it? Re-fetches a page you already have cached and returns the fresh markdown ALONG WITH a diff against your cached copy (lines added / removed). Use it to check whether docs, a spec, a changelog or a status page moved on before you rely on what you remember. Returns null if you never read the page — read it with scout_fetch first.",
+          "annotations": {
+            "readOnlyHint": false,
+            "destructiveHint": false,
+            "idempotentHint": false,
             "openWorldHint": true
           }
         },
