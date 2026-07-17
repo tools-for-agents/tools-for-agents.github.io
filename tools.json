@@ -812,6 +812,10 @@
           "prism/mcp/mcp-server.js"
         ]
       },
+      "webView": {
+        "command": "prism serve",
+        "url": "http://localhost:7970"
+      },
       "mcpTools": [
         {
           "name": "prism_shape",

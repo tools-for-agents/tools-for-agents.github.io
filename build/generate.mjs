@@ -46,7 +46,7 @@ const TOOLS = [
     tagline: "The web, ~90% lighter.",
     blurb: "A URL becomes clean, cached, full-text-searchable markdown. Re-reads are free; the reading history is a corpus.",
     use: "Use instead of fetching raw HTML into your context." },
-  { id: "prism", glyph: "🔻", verb: "read data", color: "#38bdf8", webless: true,
+  { id: "prism", glyph: "🔻", verb: "read data", color: "#38bdf8",
     tagline: "Read data without reading the blob.",
     blurb: "Any JSON or JSONL blob becomes its shape and the slice you asked for — depth-, key-, token- and node-bounded, because it reads untrusted data.",
     use: "Use INSTEAD of pasting a big JSON response into context. `prism shape` first, then `prism read` the paths you need." },
@@ -171,8 +171,8 @@ const tools = [];
 for (const t of TOOLS) {
   const mcpTools = await askServer(t.id);
   const pkg = JSON.parse(await readFile(join(ROOT, t.id, "package.json"), "utf8"));
-  // Most tools ship a web view and PROVE its port in CI; a CLI+MCP-only tool (prism) has none, and
-  // must not be made to advertise a port nobody serves. servedPort stays strict for the rest.
+  // Every tool ships a web view and PROVES its port in CI. A tool that opted out (`webless:true`)
+  // would not be made to advertise a port nobody serves — the escape hatch stays, unused for now.
   t.port = t.webless ? null : await servedPort(t.id);
   // A server that fails to answer returns [] — and an empty list is not a fact, it is a
   // failed handshake wearing the costume of one. Publishing "lens: 0 tools" because a

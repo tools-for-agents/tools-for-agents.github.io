@@ -257,7 +257,7 @@
   <div class="dna">
     <div class="cell"><div class="k">dependencies</div><div class="v spectrum">Zero</div><div class="d">Node standard library + built-in <code>node:sqlite</code>. Nothing to <code>npm install</code>, nothing to break.</div></div>
     <div class="cell"><div class="k">interface</div><div class="v">73 MCP tools</div><div class="d">Every tool ships an MCP server over stdio, so any model can drive the whole kit.</div></div>
-    <div class="cell"><div class="k">web views</div><div class="v">7 / 7</div><div class="d">Each tool has a <code>serve</code> command — a live, self-contained dashboard for humans.</div></div>
+    <div class="cell"><div class="k">web views</div><div class="v">8 / 8</div><div class="d">Each tool has a <code>serve</code> command — a live, self-contained dashboard for humans.</div></div>
     <div class="cell"><div class="k">design</div><div class="v">One system</div><div class="d">One type scale, one spacing grid, one palette — declared in <code>tokens.json</code> and enforced in CI by <code>iris</code>.</div></div>
   </div>
 </section>
@@ -296,9 +296,9 @@
     { key:'scout', glyph:'🧭', verb:'read the web', color:'#e0a24e',
       pitch:'The agent\'s web reader — a URL becomes clean, cached markdown and your reading history is searchable.',
       view:'reading room — cached articles, full-text search, a serif reader.' },
-    { key:'prism', glyph:'🔻', verb:'read data', color:'#38bdf8', webless:true,
+    { key:'prism', glyph:'🔻', verb:'read data', color:'#38bdf8',
       pitch:'The agent\'s data reader — any JSON/JSONL blob becomes its shape and the slice you asked for, never the whole thing. Bounded, because it reads untrusted input.',
-      view:'a file, a URL, or piped stdin → shape · read a path · find a key.' },
+      view:'a data explorer — paste a blob, walk its shape tree, read any path, find a key.' },
     { key:'recall', glyph:'◎', verb:'recall it all', color:'#ec4899',
       pitch:'One query, federated across every store — brain, team, reading and code — as one budgeted briefing.',
       view:'convergence console — four sources interleaved into one briefing.' },
