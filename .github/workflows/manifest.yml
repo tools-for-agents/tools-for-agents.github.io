@@ -298,11 +298,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-      - name: check out the seven tools
+      - name: check out the eight tools
         run: |
           mkdir -p _tools
-          for t in agent-hq lens anvil cortex scout recall iris; do
+          for t in agent-hq lens anvil cortex scout prism recall iris; do
             git clone --depth 1 -q "https://github.com/tools-for-agents/$t.git" "_tools/$t"
           done
-      - name: the seven repos must agree on every shared invariant
+      - name: the eight repos must agree on every shared invariant
         run: node build/consistent.mjs --root "$PWD/_tools"

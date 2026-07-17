@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // consistent.mjs — DO THE SEVEN REPOS STILL AGREE ON WHAT MUST BE IDENTICAL?
 //
-// The kit is seven repos that ship as ONE thing, evolving in parallel. That is exactly the shape
+// The kit is eight repos that ship as ONE thing, evolving in parallel. That is exactly the shape
 // where a fix lands in six and misses the seventh — I have hit it: iris's serveStatic kept the weak
 // path guard for a full cycle after the other six were hardened, and the mutants-gate timeout bug
 // was latent in all seven copies at once. The behavioural gates (honest / sealed / additive /
@@ -20,7 +20,7 @@ import { join, resolve } from 'node:path';
 
 const rootArg = process.argv.indexOf('--root');
 const ROOT = resolve(rootArg >= 0 ? process.argv[rootArg + 1] : '.');
-const REPOS = ['agent-hq', 'lens', 'anvil', 'cortex', 'scout', 'recall', 'iris'];
+const REPOS = ['agent-hq', 'lens', 'anvil', 'cortex', 'scout', 'prism', 'recall', 'iris'];
 
 const read = (r, f) => { try { return readFileSync(join(ROOT, r, f), 'utf8'); } catch { return null; } };
 const pkg = (r) => { try { return JSON.parse(read(r, 'package.json')); } catch { return null; } };
@@ -38,7 +38,7 @@ function mustAgree(label, valueOf) {
   if (odd.length) {
     problems.push(`${label}: ${odd.map((r) => `${r}=${vals[r]}`).join(', ')} — the other ${REPOS.length - odd.length} say "${majority}"`);
   } else {
-    console.log(`✓ ${label}: all seven agree on "${majority}"`);
+    console.log(`✓ ${label}: all ${REPOS.length} agree on "${majority}"`);
   }
 }
 
@@ -46,7 +46,7 @@ function mustAgree(label, valueOf) {
 function mustHave(label, hasIt) {
   const missing = REPOS.filter((r) => !hasIt(r));
   if (missing.length) problems.push(`${label}: MISSING in ${missing.join(', ')}`);
-  else console.log(`✓ ${label}: present in all seven`);
+  else console.log(`✓ ${label}: present in all ${REPOS.length}`);
 }
 
 // ── the invariants ────────────────────────────────────────────────────────────────────────
@@ -59,7 +59,7 @@ for (const r of REPOS) {
   const name = pkg(r)?.mcpName;
   if (!name || !/^io\.github\.tools-for-agents\//.test(name)) problems.push(`mcpName in ${r}: ${name ?? '(missing)'} — must be io.github.tools-for-agents/<tool>`);
 }
-if (!problems.some((p) => p.startsWith('mcpName'))) console.log('✓ mcpName: all seven in the io.github.tools-for-agents/* namespace');
+if (!problems.some((p) => p.startsWith('mcpName'))) console.log(`✓ mcpName: all ${REPOS.length} in the io.github.tools-for-agents/* namespace`);
 // 4. The core files a publishable, gated repo must carry.
 mustHave('server.json (registry metadata)', (r) => existsSync(join(ROOT, r, 'server.json')));
 mustHave('scripts/mutants.mjs (the canary gate)', (r) => existsSync(join(ROOT, r, 'scripts', 'mutants.mjs')));
@@ -80,4 +80,4 @@ if (problems.length) {
   console.error('\nA kit that ships as one thing must agree on what is identical. Bring the odd repo back into line.');
   process.exit(1);
 }
-console.log('All seven repos agree on every shared invariant.');
+console.log(`All ${REPOS.length} repos agree on every shared invariant.`);
