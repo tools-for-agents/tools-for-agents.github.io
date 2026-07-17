@@ -376,7 +376,9 @@ try {
   const idx = join(OUT, "index.html");
   const before = await readFile(idx, "utf8");
   const after = before
-    .replace(/\b\d+ MCP tools\b/g, `${total} MCP tools`)
+    // "<n> MCP tools" and "<n> callable MCP tools" (the meta descriptions phrase it the second way,
+    // and the bare-\d+ pattern silently skipped them — so the OG count drifted while the body updated).
+    .replace(/\b\d+( callable)? MCP tools\b/g, `${total}$1 MCP tools`)
     .replace(/\b\d+ tools registered\b/g, `${total} tools registered`)
     .replace(/\ball \d+ tools\b/gi, (m) => m.replace(/\d+/, total));
   if (after !== before) { await writeFile(idx, after); console.log(`  index.html: tool count → ${total}`); }

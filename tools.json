@@ -12,7 +12,7 @@
   "github": "https://github.com/tools-for-agents",
   "license": "MIT",
   "toolCount": 8,
-  "mcpToolCount": 73,
+  "mcpToolCount": 74,
   "loop": [
     "coordinate",
     "read code",
@@ -103,8 +103,8 @@
     "aTypoIsNotAnEmptySet": "Columns, agents and namespaces are finite, known sets. A filter naming something outside the set is a MISTAKE, not a query with no results — and the error lists the values that do exist.",
     "aReadCreatesNothing": "Ask a question in any directory and nothing is left behind. Opening a store used to create it, so the empty store the tool had just made then answered the question — the tool invented the evidence for its own answer.",
     "everyErrorIsActionable": "'fetch failed' is not an error message. Every error names what went wrong, where it looked, and the command that fixes it.",
-    "everyToolDeclaresWhatItDoes": "MCP tool annotations on all 73: 42 read-only, 7 destructive, 15 open-world. A client can tell a search from a delete without calling either.",
-    "everyClaimIsGated": "The whole loop runs on every push from fresh clones; all 73 tools are called; the UI is looked at with data ugly enough to break it; a skipped test is a failed test."
+    "everyToolDeclaresWhatItDoes": "MCP tool annotations on all 74: 43 read-only, 7 destructive, 16 open-world. A client can tell a search from a delete without calling either.",
+    "everyClaimIsGated": "The whole loop runs on every push from fresh clones; all 74 tools are called; the UI is looked at with data ugly enough to break it; a skipped test is a failed test."
   },
   "publication": {
     "npm": {
@@ -836,6 +836,14 @@
         {
           "name": "prism_find",
           "description": "Find where a key or value lives inside a JSON/JSONL blob — returns the PATHS (the input to prism_read), breadth-first so the shallowest matches come first. Matches key names by substring and scalar values (strings by substring, numbers/bools exactly, so \"1\" does not match \"1000\"). Node- and hit-bounded: on a huge document it stops and tells you the result may be partial.",
+          "annotations": {
+            "readOnlyHint": true,
+            "openWorldHint": true
+          }
+        },
+        {
+          "name": "prism_diff",
+          "description": "Compare TWO JSON/JSONL blobs and get back the PATHS that changed — added, removed, or a scalar that moved — with a summary count of each. It walks the structure (objects by key, arrays by index; a value that changed type counts as changed), NOT a line diff of the pretty-printed text, so a reordered or reformatted-but-equal document reads as identical. Node- and hit-bounded. Use it to see what differs between two API responses, two configs, or a before and after.",
           "annotations": {
             "readOnlyHint": true,
             "openWorldHint": true
