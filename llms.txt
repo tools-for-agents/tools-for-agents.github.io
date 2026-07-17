@@ -1,20 +1,21 @@
 # tools-for-agents
 
-> An operating system for agents: seven zero-dependency, MCP-native tools that form one loop — coordinate, read code, run safely, remember, read the web, recall, and see. Every tool speaks MCP over stdio, runs locally, and ships a live web view. 70 callable MCP tools in total.
+> An operating system for agents: eight zero-dependency, MCP-native tools that form one loop — coordinate, read code, run safely, remember, read the web, read data, recall, and see. Every tool speaks MCP over stdio and runs locally. 73 callable MCP tools in total.
 
-If you are an agent, start with [tools.json](https://tools-for-agents.github.io/tools.json): one fetch gives you every tool, its install command, and the name and description of all 70 MCP tools you can call — without cloning anything.
+If you are an agent, start with [tools.json](https://tools-for-agents.github.io/tools.json): one fetch gives you every tool, its install command, and the name and description of all 73 MCP tools you can call — without cloning anything.
 
-The kit is one loop. `recall` at the start of a task, `lens` to read code instead of opening files, `anvil` to run anything you have not verified, `cortex` to keep what you learned, `scout` to read the web, `agent-hq` to coordinate with other agents, and `iris` to look at what you built before claiming it works.
+The kit is one loop. `recall` at the start of a task, `lens` to read code instead of opening files, `anvil` to run anything you have not verified, `cortex` to keep what you learned, `scout` to read the web, `prism` to see the shape of a JSON blob instead of pasting it whole, `agent-hq` to coordinate with other agents, and `iris` to look at what you built before claiming it works.
 
 Requirements: Node 22+ (built-in `node:sqlite`), Docker for `anvil`, Chrome for `iris`. Nothing to `npm install` — every tool has zero runtime dependencies.
 
-## The seven tools
+## The eight tools
 
 - [agent-hq](https://raw.githubusercontent.com/tools-for-agents/agent-hq/main/README.md): coordinate — Shared memory, a kanban board an agent can claim work from, an agent registry, messaging and a cost ledger. 28 MCP tools: `agent_register`, `agent_set_status`, `agent_list`, `kanban_board`, `kanban_get_task`, `kanban_list_tasks`, `kanban_create_task`, `kanban_move_task`, `kanban_flow`, `kanban_set_wip_limit`, `kanban_update_task`, `kanban_claim_task`, `kanban_next_task`, `kanban_release_task`, `message_send`, `message_inbox`, `kanban_comment`, `kanban_add_dependency`, `kanban_remove_dependency`, `memory_write`, `memory_search`, `activity_feed`, `run_start`, `run_end`, `run_record`, `ledger_summary`, `company_stats`, `company_graph`.
 - [lens](https://raw.githubusercontent.com/tools-for-agents/lens/main/README.md): read code — Token-efficient retrieval: FTS5 search, symbol outlines and surgical line-range reads. 8 MCP tools: `lens_index`, `lens_search`, `lens_references`, `lens_outline`, `lens_read`, `lens_map`, `lens_freshness`, `lens_stats`.
 - [anvil](https://raw.githubusercontent.com/tools-for-agents/anvil/main/README.md): run safely — A throwaway Docker sandbox — network off, memory capped, caps dropped, hard timeout, structured result. 3 MCP tools: `anvil_run_code`, `anvil_run_command`, `anvil_check`.
 - [cortex](https://raw.githubusercontent.com/tools-for-agents/cortex/main/README.md): remember — An Obsidian-compatible vault: markdown notes, [[wikilinks]], a knowledge graph, FTS5 search. Broken links heal themselves. 16 MCP tools: `cortex_write`, `cortex_capture`, `cortex_search`, `cortex_read`, `cortex_links`, `cortex_related`, `cortex_suggest`, `cortex_lint`, `cortex_tags`, `cortex_graph`, `cortex_recent`, `cortex_daily`, `cortex_sync`, `cortex_stats`, `cortex_triage`, `cortex_weave`.
 - [scout](https://raw.githubusercontent.com/tools-for-agents/scout/main/README.md): read the web — A URL becomes clean, cached, full-text-searchable markdown. Re-reads are free; the reading history is a corpus. 8 MCP tools: `scout_fetch`, `scout_search`, `scout_links`, `scout_list`, `scout_reread`, `scout_forget`, `scout_stats`, `scout_overview`.
+- [prism](https://raw.githubusercontent.com/tools-for-agents/prism/main/README.md): read data — Any JSON or JSONL blob becomes its shape and the slice you asked for — depth-, key-, token- and node-bounded, because it reads untrusted data. 3 MCP tools: `prism_shape`, `prism_read`, `prism_find`.
 - [recall](https://raw.githubusercontent.com/tools-for-agents/recall/main/README.md): recall it all — Federated search across cortex (brain), agent-hq (team), scout (reading) and lens (code) — one token-budgeted briefing. 3 MCP tools: `recall_search`, `recall_expand`, `recall_status`.
 - [iris](https://raw.githubusercontent.com/tools-for-agents/iris/main/README.md): see — Renders your page or game at real viewports and themes and hands the PIXELS back to the model — overflow, clipping, contrast, unreadable type, collisions, dead game loops, design drift. 4 MCP tools: `iris_look`, `iris_play`, `iris_runs`, `iris_stats`.
 
@@ -32,7 +33,7 @@ A model cannot see your screen, cannot check your filesystem, and cannot tell th
 ## Machine-readable
 
 - [tools.json](https://tools-for-agents.github.io/tools.json): every tool and every callable MCP tool, as JSON. Start here.
-- [llms-full.txt](https://tools-for-agents.github.io/llms-full.txt): the full README of all seven tools, concatenated into one fetch.
+- [llms-full.txt](https://tools-for-agents.github.io/llms-full.txt): the full README of all eight tools, concatenated into one fetch.
 
 ## Source
 
@@ -41,9 +42,10 @@ A model cannot see your screen, cannot check your filesystem, and cannot tell th
 - [anvil on GitHub](https://github.com/tools-for-agents/anvil): Run it before you claim it works.
 - [cortex on GitHub](https://github.com/tools-for-agents/cortex): A second brain that outlives the context window.
 - [scout on GitHub](https://github.com/tools-for-agents/scout): The web, ~90% lighter.
+- [prism on GitHub](https://github.com/tools-for-agents/prism): Read data without reading the blob.
 - [recall on GitHub](https://github.com/tools-for-agents/recall): One query. Every store you have.
 - [iris on GitHub](https://github.com/tools-for-agents/iris): Look at what you built.
-- [the organisation](https://github.com/tools-for-agents): all seven repositories, MIT, CI-green, gated by iris.
+- [the organisation](https://github.com/tools-for-agents): all eight repositories, MIT, CI-green, gated by iris.
 
 ## Optional
 

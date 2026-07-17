@@ -28,6 +28,9 @@ const SMOKE = {
   anvil:      ["anvil_check",   {}, "docker"],
   cortex:     ["cortex_stats",  {}, "notes"],
   scout:      ["scout_stats",   {}, "pages"],
+  // prism owns no store, so it has no stats call to smoke — instead shape a tiny inline blob, which
+  // needs no preconditions and proves a real answer: the shape of {"n":1} contains the type "object".
+  prism:      ["prism_shape",   { data: '{"n":1}' }, "object"],
   recall:     ["recall_status", {}, "stores"],
   iris:       ["iris_stats",    {}, "runs"],
 };

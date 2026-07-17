@@ -23,11 +23,11 @@ const rootArg = process.argv.indexOf('--root');
 const ROOT = resolve(rootArg >= 0 ? process.argv[rootArg + 1] : '.');
 const ONLY = process.argv.slice(2).filter((a, i, arr) => !a.startsWith('--') && arr[i - 1] !== '--root');
 
-const REPOS = ['agent-hq', 'lens', 'anvil', 'cortex', 'scout', 'recall', 'iris'];
+const REPOS = ['agent-hq', 'lens', 'anvil', 'cortex', 'scout', 'prism', 'recall', 'iris'];
 
-// The published command: `npx <pkg> [mcp]`. Six give the CLI an `mcp` subcommand; agent-hq's bin IS
-// the MCP server, so it takes no subcommand. We derive this from package.json + server.json rather
-// than hardcode it — if a repo changes how it launches, this follows.
+// The published command: `npx <pkg> [mcp]`. All the CLI tools give the bin an `mcp` subcommand;
+// agent-hq's bin IS the MCP server, so it takes no subcommand. We derive this from package.json +
+// server.json rather than hardcode it — if a repo changes how it launches, this follows.
 function launchArgs(repo) {
   const pkg = JSON.parse(readFileSync(join(ROOT, repo, 'package.json'), 'utf8'));
   const binName = Object.keys(pkg.bin || {})[0];

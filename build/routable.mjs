@@ -27,7 +27,7 @@ import { join } from "node:path";
 
 const ROOT = process.argv[2];
 if (!ROOT) { console.error("usage: routable.mjs <dir of throwaway clones>"); process.exit(2); }
-const TOOLS = ["agent-hq", "lens", "anvil", "cortex", "scout", "recall", "iris"];
+const TOOLS = ["agent-hq", "lens", "anvil", "cortex", "scout", "prism", "recall", "iris"];
 
 /**
  * Is this response a BROKEN tool, or a tool complaining correctly?
