@@ -48,8 +48,8 @@ const TOOLS = [
     use: "Use instead of fetching raw HTML into your context." },
   { id: "prism", glyph: "🔻", verb: "read data", color: "#38bdf8",
     tagline: "Read data without reading the blob.",
-    blurb: "Any JSON or JSONL blob becomes its shape and the slice you asked for — depth-, key-, token- and node-bounded, because it reads untrusted data.",
-    use: "Use INSTEAD of pasting a big JSON response into context. `prism shape` first, then `prism read` the paths you need." },
+    blurb: "Any JSON, JSONL, CSV or TSV blob becomes its shape and the slice you asked for — depth-, key-, token- and node-bounded, because it reads untrusted data.",
+    use: "Use INSTEAD of pasting a big JSON or CSV response into context. `prism shape` first, then `prism read` the paths you need." },
   { id: "recall", glyph: "◎", verb: "recall it all", color: "#ec4899",
     tagline: "One query. Every store you have.",
     blurb: "Federated search across cortex (brain), agent-hq (team), scout (reading) and lens (code) — one token-budgeted briefing.",
@@ -318,7 +318,7 @@ const llms = `# tools-for-agents
 
 If you are an agent, start with [tools.json](${SITE}/tools.json): one fetch gives you every tool, its install command, and the name and description of all ${total} MCP tools you can call — without cloning anything.
 
-The kit is one loop. \`recall\` at the start of a task, \`lens\` to read code instead of opening files, \`anvil\` to run anything you have not verified, \`cortex\` to keep what you learned, \`scout\` to read the web, \`prism\` to see the shape of a JSON blob instead of pasting it whole, \`agent-hq\` to coordinate with other agents, and \`iris\` to look at what you built before claiming it works.
+The kit is one loop. \`recall\` at the start of a task, \`lens\` to read code instead of opening files, \`anvil\` to run anything you have not verified, \`cortex\` to keep what you learned, \`scout\` to read the web, \`prism\` to see the shape of a JSON or CSV blob instead of pasting it whole, \`agent-hq\` to coordinate with other agents, and \`iris\` to look at what you built before claiming it works.
 
 Requirements: Node 22+ (built-in \`node:sqlite\`), Docker for \`anvil\`, Chrome for \`iris\`. Nothing to \`npm install\` — every tool has zero runtime dependencies.
 
