@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630" role="img" aria-label="tools-for-agents — an operating system for agents">
+  <defs>
+    <linearGradient id="wm" x1="0" y1="0" x2="1" y2="0.3">
+      <stop offset="0" stop-color="#6ea8fe"/><stop offset="0.22" stop-color="#4fd6be"/>
+      <stop offset="0.44" stop-color="#a78bfa"/><stop offset="0.62" stop-color="#c792ea"/>
+      <stop offset="0.8" stop-color="#ec4899"/><stop offset="1" stop-color="#e0a24e"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="78%" cy="-6%" r="80%">
+      <stop offset="0" stop-color="#16213a"/><stop offset="55%" stop-color="#0a0b0e" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="core" cx="50%" cy="42%" r="70%">
+      <stop offset="0" stop-color="#1b1f29"/><stop offset="100%" stop-color="#0a0b0e"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="1200" height="630" fill="#0a0b0e"/>
+  <rect width="1200" height="630" fill="url(#glow)"/>
+
+  <!-- the loop -->
+  <g transform="translate(250,300)">
+    <g fill="none" stroke-width="5" stroke-linecap="round" opacity="0.55">
+      <path d="M0 -135 A135 135 0 0 1 95.5 -95.5" stroke="#4fd6be"/>
+      <path d="M95.5 -95.5 A135 135 0 0 1 135 0" stroke="#ff6a1a"/>
+      <path d="M135 0 A135 135 0 0 1 95.5 95.5" stroke="#a78bfa"/>
+      <path d="M95.5 95.5 A135 135 0 0 1 0 135" stroke="#e0a24e"/>
+      <path d="M0 135 A135 135 0 0 1 -95.5 95.5" stroke="#38bdf8"/>
+      <path d="M-95.5 95.5 A135 135 0 0 1 -135 0" stroke="#ec4899"/>
+      <path d="M-135 0 A135 135 0 0 1 -95.5 -95.5" stroke="#c792ea"/>
+      <path d="M-95.5 -95.5 A135 135 0 0 1 0 -135" stroke="#6ea8fe"/>
+    </g>
+    <g>
+      <circle cx="0" cy="-135" r="31" fill="#6ea8fe" opacity="0.16"/><circle cx="0" cy="-135" r="17" fill="#6ea8fe"/>
+      <circle cx="95.5" cy="-95.5" r="31" fill="#4fd6be" opacity="0.16"/><circle cx="95.5" cy="-95.5" r="17" fill="#4fd6be"/>
+      <circle cx="135" cy="0" r="31" fill="#ff6a1a" opacity="0.16"/><circle cx="135" cy="0" r="17" fill="#ff6a1a"/>
+      <circle cx="95.5" cy="95.5" r="31" fill="#a78bfa" opacity="0.16"/><circle cx="95.5" cy="95.5" r="17" fill="#a78bfa"/>
+      <circle cx="0" cy="135" r="31" fill="#e0a24e" opacity="0.16"/><circle cx="0" cy="135" r="17" fill="#e0a24e"/>
+      <circle cx="-95.5" cy="95.5" r="31" fill="#38bdf8" opacity="0.16"/><circle cx="-95.5" cy="95.5" r="17" fill="#38bdf8"/>
+      <circle cx="-135" cy="0" r="31" fill="#ec4899" opacity="0.16"/><circle cx="-135" cy="0" r="17" fill="#ec4899"/>
+      <circle cx="-95.5" cy="-95.5" r="31" fill="#c792ea" opacity="0.16"/><circle cx="-95.5" cy="-95.5" r="17" fill="#c792ea"/>
+    </g>
+    <circle cx="0" cy="0" r="35" fill="url(#core)" stroke="#333947" stroke-width="2"/>
+    <circle cx="0" cy="0" r="9" fill="#e8ebf2"/>
+  </g>
+
+  <!-- text -->
+  <text x="470" y="238" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="21" letter-spacing="4" fill="#9aa3b5">AN OPERATING SYSTEM FOR AGENTS</text>
+  <text x="466" y="336" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="82" font-weight="800" letter-spacing="-2" fill="url(#wm)">tools-for-agents</text>
+  <text x="470" y="398" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif" font-size="31" fill="#c2c9d6">Eight primitives. One agent loop.</text>
+  <text x="470" y="452" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="20" fill="#7b8391">74 MCP tools · zero-dependency · MCP-native</text>
+
+  <!-- the eight, as a legend -->
+  <g font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="17" fill="#9aa3b5">
+    <circle cx="474" cy="521" r="6" fill="#6ea8fe"/><text x="488" y="527">agent-hq</text>
+    <circle cx="474" cy="551" r="6" fill="#4fd6be"/><text x="488" y="557">lens</text>
+    <circle cx="474" cy="581" r="6" fill="#ff6a1a"/><text x="488" y="587">anvil</text>
+    <circle cx="624" cy="521" r="6" fill="#a78bfa"/><text x="638" y="527">cortex</text>
+    <circle cx="624" cy="551" r="6" fill="#e0a24e"/><text x="638" y="557">scout</text>
+    <circle cx="624" cy="581" r="6" fill="#38bdf8"/><text x="638" y="587">prism</text>
+    <circle cx="774" cy="521" r="6" fill="#ec4899"/><text x="788" y="527">recall</text>
+    <circle cx="774" cy="551" r="6" fill="#c792ea"/><text x="788" y="557">iris</text>
+  </g>
+
+  <rect x="0" y="0" width="1200" height="630" fill="none" stroke="#20242e" stroke-width="2"/>
+</svg>

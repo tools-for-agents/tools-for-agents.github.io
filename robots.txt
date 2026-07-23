@@ -1,0 +1,36 @@
+# tools-for-agents — an operating system for agents.
+# Everyone is welcome to crawl and index this site: humans, search engines,
+# and AI/LLM agents alike. This kit is *for* agents — being found by them is the point.
+
+User-agent: *
+Allow: /
+
+# AI / LLM crawlers, named explicitly and welcomed:
+User-agent: GPTBot
+Allow: /
+User-agent: OAI-SearchBot
+Allow: /
+User-agent: ChatGPT-User
+Allow: /
+User-agent: ClaudeBot
+Allow: /
+User-agent: Claude-Web
+Allow: /
+User-agent: anthropic-ai
+Allow: /
+User-agent: PerplexityBot
+Allow: /
+User-agent: Google-Extended
+Allow: /
+User-agent: Applebot-Extended
+Allow: /
+User-agent: CCBot
+Allow: /
+User-agent: Bytespider
+Allow: /
+User-agent: Amazonbot
+Allow: /
+User-agent: cohere-ai
+Allow: /
+
+Sitemap: https://tools-for-agents.github.io/sitemap.xml
