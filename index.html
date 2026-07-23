@@ -21,6 +21,8 @@
     /* the eight tool identities */
     --hq:#6ea8fe; --lens:#4fd6be; --anvil:#ff6a1a; --cortex:#a78bfa;
     --scout:#e0a24e; --prism:#38bdf8; --recall:#ec4899; --iris:#c792ea;
+    /* the one non-identity accent: success. Everything else is body/muted/faint or a tool identity. */
+    --ok:#7fd88f;
     --sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
     --mono:ui-monospace,"SFMono-Regular","JetBrains Mono","Cascadia Code",Menlo,monospace;
     --maxw:1080px;
@@ -100,7 +102,7 @@
   .term-body { padding:16px; font-family:var(--mono); font-size:12px; line-height:1.9; overflow-x:auto; }
   .term-body .ln { white-space:pre; }
   .term-body .p { color:var(--lens); } .term-body .g { color:var(--faint); }
-  .term-body .ok { color:#7fd88f; }
+  .term-body .ok { color:var(--ok); }
   .term-body .tool-g { filter:drop-shadow(0 0 6px currentColor); }
   .term-body .c { color:var(--muted); }
 
@@ -405,8 +407,8 @@
     ctx.strokeStyle = 'rgba(255,255,255,.16)'; ctx.lineWidth = 1; ctx.stroke();
     if (coreLit) {
       ctx.font = `600 22px ${MONO}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.fillStyle = '#e8ebf2'; ctx.fillText('◉', cx, cy + 1);
-      ctx.font = `10px ${MONO}`; ctx.fillStyle = '#7b8391';
+      ctx.fillStyle = C.txt; ctx.fillText('◉', cx, cy + 1);
+      ctx.font = `10px ${MONO}`; ctx.fillStyle = C.faint;
       ctx.fillText('agent', cx, cy + 20);
     }
 
@@ -453,9 +455,9 @@
         // The NAME reads first, above or below. Putting the key nearest the node would be
         // radially tidy and read backwards on the top half — "coordinate / agent-hq".
         const ky = y + (above ? -gap : gap);
-        ctx.font = `600 11px ${MONO}`; ctx.fillStyle = focus ? t.color : '#9098a8';
+        ctx.font = `600 11px ${MONO}`; ctx.fillStyle = focus ? t.color : C.muted;
         ctx.fillText(t.key, x, ky + (above ? -13 : 0));
-        ctx.font = `9px ${MONO}`; ctx.fillStyle = '#7b8391';
+        ctx.font = `9px ${MONO}`; ctx.fillStyle = C.faint;
         ctx.fillText(t.verb, x, ky + (above ? 0 : 13));
       }
       ctx.globalAlpha = 1;
@@ -467,6 +469,11 @@
 
   const MONO = "ui-monospace, Menlo, monospace";
   const SANS = "system-ui, sans-serif";
+  // A canvas can't read CSS custom properties, so it can't share the :root palette by
+  // reference — and that is exactly how a stray fourth grey (#9098a8) drifted in here,
+  // invisible to the design system because the DOM sees a canvas as one opaque element.
+  // Mirror the decided roles once, and every fill below names a role instead of a literal.
+  const C = { txt:'#e8ebf2', muted:'#9aa3b5', faint:'#7b8391', ok:'#7fd88f' };
 
   // hover detection → cross-highlight cards
   cv.addEventListener('pointermove', (e) => {
