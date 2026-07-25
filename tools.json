@@ -136,7 +136,7 @@
         ]
       },
       "webView": {
-        "command": "agent-hq serve",
+        "command": "node agent-hq/src/server.js",
         "url": "http://localhost:7700"
       },
       "mcpTools": [

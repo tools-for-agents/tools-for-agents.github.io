@@ -302,7 +302,16 @@ const manifest = {
           : ["npx", "-y", t.package, "mcp"],
       } : {}),
     },
-    ...(t.port ? { webView: { command: `${t.id} serve`, url: `http://localhost:${t.port}` } } : {}),
+    // Same reason as the `npx` case above: agent-hq's bin IS the MCP server, so it has
+    // no `serve` subcommand — and it does not fail on one, it ignores the argument and
+    // starts the stdio server, printing "ready → http://localhost:7700" while listening
+    // on nothing. An agent following `agent-hq serve` would think it had a web view.
+    ...(t.port ? {
+      webView: {
+        command: t.id === "agent-hq" ? "node agent-hq/src/server.js" : `${t.id} serve`,
+        url: `http://localhost:${t.port}`,
+      },
+    } : {}),
     mcpTools: t.mcpTools,
   })),
 };
