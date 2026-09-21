@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// consistent.mjs — DO THE SEVEN REPOS STILL AGREE ON WHAT MUST BE IDENTICAL?
+// consistent.mjs — DO THE REPOS STILL AGREE ON WHAT MUST BE IDENTICAL?
 //
 // The kit is eight repos that ship as ONE thing, evolving in parallel. That is exactly the shape
 // where a fix lands in six and misses the seventh — I have hit it: iris's serveStatic kept the weak
@@ -21,6 +21,12 @@ import { join, resolve } from 'node:path';
 const rootArg = process.argv.indexOf('--root');
 const ROOT = resolve(rootArg >= 0 ? process.argv[rootArg + 1] : '.');
 const REPOS = ['agent-hq', 'lens', 'anvil', 'cortex', 'scout', 'prism', 'recall', 'iris'];
+// A companion ships in the kit without being an MCP server, so the MCP- and web-shaped
+// invariants below genuinely do not apply to it. The rest do, and used to be skipped by
+// accident rather than on purpose: `ghost` was public, in the org, and silently exempt from
+// every shared bar because it was not in this list. "Not a tool" is not "not held to anything".
+const COMPANIONS = ['ghost'];
+const ALL = [...REPOS, ...COMPANIONS];
 
 const read = (r, f) => { try { return readFileSync(join(ROOT, r, f), 'utf8'); } catch { return null; } };
 const pkg = (r) => { try { return JSON.parse(read(r, 'package.json')); } catch { return null; } };
@@ -28,25 +34,25 @@ const pkg = (r) => { try { return JSON.parse(read(r, 'package.json')); } catch {
 const problems = [];
 
 // A field that every repo must set to the SAME value. Report the odd ones out against the majority.
-function mustAgree(label, valueOf) {
+function mustAgree(label, valueOf, who = ALL) {
   const vals = {};
-  for (const r of REPOS) { const v = valueOf(r); vals[r] = v === undefined ? '(missing)' : String(v); }
+  for (const r of who) { const v = valueOf(r); vals[r] = v === undefined ? '(missing)' : String(v); }
   const counts = {};
   for (const v of Object.values(vals)) counts[v] = (counts[v] || 0) + 1;
   const majority = Object.entries(counts).sort((a, b) => b[1] - a[1])[0][0];
-  const odd = REPOS.filter((r) => vals[r] !== majority);
+  const odd = who.filter((r) => vals[r] !== majority);
   if (odd.length) {
-    problems.push(`${label}: ${odd.map((r) => `${r}=${vals[r]}`).join(', ')} — the other ${REPOS.length - odd.length} say "${majority}"`);
+    problems.push(`${label}: ${odd.map((r) => `${r}=${vals[r]}`).join(', ')} — the other ${who.length - odd.length} say "${majority}"`);
   } else {
-    console.log(`✓ ${label}: all ${REPOS.length} agree on "${majority}"`);
+    console.log(`✓ ${label}: all ${who.length} agree on "${majority}"`);
   }
 }
 
 // A file/flag every repo must HAVE. Report the ones missing it.
-function mustHave(label, hasIt) {
-  const missing = REPOS.filter((r) => !hasIt(r));
+function mustHave(label, hasIt, who = ALL) {
+  const missing = who.filter((r) => !hasIt(r));
   if (missing.length) problems.push(`${label}: MISSING in ${missing.join(', ')}`);
-  else console.log(`✓ ${label}: present in all ${REPOS.length}`);
+  else console.log(`✓ ${label}: present in all ${who.length}`);
 }
 
 // ── the invariants ────────────────────────────────────────────────────────────────────────
@@ -54,30 +60,38 @@ function mustHave(label, hasIt) {
 mustAgree('package version', (r) => pkg(r)?.version);
 // 2. Node engine — the published packages promise the same runtime floor.
 mustAgree('engines.node', (r) => pkg(r)?.engines?.node);
-// 3. mcpName format — the registry namespace ownership marker.
+// 3. mcpName format — the registry namespace ownership marker. TOOLS ONLY: a companion has no
+//    MCP server, so claiming a server name for it would be the confident-wrong-answer bug again.
 for (const r of REPOS) {
   const name = pkg(r)?.mcpName;
   if (!name || !/^io\.github\.tools-for-agents\//.test(name)) problems.push(`mcpName in ${r}: ${name ?? '(missing)'} — must be io.github.tools-for-agents/<tool>`);
 }
 if (!problems.some((p) => p.startsWith('mcpName'))) console.log(`✓ mcpName: all ${REPOS.length} in the io.github.tools-for-agents/* namespace`);
 // 4. The core files a publishable, gated repo must carry.
-mustHave('server.json (registry metadata)', (r) => existsSync(join(ROOT, r, 'server.json')));
+mustHave('server.json (registry metadata)', (r) => existsSync(join(ROOT, r, 'server.json')), REPOS);
+mustHave('publish.yml (the release workflow)', (r) => existsSync(join(ROOT, r, '.github', 'workflows', 'publish.yml')), REPOS);
+// The canary gate is the one thing NOTHING here is exempt from. Every other check asks whether
+// a repo is right; this asks whether anything is still watching — and a companion whose suite
+// stopped watching fails in exactly the same silence as a tool's.
 mustHave('scripts/mutants.mjs (the canary gate)', (r) => existsSync(join(ROOT, r, 'scripts', 'mutants.mjs')));
-mustHave('publish.yml (the release workflow)', (r) => existsSync(join(ROOT, r, '.github', 'workflows', 'publish.yml')));
 // 5. The CI gates every repo must run — the ones with no per-repo exception. (refused-write is
 //    deliberately NOT here: four write-primary tools have it, three read-primary ones don't.)
-for (const gate of ['test', 'mutants', 'look', 'first-run', 'dead-api']) {
-  mustHave(`CI gate "${gate}"`, (r) => new RegExp(`^  ${gate}:$`, 'm').test(read(r, '.github/workflows/ci.yml') || ''));
-}
+const hasGate = (gate) => (r) => new RegExp(`^  ${gate}:$`, 'm').test(read(r, '.github/workflows/ci.yml') || '');
+// Every repo in the kit, companion or not, runs its suite, proves the suite can still fail, and
+// proves a stranger's first install works.
+for (const gate of ['test', 'mutants', 'first-run']) mustHave(`CI gate "${gate}"`, hasGate(gate));
+// TOOLS ONLY: `look` needs a web view to look at and `dead-api` an MCP surface to sweep.
+for (const gate of ['look', 'dead-api']) mustHave(`CI gate "${gate}"`, hasGate(gate), REPOS);
 // 6. The CI node version — the box the gates run on.
 mustAgree('CI node-version', (r) => (read(r, '.github/workflows/ci.yml') || '').match(/node-version: '?(\d+)'?/)?.[1]);
 // 7. The shared design tokens + strict — nobody vendors a copy of the design system.
-mustHave('tokens: kit (shared design system)', (r) => /tokens: kit/.test(read(r, '.github/workflows/ci.yml') || ''));
+// TOOLS ONLY: a companion with no interface has no design system to drift from.
+mustHave('tokens: kit (shared design system)', (r) => /tokens: kit/.test(read(r, '.github/workflows/ci.yml') || ''), REPOS);
 
 console.log('');
 if (problems.length) {
-  console.error(`✗ the seven repos have drifted apart:\n${problems.map((p) => `  · ${p}`).join('\n')}`);
+  console.error(`✗ the kit's repos have drifted apart:\n${problems.map((p) => `  · ${p}`).join('\n')}`);
   console.error('\nA kit that ships as one thing must agree on what is identical. Bring the odd repo back into line.');
   process.exit(1);
 }
-console.log(`All ${REPOS.length} repos agree on every shared invariant.`);
+console.log(`All ${ALL.length} repos agree on every shared invariant (${REPOS.length} tools + ${COMPANIONS.length} companion).`);
