@@ -269,6 +269,8 @@ node src/cli.js serve                         # browsable web explorer → :7900
 
 Index location is `./.lens/index.db` (override with `LENS_DB`).
 
+**Flags go anywhere, and a mangled command is an error — never `0 hits`.** `search -k 3 "parse auth header"` and `search "parse auth header" -k 3` are the same search. (They were not: the first searched the index for the literal string `3`, printed `— 0 hits, ~0 tokens —` and exited 0 — because the query was found as "the first argument without a dash", which is the preceding flag's *value*. With `--glob 'src/*'` in front it was worse: the glob became the query, matched the indexed `path` column, and lens answered with ranked, syntax-clean snippets from the right directory to a question nobody asked.) An unknown flag, a flag with no value, forgotten quotes (`search parse auth header`), a query that is itself a flag, or an unknown command now fail on stderr with a non-zero exit and the command that fixes them — `--` ends the flags, so `search -- "--reindex"` searches for the text. And a search that honestly finds nothing carries the size of the haystack — **the scope it searched, not the index**: `— 0 hits for "<query>", ~0 tokens — searched 20 files / 129 chunks`, and under `--glob 'mcp/*'` that becomes `searched 1 file / 4 chunks matching "mcp/*"`, the filter's own count. (Counts from one run of `search` against this repo; they move as the repo does.) This shipped the other way round for one review cycle — the whole index's totals with the glob glued on the end, so a one-file filter announced twenty files and told you none of them held a symbol that is sitting in `src/core.js`. A precise wrong answer is worse than a vague one: a number invites even less of a second look.
+
 ## Web explorer (`lens serve`)
 
 ![lens serve — the code explorer: file tree, FTS search, syntax-highlighted reader and symbol outline](docs/web-view.png)
@@ -538,6 +540,8 @@ Write `[[Other Note]]` to link and `#tags` to categorise. Links to notes that do
 cortex write "Neural Networks" --type concept --tags ml,ai \
   --body "Function approximator. Trained by [[Backpropagation]]. #deeplearning"
 cortex write "Neural Networks" --append --body "Modern variants: [[Transformers]]."
+cortex write "Backpropagation" --slug backprop --append --body "…"   # edit THAT note, whatever its file is called
+                                                                     # (the name is only the lookup — the note keeps its title)
 cortex capture "raw article text…" --source https://example.com   # inbox for later
 cortex search "train network error" -k 6 --tag deeplearning        # ranked snippets
 cortex read "Neural Networks"                                      # full note
@@ -600,7 +604,7 @@ node src/cli.js serve
 
 | Tool | Use it to… |
 |---|---|
-| `cortex_write` | Create/update a note — link with `[[wikilinks]]`, tag with `#tags`. Distil learnings into small interconnected notes. |
+| `cortex_write` | Create/update a note — link with `[[wikilinks]]`, tag with `#tags`. Distil learnings into small interconnected notes. Updating one you looked up? Pass its `slug` — in a real vault the filename is often not the title, and the title alone would write a second note. With a `slug` the title is just the name you looked it up by: the note keeps its own, and never gets renamed out from under the links that point at it. |
 | `cortex_capture` | Stash raw material (article, transcript, finding) into the source inbox to distil later. |
 | `cortex_search` | Recall what you already know as ranked, **token-budgeted** snippets — instead of re-deriving it. |
 | `cortex_read` | Read a full note by title / slug / alias. |
@@ -739,7 +743,7 @@ Try the demo without a network fetch: `node scripts/seed.js` then `scout serve`.
 |---|---|
 | `scout_fetch` | Read a web page as clean, token-budgeted markdown (cached; `fresh` to re-fetch). |
 | `scout_search` | Search every page you've already read — ranked snippets, no re-fetch. |
-| `scout_links` | Extract a page's outbound links (absolute URLs + text) to decide where to go next. |
+| `scout_links` | Extract a page's outbound links (absolute URLs + text) to decide where to go next — and say so, loudly, when the page was a 404/403 error page, a binary file, read only up to the cap, or a list `limit` cut short. |
 | `scout_list` | Your recent reading history. |
 | `scout_reread` | Has a page changed since you read it? Re-fetch and diff against your cached copy. |
 | `scout_forget` | Drop a page from the cache. |
@@ -757,6 +761,8 @@ Try the demo without a network fetch: `node scripts/seed.js` then `scout serve`.
 - **Fetch** uses Node's global `fetch` (follows redirects, 20 s timeout, a plain user-agent). The body is **streamed with a size cap** (`SCOUT_MAX_BYTES`, default 5 MB) rather than buffered whole — a runaway or hostile page can't spike memory or bloat the cache, and if a page is bigger than the cap scout reads the start and *says so* up front.
 - **Extraction** is regex-based readability-lite: strip `<script>/<style>/<nav>/<footer>/…`, pick the densest `<article>`/`<main>`/`<body>` region, convert headings, links (resolved to absolute), **content images** (`<img>`/`<figure>` → markdown, tracking pixels dropped), code, lists, bold/italic, and decode HTML entities. Not a full DOM parse — but it reliably turns an article into readable prose at a fraction of the tokens.
 - **Cache** is a `node:sqlite` table keyed by URL; the same URL returns instantly unless `fresh`. An FTS5 mirror makes the whole history searchable by **bm25**, filled to a token budget (≈4 chars/token) — the same discipline as [`lens`](../lens) and [`cortex`](../cortex).
+- **An error page is not a page.** A 4xx/5xx still has a body — usually a friendly "Oops, try these instead" — and it converts to tidy markdown like anything else. Both network surfaces refuse to let it pass for the real thing: `scout_fetch` leads its markdown with the status, and `scout_links` leads its result with an `error` saying the links below are the *error page's* navigation, not the page's (and `scout links` exits **1**, where `scout fetch` exits 0 — fetch's job, handing back a labelled body, was still done; "where does this page point" was not).
+- **A cut list is not a complete one.** A links result also says the shape of its own answer, the same way `scout_list` does: `count` is how many outbound links the page has, `shown` is how many came back, and `truncated` means the list you are holding was cut — by `limit` (100 by default), or because the page itself was read only up to the fetch cap. Both say which, in words, in `note`. So **`0 links`, `100 links` and `100 of 500 links` are three different answers**, and none of them is silent about what it is not. What scout cannot tell you is what the server never said: a *soft* 404 — HTTP `200 OK` with a "sorry, not found" body — is a page as far as any HTTP client is concerned, here and everywhere else.
 - Non-HTML **text** responses (JSON, plain text) are stored verbatim. A **binary** resource (image, PDF, archive, font — by content-type, or a body that decoded to mostly replacement bytes) is not: decoding it as text is mojibake, so scout returns a short note saying what it is instead of handing you — and its cache and search index — garbage.
 
 ## The agent toolkit
@@ -996,7 +1002,7 @@ A zero-dependency **unified-briefing console**: one query, one interleaved brief
 - Runs the query as an FTS5 `MATCH` against each store's index and normalises every hit to `{ source, title, ref, meta, excerpt, score }`.
 - bm25 scores aren't comparable across separate databases, so results are **interleaved round-robin** across sources (best-of-each, then next-best-of-each…) and filled to a token budget — a balanced briefing rather than one store drowning out the rest.
 - SQLite stores are opened **read-only**; recall never writes. Delete or rebuild any underlying index freely.
-- The `team` store is queried over agent-hq's HTTP memory API (per-term, in parallel, with a short timeout) and degrades silently when the platform isn't running.
+- The `team` store is queried over agent-hq's HTTP memory API (per-term, in parallel, with a short timeout). It degrades **silently** when nothing answers at all — and **loudly** when the platform is running and answers badly: a 500, a 404 from an `HQ_URL` on the wrong port, a body that isn't a list of memories, or a term probe that never comes back while the others do, all land in `failed`, never in `searched` with `matched: 0`. *“The team has no record of this”* is a claim recall makes only when agent-hq answered **every** term it was asked.
 - It depends only on the sibling tools' **stable interfaces** — their table schemas (`notes_fts`, `pages_fts`, `chunks`) and agent-hq's `/api/memory` — not their code, so each tool stays independent.
 
 ## The agent toolkit
