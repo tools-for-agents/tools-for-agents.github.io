@@ -99,6 +99,11 @@ const SERVERS = [
     setup: (r, e, s) => sh('node', ['scripts/seed.js', join(s, 'seed')], r, e) },
   { name: 'iris',     env: (d) => ({ IRIS_OUT: join(d, 'iris') }),
     setup: (r, e) => sh('node', ['src/cli.js', 'look', 'test/fixtures/clean.html', '--viewports', 'desktop', '--themes', 'dark'], r, e) },
+  // prism declares openWorldHint:TRUE on all four tools, and honestly — its `source` accepts an
+  // http(s) URL, so it really may leave the machine. There is no openWorldHint:false tool of its
+  // to hold home. Named here so a run that skips it says WHY, not silently.
+  { name: 'prism', skip: 'every tool declares openWorldHint:true, honestly — `source` accepts an http(s) URL' },
+
   { name: 'agent-hq', env: (d) => ({ HQ_DB_PATH: join(d, 'hq.db'), HQ_URL: 'http://localhost:7789', PORT: '7789' }),
     http: true, setup: (r, e) => sh('node', ['scripts/seed.js'], r, e) },
 ];
@@ -160,6 +165,10 @@ writeFileSync(wallFile, WALL);
 let failed = 0, checked = 0, proofs = 0;
 for (const s of SERVERS) {
   if (ONLY.length && !ONLY.includes(s.name)) continue;
+  // An exemption that is DECLARED, with a reason, is a decision. An exemption that is a missing
+  // row in a table is an accident nobody can see — which is how prism went a whole lifetime
+  // without any of these gates ever looking at it.
+  if (s.skip) { console.log(`· ${s.name}: skipped — ${s.skip}`); continue; }
   const repo = resolve(ROOT, s.name);
   if (!existsSync(join(repo, 'mcp', 'mcp-server.js'))) {
     failed++; console.error(`✗ ${s.name}: no MCP server at ${repo} — I cannot check what I cannot find`);

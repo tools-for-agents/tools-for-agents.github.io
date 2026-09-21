@@ -88,6 +88,29 @@ mustAgree('CI node-version', (r) => (read(r, '.github/workflows/ci.yml') || '').
 // TOOLS ONLY: a companion with no interface has no design system to drift from.
 mustHave('tokens: kit (shared design system)', (r) => /tokens: kit/.test(read(r, '.github/workflows/ci.yml') || ''), REPOS);
 
+// 8. AND THE CHECKS THEMSELVES MUST COVER EVERY REPO.
+//
+// Three times in one evening the same bug: a repo missing from a list, and therefore silently
+// exempt from a gate. ghost was public and held to none of these invariants because it was not
+// in REPOS. prism — whose whole job is parsing UNTRUSTED blobs — had never once been through the
+// read-only gate, because it was not in that gate's server table, and nothing anywhere said so.
+//
+// A skipped repo and a passing repo print the same nothing. So the tables are themselves an
+// invariant: every tool must appear in every behavioural gate, either as a row that runs or as
+// a `skip:` with a reason. An exemption on the record is a decision. An exemption by omission is
+// an accident that lasts until someone happens to look.
+for (const gate of ['honest', 'sealed', 'additive', 'idempotent']) {
+  const src = (() => { try { return readFileSync(new URL(`./${gate}.mjs`, import.meta.url), 'utf8'); } catch { return null; } })();
+  if (src === null) { problems.push(`gate coverage: build/${gate}.mjs is missing — a gate nobody can run covers nothing`); continue; }
+  const listed = REPOS.filter((r) => new RegExp(`name: '${r}'`).test(src));
+  const absent = REPOS.filter((r) => !listed.includes(r));
+  if (absent.length) {
+    problems.push(`gate coverage: ${gate}.mjs never mentions ${absent.join(', ')} — add a row, or a skip: saying why not`);
+  } else {
+    console.log(`✓ gate coverage: ${gate}.mjs accounts for all ${REPOS.length} tools`);
+  }
+}
+
 console.log('');
 if (problems.length) {
   console.error(`✗ the kit's repos have drifted apart:\n${problems.map((p) => `  · ${p}`).join('\n')}`);

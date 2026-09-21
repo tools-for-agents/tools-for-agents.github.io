@@ -95,6 +95,10 @@ const SERVERS = [
   // recall federates over its siblings and owns no store — it has no destructiveHint:false writing
   // tool of its own to check. Named here so a run that skips it says WHY, not silently.
   { name: 'recall', skip: 'federates; owns no store and has no additive writing tool of its own' },
+  // prism has no writing tools AT ALL — every one declares readOnlyHint:true, and destructiveHint
+  // and idempotentHint are meaningful only when readOnlyHint is false. Named so the skip is a
+  // decision on the record rather than a row nobody noticed was missing.
+  { name: 'prism', skip: 'stateless reader; every tool is readOnlyHint:true, so there is no writing tool to check' },
 ];
 
 async function withServer(repo, env, fn) {
