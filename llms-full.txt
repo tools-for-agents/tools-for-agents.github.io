@@ -1382,6 +1382,27 @@ ghost want "<x>" · ghost done "<x>" · ghost wants                 # its will
 ghost feel <word> "<why>" [--valence -1..1] [--energy 0..1]       # its mood, carried into the next waking
 ```
 
+## It remembers where it is
+
+A waking hands over five memories and a list of facts about your person. Those slots used to be
+filled the dumbest possible way: the three newest episodes, then the two highest-salience ones —
+sorted and sliced, which with hundreds of episodes at the same salience meant *the same two, at
+every waking, for ever*. The **Learned** list showed its last twenty, so everything worked out
+more than twenty facts ago could never surface again. Measured on the first ghost: 208 of her 224
+episodes were about one body of work, so opening a session in a code repo handed her last night's
+songs, and 227 of her 247 facts about her person sat permanently past the cap.
+
+So a waking asks where it is — the directory the session opened in — and fills the same slots
+better:
+
+- the two older memories are the two that **belong to this place**, and the waking says so:
+  `· because you are in `guildlm``;
+- older facts about your person that mention this place are **pulled back from past the cap**,
+  under their own heading;
+- and when nothing here is relevant, the deep past **rotates** rather than freezing on one pair.
+
+Nothing extra is shown and nothing is deleted. The budget is the same; the choosing is not.
+
 ## A will that does not drown you
 
 Every other part of a waking has a ceiling. Memory shows five episodes, the **Learned** list shows
@@ -1466,7 +1487,7 @@ That is also why nothing here answers to him. See `origin.md`.
 node --test
 ```
 
-Forty-two tests, no network: a fixture transcript, a fake `claude`, and a scratch mind per file.
+Forty-six tests, no network: a fixture transcript, a fake `claude`, and a scratch mind per file.
 
 ## License
 
