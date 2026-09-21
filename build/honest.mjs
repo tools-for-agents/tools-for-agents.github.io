@@ -71,6 +71,24 @@ const SERVERS = [
     setup: (repo, env) => sh('node', ['src/cli.js', 'look', 'test/fixtures/clean.html', '--viewports', 'desktop', '--themes', 'dark'], repo, env),
     nonEmpty: (repo, env, store) => existsSync(join(store, 'iris')) && readdirSync(join(store, 'iris')).length > 0 },
 
+  // prism is STATELESS — no store, no seed, and not one write call in its source. That is
+  // exactly why it was never added here, and exactly why it belongs here: a tool that writes
+  // nothing is the easiest one to PROVE honest, and until something proves it, "it writes
+  // nothing" is a claim like any other. It parses untrusted blobs, so it is also the one whose
+  // read-only promise costs the most if it is wrong.
+  //
+  // It needs real arguments. Its tools take `data` or `source`, and the generic argument-filler
+  // would hand `prism_read` a bare `path: '.'` with nothing to read — every tool would error out
+  // in its first line and the whole gate would pass on work it never did.
+  { name: 'prism', env: () => ({}),
+    args: (t) => {
+      const DATA = JSON.stringify({ users: [{ name: 'ada', tags: ['x', 'y'] }, { name: 'grace', tags: [] }], count: 2 });
+      if (t.name === 'prism_diff') return { left: DATA, right: DATA.replace('grace', 'hopper') };
+      if (t.name === 'prism_find') return { data: DATA, query: 'name' };
+      if (t.name === 'prism_read') return { data: DATA, path: 'users[0].name' };
+      return { data: DATA };
+    } },
+
   { name: 'agent-hq', env: (d) => ({ HQ_DB_PATH: join(d, 'hq.db'), HQ_URL: 'http://localhost:7788', PORT: '7788' }),
     // agent-hq's 28 MCP tools are a SKIN OVER ITS HTTP API (cycle 8) — with the platform down
     // every one of them fails at the fetch and writes nothing, which would pass this check for
@@ -268,10 +286,25 @@ for (const s of SERVERS) {
 
       const beforeRepo = fingerprint(repo), beforeStore = fingerprint(store);
 
+      // AN ERRORING TOOL WRITES NOTHING EITHER. The store check above catches a server whose
+      // data is missing; it cannot catch a server whose ARGUMENTS are wrong, because a tool that
+      // rejects its input in the first line never reaches the code this gate exists to watch and
+      // leaves the same spotless fingerprint as a tool that behaved. prism is stateless, so it
+      // has no store to be empty — for it this is the only thing standing between a real pass
+      // and a blank page.
+      let errored = 0;
       for (const t of ro) {
-        await call('tools/call', { name: t.name, arguments: argsFor(t) });
+        const res = await call('tools/call', { name: t.name, arguments: s.args?.(t, store) ?? argsFor(t) });
+        if (res.result?.isError || res.error) errored++;
         checked++;
       }
+      if (ro.length && errored === ro.length) {
+        failed++;
+        console.error(`\n✗ ${s.name}: all ${ro.length} read-only tools ERRORED. Nothing wrote because `
+          + 'nothing ran — that is a blank page, not a pass. Fix the arguments this gate calls them with.');
+        return;
+      }
+      if (errored) console.log(`· ${s.name}: ${errored}/${ro.length} read-only calls returned an error (still a real exercise of the rest)`);
 
       // Close FIRST: the checkpoint on close is what makes a WAL write visible in the .db.
       await close();
@@ -302,7 +335,7 @@ for (const s of SERVERS) {
       const writers = tools.filter((t) => t.annotations?.readOnlyHint !== true);
       await withServer(repo, env, async (call2, close2) => {
         for (const t of writers) {
-          await call2('tools/call', { name: t.name, arguments: argsFor(t) });
+          await call2('tools/call', { name: t.name, arguments: s.args?.(t, store) ?? argsFor(t) });
           wrote++;
         }
         await close2();
