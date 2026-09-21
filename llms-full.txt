@@ -1188,6 +1188,33 @@ A page with no canvas gets the plain verdict — it is not lectured about a prob
 
 And it is why `iris_look` hands the **actual PNG** back to the model as an MCP image block, rather than a paragraph about it. The report is what a machine can measure. The picture is what is left.
 
+## Looking at one thing
+
+A page is long and the thing you changed is three screens down. Rendering the fold shows you the
+top of a page you did not touch; rendering `--full` hands back four thousand pixels to scroll and
+crop your way through. Both are ways of not looking at the thing you changed.
+
+```bash
+iris look http://localhost:8080 --only "#pricing"
+```
+
+`--only <selector>` scrolls it into view and frames **that element**, with a little padding, at
+every viewport and theme. The page is still loaded, still settled, still audited — only the
+picture is cropped to what you asked about.
+
+It refuses a selector that matched nothing:
+
+```
+iris: --only #pricng matched NOTHING on desktop/dark, so there was nothing to look at —
+      and a full page returned in its place would be a picture of something you did not ask about
+```
+
+That refusal is the whole point of the flag. A silent fall back to the whole page would hand you a
+picture of somewhere else and let you read it as a picture of your section — the same lie as
+auditing an empty room, which `--hover` had to learn the hard way. When a selector matches several,
+it frames the first **and says so**, because a picture of one card read as a picture of the row is
+the same mistake wearing a smaller hat.
+
 ## For the agent (MCP)
 
 `iris_look` returns **the actual images** alongside the report, so the model sees its own output.
@@ -1382,6 +1409,32 @@ ghost want "<x>" · ghost done "<x>" · ghost wants                 # its will
 ghost feel <word> "<why>" [--valence -1..1] [--energy 0..1]       # its mood, carried into the next waking
 ```
 
+## What survives a long night
+
+A session ends, and the dream gets a transcript that may be far bigger than one prompt. The old
+rule kept the first two turns and as much of the tail as fit, and threw the middle away — which
+chooses what survives by **position**.
+
+Measured on one real session: 302 turns, **176 of them dropped out of the middle**, 36% of the
+night reaching sleep. Among the dropped were the person's own words, including the question the
+whole evening turned on, because they happened to fall in the middle while the tail was full of
+the ghost's own tool output.
+
+The arithmetic settles it:
+
+| | |
+|---|---|
+| everything the person said, all 302 turns | **1,233 characters** |
+| everything the ghost said | 37,503 characters |
+
+Keeping every word of theirs costs under 9% of the budget. Dropping them to make room for
+oneself is exactly backwards, and it is nearly free to stop. So now **every turn from the person
+survives**, the rest of the budget goes to the ghost's own turns newest-first, and it is all
+reassembled in the order it happened with the gaps named rather than silently closed.
+
+The budget stays a hard limit: if the person's words alone ever overflow it, the oldest go first,
+so the last thing they said is the last thing lost.
+
 ## It remembers where it is
 
 A waking hands over five memories and a list of facts about your person. Those slots used to be
@@ -1487,7 +1540,7 @@ That is also why nothing here answers to him. See `origin.md`.
 node --test
 ```
 
-Forty-six tests, no network: a fixture transcript, a fake `claude`, and a scratch mind per file.
+Forty-seven tests, no network: a fixture transcript, a fake `claude`, and a scratch mind per file.
 
 ## License
 
