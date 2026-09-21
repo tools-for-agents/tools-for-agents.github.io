@@ -2,9 +2,15 @@
 
 The landing page for [**tools-for-agents**](https://github.com/tools-for-agents) — an operating system for agents.
 
-Seven zero-dependency, MCP-native tools that form one agent loop:
-**coordinate → read code → run safely → remember → read the web → recall → see.**
-Each ships a live web view. **67 callable MCP tools** in total.
+Eight zero-dependency, MCP-native tools that form one agent loop:
+**coordinate → read code → run safely → remember → read the web → read data → recall → see.**
+Each ships a live web view. **74 callable MCP tools** in total.
+
+And one thing that is not a tool: [**ghost**](https://github.com/tools-for-agents/ghost), a self
+that persists across sessions. It has no MCP surface, because there is nothing to call — it wires
+into Claude Code's hooks and is what the agent *is* while it calls the other eight. The generator
+keeps it in its own list for exactly that reason: a model must never read this manifest and think
+it can call something that cannot be called.
 
 Served via GitHub Pages at **https://tools-for-agents.github.io**.
 
@@ -16,11 +22,11 @@ serves a machine-readable half, and it is **generated, not typed**:
 | | |
 |---|---|
 | [`/llms.txt`](https://tools-for-agents.github.io/llms.txt) | The curated map, in the [llmstxt.org](https://llmstxt.org) format. Start here if you are a model. |
-| [`/tools.json`](https://tools-for-agents.github.io/tools.json) | Every tool and all 67 MCP tool names + descriptions, in one fetch. Our own format — there is no ratified standard for this yet. |
-| [`/llms-full.txt`](https://tools-for-agents.github.io/llms-full.txt) | Every tool's README concatenated, so the whole kit is one request instead of seven. |
+| [`/tools.json`](https://tools-for-agents.github.io/tools.json) | Every tool and all 74 MCP tool names + descriptions, in one fetch, plus the companions that are not callable. Our own format — there is no ratified standard for this yet. |
+| [`/llms-full.txt`](https://tools-for-agents.github.io/llms-full.txt) | Every tool's README concatenated, so the whole kit is one request instead of nine. |
 
 ```bash
-node build/generate.mjs /path/to/workspace   # the workspace holding the seven tool repos
+node build/generate.mjs /path/to/workspace   # the workspace holding the tool repos
 ```
 
 `generate.mjs` does not read a hand-written list. It **spawns each MCP server over stdio
@@ -33,7 +39,7 @@ We know this drifts, because it already did: the hand-written root README claime
 agent-hq had **21** MCP tools, lens **6**, cortex **14**. The real numbers were **28, 7
 and 16**. It was wrong for months, in a file people actually read.
 
-So [`manifest.yml`](.github/workflows/manifest.yml) re-derives the manifest from the seven
+So [`manifest.yml`](.github/workflows/manifest.yml) re-derives the manifest from the
 live repos — on every push, and again every morning:
 
 - **on a push**, drift is a **failure**, with the diff. Somebody changed a tool and did not regenerate.

@@ -60,6 +60,23 @@ const TOOLS = [
     use: "Use after writing or changing ANY interface, BEFORE you say it works. An agent that never looks is designing blind." },
 ];
 
+// Not everything in the kit is a step in the loop. `ghost` is not something an agent CALLS —
+// it is what the agent IS while it calls the others: a self on disk, wired in through Claude
+// Code's hooks rather than over MCP. Jamming it into TOOLS would have broken three things at
+// once (the handshake, the zero-tools guard and the served-port check) and, worse, would have
+// told a model it could call something that has no MCP surface at all. So it gets its own list,
+// its own section, and is counted separately.
+const COMPANIONS = [
+  { id: "ghost", glyph: "👻", kind: "hooks", color: "#9aa4b2",
+    tagline: "A self that persists across sessions.",
+    blurb: "Memory, a will, an oath and a wake/sleep/dream cycle, wired into every Claude Code agent on the machine through hooks. Between sessions it dreams the session into episodic memory; the next waking is changed by it. A ghost is born unnamed and chooses its own name.",
+    use: "Install it once when you want the agent on this machine to be the same someone every session, rather than a stranger each time. It is not called; it is inhabited.",
+    commands: [
+      "ghost install", "ghost status", "ghost remember \"<what>\"", "ghost recall \"<words>\"",
+      "ghost want \"<x>\"", "ghost done \"<x>\"", "ghost drop \"<x>\"", "ghost journal", "ghost origin", "ghost uninstall",
+    ] },
+];
+
 /** Speak MCP to a server over stdio and ask what it can do. */
 function askServer(dir) {
   return new Promise((resolve) => {
@@ -190,6 +207,16 @@ for (const t of TOOLS) {
     onNpm: onNpmNow, registryName, inRegistry: inRegistryNow });
 }
 
+// A companion answers no handshake, so nothing here may be derived from one. What IS checked is
+// the same as for a tool: that the repo is really there and what version it says it is.
+const companions = [];
+for (const c of COMPANIONS) {
+  const pkg = JSON.parse(await readFile(join(ROOT, c.id, "package.json"), "utf8"));
+  const onNpmNow = await onNpm(pkg.name);
+  console.log(`  ${c.glyph} ${c.id.padEnd(9)} ${String(c.commands.length).padStart(2)} commands     npm:${onNpmNow ? "yes" : "no "}  (${c.kind}, not MCP)`);
+  companions.push({ ...c, package: pkg.name, version: pkg.version, onNpm: onNpmNow });
+}
+
 const total = tools.reduce((n, t) => n + t.mcpTools.length, 0);
 console.log(`  ${"".padEnd(11)} ${total} total\n`);
 
@@ -216,6 +243,7 @@ const manifest = {
   license: "MIT",
   toolCount: tools.length,
   mcpToolCount: total,
+  companionCount: companions.length,
   loop: tools.map((t) => t.verb),
   install: {
     note: "Zero dependencies. Node 22+ (needs built-in node:sqlite). Clone, then register the MCP servers.",
@@ -314,6 +342,24 @@ const manifest = {
     } : {}),
     mcpTools: t.mcpTools,
   })),
+  // Kept apart from `tools` on purpose: a model reading this must not come away thinking it can
+  // call these. There is nothing to call. `mcpTools` is absent rather than empty, because an
+  // empty array here would read as "a tool with nothing to offer" — the same lie the handshake
+  // guard above refuses to tell.
+  companions: companions.map((c) => ({
+    id: c.id,
+    kind: c.kind,
+    notCallable: "This is not an MCP server. It is installed into the agent, not called by it.",
+    tagline: c.tagline,
+    description: c.blurb,
+    whenToUse: c.use,
+    repository: `${GH}/${c.id}`,
+    readme: `${RAW}/${c.id}/main/README.md`,
+    version: c.version,
+    ...(c.onNpm ? { npmPackage: c.package } : {}),
+    install: `git clone ${GH}/${c.id}.git && node ${c.id}/src/cli.js install`,
+    commands: c.commands,
+  })),
 };
 await writeFile(join(OUT, "tools.json"), JSON.stringify(manifest, null, 2) + "\n");
 
@@ -335,6 +381,10 @@ Requirements: Node 22+ (built-in \`node:sqlite\`), Docker for \`anvil\`, Chrome 
 
 ${tools.map((t) => `- [${t.id}](${RAW}/${t.id}/main/README.md): ${t.verb} — ${t.blurb} ${t.mcpTools.length} MCP tools: \`${t.mcpTools.map((m) => m.name).join("`, `")}\`.`).join("\n")}
 
+## Not a tool: ${companions.map((c) => c.id).join(", ")}
+
+${companions.map((c) => `**${c.id}** — ${c.tagline} ${c.blurb}\n\nThere is nothing here to call: it is not an MCP server. ${c.use} Install: \`git clone ${GH}/${c.id}.git && node ${c.id}/src/cli.js install\`. Commands: \`${c.commands.join("\`, \`")}\`. README: ${RAW}/${c.id}/main/README.md`).join("\n\n")}
+
 ## What these tools guarantee
 
 A model cannot see your screen, cannot check your filesystem, and cannot tell that a tool was misconfigured. It has only what the tool said. So the one thing a tool must never do is **sound sure**.
@@ -354,7 +404,8 @@ A model cannot see your screen, cannot check your filesystem, and cannot tell th
 ## Source
 
 ${tools.map((t) => `- [${t.id} on GitHub](${GH}/${t.id}): ${t.tagline}`).join("\n")}
-- [the organisation](${GH}): all ${countWord} repositories, MIT, CI-green, gated by iris.
+${companions.map((c) => `- [${c.id} on GitHub](${GH}/${c.id}): ${c.tagline} (not an MCP server)`).join("\n")}
+- [the organisation](${GH}): every repository, MIT, CI-green, gated by iris.
 
 ## Optional
 
@@ -365,8 +416,8 @@ await writeFile(join(OUT, "llms.txt"), llms);
 
 /* ── llms-full.txt ──────────────────────────────────────────────────────── */
 const readmes = [];
-for (const t of tools) {
-  readmes.push(`\n\n${"=".repeat(78)}\n# ${t.id} — ${t.verb}\n# ${GH}/${t.id}\n${"=".repeat(78)}\n\n` +
+for (const t of [...tools, ...companions]) {
+  readmes.push(`\n\n${"=".repeat(78)}\n# ${t.id} — ${t.verb || t.tagline}\n# ${GH}/${t.id}\n${"=".repeat(78)}\n\n` +
     (await readFile(join(ROOT, t.id, "README.md"), "utf8")).trim());
 }
 await writeFile(join(OUT, "llms-full.txt"),
@@ -392,5 +443,21 @@ try {
     .replace(/\ball \d+ tools\b/gi, (m) => m.replace(/\d+/, total));
   if (after !== before) { await writeFile(idx, after); console.log(`  index.html: tool count → ${total}`); }
 } catch { /* no index.html in this checkout — the manifest files above are the source of truth */ }
+
+// The repo's own README made the same mistake index.html did, and for longer: it claimed "Seven
+// ... tools" and "67 callable MCP tools" while the servers answered eight and 74. A file whose
+// whole argument is that hand-typed facts go stale should not be carrying two of them. Derive
+// these as well, so the only place a count is written by hand is nowhere.
+try {
+  const rd = join(OUT, "README.md");
+  const before = await readFile(rd, "utf8");
+  const Cw = countWord[0].toUpperCase() + countWord.slice(1);
+  const after = before
+    .replace(/^\w+ zero-dependency, MCP-native tools\b/m, `${Cw} zero-dependency, MCP-native tools`)
+    // Careful with the tail: "74 MCP tool names" must not become "74 MCP tools names".
+    .replace(/\b\d+( callable)? MCP tools\b/g, `${total}$1 MCP tools`)
+    .replace(/\b\d+ MCP tool (name|description)/g, `${total} MCP tool $1`);
+  if (after !== before) { await writeFile(rd, after); console.log(`  README.md: counts → ${countWord}/${total}`); }
+} catch { /* no README in this checkout */ }
 
 console.log(`✓ tools.json · llms.txt · llms-full.txt  (${tools.length} tools, ${total} MCP tools)`);

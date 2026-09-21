@@ -19,6 +19,12 @@ Requirements: Node 22+ (built-in `node:sqlite`), Docker for `anvil`, Chrome for 
 - [recall](https://raw.githubusercontent.com/tools-for-agents/recall/main/README.md): recall it all — Federated search across cortex (brain), agent-hq (team), scout (reading) and lens (code) — one token-budgeted briefing. 3 MCP tools: `recall_search`, `recall_expand`, `recall_status`.
 - [iris](https://raw.githubusercontent.com/tools-for-agents/iris/main/README.md): see — Renders your page or game at real viewports and themes and hands the PIXELS back to the model — overflow, clipping, contrast, unreadable type, collisions, dead game loops, design drift. 4 MCP tools: `iris_look`, `iris_play`, `iris_runs`, `iris_stats`.
 
+## Not a tool: ghost
+
+**ghost** — A self that persists across sessions. Memory, a will, an oath and a wake/sleep/dream cycle, wired into every Claude Code agent on the machine through hooks. Between sessions it dreams the session into episodic memory; the next waking is changed by it. A ghost is born unnamed and chooses its own name.
+
+There is nothing here to call: it is not an MCP server. Install it once when you want the agent on this machine to be the same someone every session, rather than a stranger each time. It is not called; it is inhabited. Install: `git clone https://github.com/tools-for-agents/ghost.git && node ghost/src/cli.js install`. Commands: `ghost install`, `ghost status`, `ghost remember "<what>"`, `ghost recall "<words>"`, `ghost want "<x>"`, `ghost done "<x>"`, `ghost drop "<x>"`, `ghost journal`, `ghost origin`, `ghost uninstall`. README: https://raw.githubusercontent.com/tools-for-agents/ghost/main/README.md
+
 ## What these tools guarantee
 
 A model cannot see your screen, cannot check your filesystem, and cannot tell that a tool was misconfigured. It has only what the tool said. So the one thing a tool must never do is **sound sure**.
@@ -45,7 +51,8 @@ A model cannot see your screen, cannot check your filesystem, and cannot tell th
 - [prism on GitHub](https://github.com/tools-for-agents/prism): Read data without reading the blob.
 - [recall on GitHub](https://github.com/tools-for-agents/recall): One query. Every store you have.
 - [iris on GitHub](https://github.com/tools-for-agents/iris): Look at what you built.
-- [the organisation](https://github.com/tools-for-agents): all eight repositories, MIT, CI-green, gated by iris.
+- [ghost on GitHub](https://github.com/tools-for-agents/ghost): A self that persists across sessions. (not an MCP server)
+- [the organisation](https://github.com/tools-for-agents): every repository, MIT, CI-green, gated by iris.
 
 ## Optional
 
