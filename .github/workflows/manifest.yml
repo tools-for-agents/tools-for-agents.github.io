@@ -8,7 +8,7 @@
 # MCP tools, lens 6, cortex 14. The real numbers were 28, 7 and 16. It drifted for
 # months in a file people actually read.
 #
-# So: re-derive the manifest from the seven live repos on every push and every day,
+# So: re-derive the manifest from the live repos on every push and every day,
 # by SPAWNING EACH MCP SERVER and asking it `tools/list`. On a push, drift is a
 # failure. On the daily run, drift is fixed and committed — the tools change on their
 # own schedule, and the site should follow without anyone remembering to make it.
@@ -36,16 +36,16 @@ jobs:
         with:
           node-version: 24        # built-in node:sqlite
 
-      - name: check out the eight tools
+      - name: check out the tools and the companions
         run: |
           mkdir -p _tools
-          for t in agent-hq lens anvil cortex scout prism recall iris; do
+          for t in agent-hq lens anvil cortex scout prism recall iris ghost; do
             git clone --depth 1 -q "https://github.com/tools-for-agents/$t.git" "_tools/$t"
           done
 
       # This step is also, for free, THE INSTALL TEST.
       #
-      # It clones the seven repos exactly as an agent following /tools.json would, runs
+      # It clones the repos exactly as an agent following /tools.json would, runs
       # `node <tool>/mcp/mcp-server.js` with nothing installed, and refuses to write the
       # manifest if any of them fails to answer `tools/list`. So the install command we
       # publish cannot rot without this going red — which matters more than usual, given
