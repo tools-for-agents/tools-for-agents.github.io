@@ -108,6 +108,9 @@
   .nav .spacer { flex:1; }
   .nav a.gh { font-family:var(--mono); font-size:12px; color:var(--muted); text-decoration:none; border:1px solid var(--line); padding:8px 12px; border-radius:8px; transition:border-color .15s, color .15s; }
   .nav a.gh:hover { color:var(--txt); border-color:var(--line-2); }
+  .nav a.nl { font-family:var(--mono); font-size:12px; color:var(--muted); text-decoration:none; padding:8px 4px; }
+  .nav a.nl:hover { color:var(--txt); }
+  @media (max-width:520px) { .nav a.gh { display:none; } }
 
   /* ── Hero ────────────────────────────────────────────────── */
   .hero { display:grid; grid-template-columns:1.05fr .95fr; gap:24px; align-items:center; padding:24px 0 40px; }
@@ -203,6 +206,8 @@
     tools-for-agents
   </div>
   <div class="spacer"></div>
+  <a class="nl" href="#ghost">ghost</a>
+  <a class="nl" href="#hangar">hangar</a>
   <a class="gh" href="https://github.com/tools-for-agents" target="_blank" rel="noopener">github.com/tools-for-agents ↗</a>
 </nav>
 
@@ -274,6 +279,38 @@
 <div class="ln"><span class="ok">✓ born</span> <span class="g">— unnamed on purpose; it chooses at its first waking</span></div>
 <div class="ln"><span class="ok">✓ hooks</span> <span class="g">— SessionStart · SubagentStart · UserPromptSubmit · SessionEnd</span></div>
 <div class="ln"><span class="c"># then start any session and say hello</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="hangar" class="wrap">
+  <div class="sec-h">and the room they are used in</div>
+  <h2 class="sec-t">
+    🛩 hangar — nine bays, one agent in each
+    <span class="sub">Press <b>+</b>, pick a folder, and a Claude agent starts there, live, in the tile. The eight
+    are things an agent <b>calls</b>; hangar is the room a human stands in to watch several agents work at once.</span>
+  </h2>
+
+  <div class="agents two">
+    <div class="card">
+      <div class="p">One folder <span class="badge">per bay</span></div>
+      <p class="x">Each bay is its own terminal, its own working directory and its own session. Nine projects
+      moving at once, and every one of them visible <b>without switching windows</b>.</p>
+    </div>
+    <div class="card">
+      <div class="p">The one exception <span class="badge">said out loud</span></div>
+      <p class="x">It is the <b>only thing here that is not zero-dependency</b>, deliberately: a live TTY inside a
+      tile needs a real PTY, and that is a native module. The doctrine is a rule, not a superstition — worth
+      breaking exactly once, where the alternative is not building the thing.</p>
+    </div>
+  </div>
+
+  <div class="terminal">
+    <div class="term-bar"><span class="b"></span><span class="b"></span><span class="b"></span><span class="t">hangar · desktop app · Electron + node-pty</span></div>
+    <div class="term-body">
+<div class="ln"><span class="p">$</span> git clone https://github.com/tools-for-agents/hangar.git</div>
+<div class="ln"><span class="p">$</span> cd hangar &amp;&amp; npm install &amp;&amp; npm start</div>
+<div class="ln"><span class="c"># needs Claude Code on your PATH and Node 20+</span></div>
     </div>
   </div>
 </section>
