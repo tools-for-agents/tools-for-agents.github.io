@@ -3,7 +3,7 @@
  * THE LOOP, PROVEN.
  *
  * The headline claim of this whole kit — the first line of the landing page, the first
- * line of every README — is that these are not seven tools, they are ONE LOOP:
+ * line of every README — is that these are not separate tools, they are ONE LOOP:
  *
  *     coordinate → read code → run safely → remember → read the web → recall → see
  *
@@ -130,7 +130,7 @@ try {
     await hq.call("agent_register", { name: "loop-prover", role: "integration", avatar: "🔁" });
     const task = await hq.call("kanban_create_task", {
       title: "Prove the loop actually closes",
-      description: "Run all seven tools as one loop, over MCP, and make recall see the result.",
+      description: "Run the tools as one loop, over MCP, and make recall see the result.",
       column: "Todo", priority: "high", labels: ["verification"], created_by: "loop-prover",
     });
     taskId = task.id;
@@ -183,7 +183,7 @@ try {
 
   // ── 6. recall it all ─────────────────────────────────────────────────────────
   // The step that can actually fail. It is the only one that depends on all the others
-  // having really happened — this is what makes the seven a loop and not a list.
+  // having really happened — this is what makes the tools a loop and not a list.
   await step(6, "recall    recall it all", async () => {
     const r = await recall.call("recall_search", { query: "token budget", max_tokens: 800 });
     const sources = new Set((r.results || []).map((x) => x.source));
@@ -250,7 +250,7 @@ try {
 
   // ── 8. close it out ──────────────────────────────────────────────────────────
   await step(8, "agent-hq  done", async () => {
-    await hq.call("kanban_comment", { task_id: taskId, body: "The loop closed: recall saw what the other six did.", author: "loop-prover" });
+    await hq.call("kanban_comment", { task_id: taskId, body: "The loop closed: recall saw what the others did.", author: "loop-prover" });
     await hq.call("kanban_move_task", { task_id: taskId, to_column: "Done", actor: "loop-prover" });
     const t = await hq.call("kanban_get_task", { task_id: taskId });
     return `task ${taskId} → Done`;
