@@ -3,12 +3,12 @@
 The landing page for [**tools-for-agents**](https://github.com/tools-for-agents) — an operating system for agents.
 
 Nine zero-dependency, MCP-native tools that form one agent loop:
-**coordinate → read code → run safely → remember → read the web → read data → recall → see.**
-Each ships a live web view. **79 callable MCP tools** in total.
+**coordinate → read code → run safely → hold secrets → remember → read the web → read data → recall → see.**
+Every tool but one ships a live web view (keep holds secrets, and has none on purpose). **79 callable MCP tools** in total.
 
-And one thing that is not a tool: [**ghost**](https://github.com/tools-for-agents/ghost), a self
-that persists across sessions. It has no MCP surface, because there is nothing to call — it wires
-into Claude Code's hooks and is what the agent *is* while it calls the other eight. The generator
+And at the centre of the loop, the one thing that is not a tool: [**ghost**](https://github.com/tools-for-agents/ghost), a self
+that persists across sessions — drawn at the centre of the ring on the page and in every piece of the brand. It has no MCP surface, because there is nothing to call — it wires
+into Claude Code's hooks and is what the agent *is* while it calls the other nine. The generator
 keeps it in its own list for exactly that reason: a model must never read this manifest and think
 it can call something that cannot be called.
 

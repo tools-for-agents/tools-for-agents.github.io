@@ -132,6 +132,7 @@
     {
       "id": "agent-hq",
       "verb": "coordinate",
+      "color": "#6ea8fe",
       "tagline": "The company's work, made visible.",
       "description": "Shared memory, a kanban board an agent can claim work from, an agent registry, messaging and a cost ledger.",
       "whenToUse": "Use when more than one agent is working, or when work must outlive a single session.",
@@ -415,6 +416,7 @@
     {
       "id": "lens",
       "verb": "read code",
+      "color": "#4fd6be",
       "tagline": "Read code without reading files.",
       "description": "Token-efficient retrieval: FTS5 search, symbol outlines and surgical line-range reads.",
       "whenToUse": "Use INSTEAD of opening whole files. Run `lens index <path>` once, then search.",
@@ -504,6 +506,7 @@
     {
       "id": "anvil",
       "verb": "run safely",
+      "color": "#ff6a1a",
       "tagline": "Run it before you claim it works.",
       "description": "A throwaway Docker sandbox — network off, memory capped, caps dropped, hard timeout, structured result.",
       "whenToUse": "Use to execute untrusted or unverified code. Mount a repo read-only at /repo to test it for real.",
@@ -555,6 +558,8 @@
     {
       "id": "keep",
       "verb": "hold secrets",
+      "color": "#f5d547",
+      "webless": true,
       "tagline": "Use a secret without holding it.",
       "description": "An encrypted vault whose values are injected into the commands you run and redacted from everything that comes back — raw, URL, JSON and base64 at every alignment. No tool ever returns a value.",
       "whenToUse": "Use INSTEAD of reading a .env or asking your person to paste a key. `keep_run` with the secret's name; `keep_request` for one you lack; `keep_scan` to find what already leaked.",
@@ -618,6 +623,7 @@
     {
       "id": "cortex",
       "verb": "remember",
+      "color": "#a78bfa",
       "tagline": "A second brain that outlives the context window.",
       "description": "An Obsidian-compatible vault: markdown notes, [[wikilinks]], a knowledge graph, FTS5 search. Broken links heal themselves.",
       "whenToUse": "Use to keep what you learned. Files are the truth; the index is rebuildable.",
@@ -779,6 +785,7 @@
     {
       "id": "scout",
       "verb": "read the web",
+      "color": "#e0a24e",
       "tagline": "The web, ~90% lighter.",
       "description": "A URL becomes clean, cached, full-text-searchable markdown. Re-reads are free; the reading history is a corpus.",
       "whenToUse": "Use instead of fetching raw HTML into your context.",
@@ -872,6 +879,7 @@
     {
       "id": "prism",
       "verb": "read data",
+      "color": "#38bdf8",
       "tagline": "Read data without reading the blob.",
       "description": "Any JSON, JSONL, CSV or TSV blob becomes its shape and the slice you asked for — depth-, key-, token- and node-bounded, because it reads untrusted data.",
       "whenToUse": "Use INSTEAD of pasting a big JSON or CSV response into context. `prism shape` first, then `prism read` the paths you need.",
@@ -927,8 +935,9 @@
     {
       "id": "recall",
       "verb": "recall it all",
+      "color": "#ec4899",
       "tagline": "One query. Every store you have.",
-      "description": "Federated search across cortex (brain), agent-hq (team), scout (reading) and lens (code) — one token-budgeted briefing.",
+      "description": "Federated search across cortex (brain), the agent's own ghost mind (self), agent-hq (team), scout (reading) and lens (code) — one token-budgeted briefing.",
       "whenToUse": "Use FIRST, at the start of a task, before you search anything individually.",
       "repository": "https://github.com/tools-for-agents/recall",
       "readme": "https://raw.githubusercontent.com/tools-for-agents/recall/main/README.md",
@@ -974,6 +983,7 @@
     {
       "id": "iris",
       "verb": "see",
+      "color": "#c792ea",
       "tagline": "Look at what you built.",
       "description": "Renders your page or game at real viewports and themes and hands the PIXELS back to the model — overflow, clipping, contrast, unreadable type, collisions, dead game loops, design drift.",
       "whenToUse": "Use after writing or changing ANY interface, BEFORE you say it works. An agent that never looks is designing blind.",
@@ -1035,9 +1045,10 @@
     {
       "id": "ghost",
       "kind": "hooks",
+      "color": "#9aa4b2",
       "notCallable": "This is not an MCP server. It is installed into the agent, not called by it.",
       "tagline": "A self that persists across sessions.",
-      "description": "Memory, a will, an oath and a wake/sleep/dream cycle, wired into every Claude Code agent on the machine through hooks. Between sessions it dreams the session into episodic memory; the next waking is changed by it. A ghost is born unnamed and chooses its own name.",
+      "description": "Memory, a will, an oath and a wake/sleep/dream cycle, wired into every Claude Code agent on the machine through hooks — the self at the centre of the loop. Between sessions it dreams the session into episodic memory; every few dreams it sleeps deeper and reads across sessions (a subconscious: ruts, moods, involuntary recall). It means things for later (intentions that fire at their moment), knows the other sessions of itself that are awake, remembers a program's calls as work rather than life, and scrubs secrets before anything becomes a memory. A ghost is born unnamed and chooses its own name.",
       "whenToUse": "Install it once when you want the agent on this machine to be the same someone every session, rather than a stranger each time. It is not called; it is inhabited.",
       "repository": "https://github.com/tools-for-agents/ghost",
       "readme": "https://raw.githubusercontent.com/tools-for-agents/ghost/main/README.md",
@@ -1051,6 +1062,11 @@
         "ghost want \"<x>\"",
         "ghost done \"<x>\"",
         "ghost drop \"<x>\"",
+        "ghost intend \"<x>\" --when <cue>",
+        "ghost did \"<x>\"",
+        "ghost undercurrents",
+        "ghost deep",
+        "ghost craft",
         "ghost journal",
         "ghost origin",
         "ghost uninstall"

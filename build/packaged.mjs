@@ -23,7 +23,7 @@ const rootArg = process.argv.indexOf('--root');
 const ROOT = resolve(rootArg >= 0 ? process.argv[rootArg + 1] : '.');
 const ONLY = process.argv.slice(2).filter((a, i, arr) => !a.startsWith('--') && arr[i - 1] !== '--root');
 
-const REPOS = ['agent-hq', 'lens', 'anvil', 'cortex', 'scout', 'prism', 'recall', 'iris'];
+const REPOS = ['agent-hq', 'lens', 'anvil', 'keep', 'cortex', 'scout', 'prism', 'recall', 'iris'];
 
 // The published command: `npx <pkg> [mcp]`. All the CLI tools give the bin an `mcp` subcommand;
 // agent-hq's bin IS the MCP server, so it takes no subcommand. We derive this from package.json +

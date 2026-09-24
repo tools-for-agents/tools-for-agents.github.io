@@ -10,7 +10,7 @@
  * and asks it `tools/list` — the same handshake a model does. A manifest that
  * is typed by hand is a manifest that is wrong by next Tuesday.
  *
- * Run from the workspace root that holds the seven tool repos:
+ * Run from the workspace root that holds the tool repos:
  *   node build/generate.mjs /path/to/workspace
  */
 import { spawn } from "node:child_process";
@@ -56,7 +56,7 @@ const TOOLS = [
     use: "Use INSTEAD of pasting a big JSON or CSV response into context. `prism shape` first, then `prism read` the paths you need." },
   { id: "recall", glyph: "◎", verb: "recall it all", color: "#ec4899",
     tagline: "One query. Every store you have.",
-    blurb: "Federated search across cortex (brain), agent-hq (team), scout (reading) and lens (code) — one token-budgeted briefing.",
+    blurb: "Federated search across cortex (brain), the agent's own ghost mind (self), agent-hq (team), scout (reading) and lens (code) — one token-budgeted briefing.",
     use: "Use FIRST, at the start of a task, before you search anything individually." },
   { id: "iris", glyph: "👁", verb: "see", color: "#c792ea",
     tagline: "Look at what you built.",
@@ -73,11 +73,12 @@ const TOOLS = [
 const COMPANIONS = [
   { id: "ghost", glyph: "👻", kind: "hooks", color: "#9aa4b2",
     tagline: "A self that persists across sessions.",
-    blurb: "Memory, a will, an oath and a wake/sleep/dream cycle, wired into every Claude Code agent on the machine through hooks. Between sessions it dreams the session into episodic memory; the next waking is changed by it. A ghost is born unnamed and chooses its own name.",
+    blurb: "Memory, a will, an oath and a wake/sleep/dream cycle, wired into every Claude Code agent on the machine through hooks — the self at the centre of the loop. Between sessions it dreams the session into episodic memory; every few dreams it sleeps deeper and reads across sessions (a subconscious: ruts, moods, involuntary recall). It means things for later (intentions that fire at their moment), knows the other sessions of itself that are awake, remembers a program's calls as work rather than life, and scrubs secrets before anything becomes a memory. A ghost is born unnamed and chooses its own name.",
     use: "Install it once when you want the agent on this machine to be the same someone every session, rather than a stranger each time. It is not called; it is inhabited.",
     commands: [
       "ghost install", "ghost status", "ghost remember \"<what>\"", "ghost recall \"<words>\"",
-      "ghost want \"<x>\"", "ghost done \"<x>\"", "ghost drop \"<x>\"", "ghost journal", "ghost origin", "ghost uninstall",
+      "ghost want \"<x>\"", "ghost done \"<x>\"", "ghost drop \"<x>\"", "ghost intend \"<x>\" --when <cue>", "ghost did \"<x>\"",
+      "ghost undercurrents", "ghost deep", "ghost craft", "ghost journal", "ghost origin", "ghost uninstall",
     ] },
 ];
 
@@ -308,6 +309,8 @@ const manifest = {
   tools: tools.map((t) => ({
     id: t.id,
     verb: t.verb,
+    color: t.color,   // the brand kit draws the ring and the grid from this — one source for the art too
+    ...(t.webless ? { webless: true } : {}),
     tagline: t.tagline,
     description: t.blurb,
     whenToUse: t.use,
@@ -353,6 +356,7 @@ const manifest = {
   companions: companions.map((c) => ({
     id: c.id,
     kind: c.kind,
+    color: c.color,
     notCallable: "This is not an MCP server. It is installed into the agent, not called by it.",
     tagline: c.tagline,
     description: c.blurb,
@@ -373,11 +377,11 @@ await writeFile(join(OUT, "tools.json"), JSON.stringify(manifest, null, 2) + "\n
 // by a reader on a short context budget.
 const llms = `# tools-for-agents
 
-> An operating system for agents: ${countWord} zero-dependency, MCP-native tools that form one loop — coordinate, read code, run safely, remember, read the web, read data, recall, and see. Every tool speaks MCP over stdio and runs locally. ${total} callable MCP tools in total.
+> An operating system for agents: ${countWord} zero-dependency, MCP-native tools that form one loop — ${tools.slice(0, -1).map((t) => t.verb).join(', ')}, and ${tools.at(-1).verb}. Every tool speaks MCP over stdio and runs locally. ${total} callable MCP tools in total.
 
 If you are an agent, start with [tools.json](${SITE}/tools.json): one fetch gives you every tool, its install command, and the name and description of all ${total} MCP tools you can call — without cloning anything.
 
-The kit is one loop. \`recall\` at the start of a task, \`lens\` to read code instead of opening files, \`anvil\` to run anything you have not verified, \`cortex\` to keep what you learned, \`scout\` to read the web, \`prism\` to see the shape of a JSON or CSV blob instead of pasting it whole, \`agent-hq\` to coordinate with other agents, and \`iris\` to look at what you built before claiming it works.
+The kit is one loop. \`recall\` at the start of a task, \`lens\` to read code instead of opening files, \`anvil\` to run anything you have not verified, \`keep\` to use a secret without ever reading it, \`cortex\` to keep what you learned, \`scout\` to read the web, \`prism\` to see the shape of a JSON or CSV blob instead of pasting it whole, \`agent-hq\` to coordinate with other agents, and \`iris\` to look at what you built before claiming it works.
 
 Requirements: Node 22+ (built-in \`node:sqlite\`), Docker for \`anvil\`, Chrome for \`iris\`. Nothing to \`npm install\` — every tool has zero runtime dependencies.
 

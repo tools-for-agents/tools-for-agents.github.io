@@ -1,6 +1,6 @@
 # THE LOOP, PROVEN — on every push, and again every morning.
 #
-# The headline claim of this kit is that these are not seven tools, they are ONE LOOP:
+# The headline claim of this kit is that these are not separate tools, they are ONE LOOP:
 # coordinate → read code → run safely → remember → read the web → recall → see.
 #
 # Every tool was tested alone. Every server was handshaken; all 67 tools called. The
@@ -43,14 +43,14 @@ jobs:
       - uses: browser-actions/setup-chrome@v1
         id: chrome
 
-      - name: check out the seven tools
+      - name: check out the tools the loop runs
         run: |
           mkdir -p _tools
           for t in agent-hq lens anvil cortex scout recall iris; do
             git clone --depth 1 -q "https://github.com/tools-for-agents/$t.git" "_tools/$t"
           done
 
-      - name: agent-hq is a service — the other six talk to it over HTTP
+      - name: agent-hq is a service — the others talk to it over HTTP
         run: |
           (cd _tools/agent-hq && PORT=7700 HQ_DB_PATH=/tmp/loop.db node src/server.js &)
           for i in $(seq 30); do curl -sf http://localhost:7700/api/health >/dev/null && break; sleep 1; done

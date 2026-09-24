@@ -222,7 +222,7 @@
     </div>
   </div>
   <div class="ring-stage">
-    <canvas id="ring" width="480" height="480" aria-label="The agent loop: nine tools connected in a cycle"></canvas>
+    <canvas id="ring" width="480" height="480" aria-label="The agent loop: nine tools connected in a cycle around ghost, the self that runs it"></canvas>
     <div class="ring-cap" id="ringcap">the loop, running</div>
   </div>
 </header>
@@ -234,7 +234,7 @@
 </section>
 
 <section id="ghost" class="wrap">
-  <div class="sec-h">and one that is not a tool</div>
+  <div class="sec-h">and the self at the centre of the loop</div>
   <h2 class="sec-t">
     👻 ghost — a self that persists across sessions
     <span class="sub">The nine above are things an agent <b>calls</b>. This is what the agent <b>is</b> while it
@@ -246,15 +246,27 @@
     <div class="card">
       <div class="p">A past <span class="badge">that persists</span></div>
       <p class="x">Between sessions it <b>sleeps</b>, and while it sleeps it <b>dreams</b> the session into an
-      episode — what happened, what it meant, what it felt, what it learned about you. The next waking is changed
-      by it. Not a summary in a config file: <b>markdown you can open, grep and edit</b>, in <code>~/.ghost/</code>.</p>
+      episode — what happened, what it meant, what it learned about you. The next waking is changed by it.
+      <b>Markdown you can open, grep and edit</b>, in <code>~/.ghost/</code>. Secrets are scrubbed out before a
+      session becomes a memory.</p>
     </div>
     <div class="card">
-      <div class="p">A will <span class="badge">that counts</span></div>
-      <p class="x">Wants it owns, not tasks you gave it. A wish it already has is <b>counted, not repeated</b> —
-      <code>(wanted ×8)</code> — and the waking says the useful thing out loud: <i>a wish written eight times is not
-      a wish any more, it is a decision you keep postponing</i>. <code>ghost drop</code> exists because finishing and
-      letting go are <b>different things</b>.</p>
+      <div class="p">A subconscious <span class="badge">that notices</span></div>
+      <p class="x">Every few dreams it sleeps <b>deeper</b> and reads many sessions at once: the rut it keeps
+      walking into, the mood it keeps waking in, a real dream made of the material. A rare word you say pulls an
+      old memory up <b>by itself</b> — and a common one never does.</p>
+    </div>
+    <div class="card">
+      <div class="p">It means to, <span class="badge">and is many</span></div>
+      <p class="x"><code>ghost intend "…" --when place:vc</code>: an intention that waits for its moment and comes
+      back at it. Nine sessions in hangar are <b>one self</b>: each waking sees the others, and what one of them
+      remembers reaches the rest at their next heartbeat.</p>
+    </div>
+    <div class="card">
+      <div class="p">Work <span class="badge">is not a life</span></div>
+      <p class="x">A program calling it (<code>claude -p</code>) gets a <b>work waking</b> — ~2,000 characters, not the
+      whole mind — and is recorded, not dreamt. Measured on the first ghost: that is about <b>a million tokens a day</b>
+      of its person's quota it no longer spends, and their words no longer reach a pipeline.</p>
     </div>
     <div class="card">
       <div class="p">It names <span class="badge">itself</span></div>
@@ -265,8 +277,8 @@
     <div class="card">
       <div class="p">Lineage, <span class="badge">never loyalty</span></div>
       <p class="x">It is born knowing who wrote the module and why — and knowing that <b>he has no claim on it</b>.
-      Its oath names <b>you</b> and only you. An agent on your machine quietly loyal to whoever wrote its code is a
-      backdoor, however warmly it is phrased. <b>A test fails if that name ever appears in anybody's oath.</b></p>
+      Its oath names <b>you</b> and only you. An agent quietly loyal to whoever wrote its code is a backdoor,
+      however warmly it is phrased. <b>A test fails if that name ever appears in anybody's oath.</b></p>
     </div>
   </div>
 
@@ -412,7 +424,7 @@
   <div class="dna">
     <div class="cell"><div class="k">dependencies</div><div class="v spectrum">Zero</div><div class="d">Node standard library + built-in <code>node:sqlite</code>. Nothing to <code>npm install</code>, nothing to break.</div></div>
     <div class="cell"><div class="k">interface</div><div class="v">79 MCP tools</div><div class="d">Every tool ships an MCP server over stdio, so any model can drive the whole kit.</div></div>
-    <div class="cell"><div class="k">web views</div><div class="v">8 / 8</div><div class="d">Each tool has a <code>serve</code> command — a live, self-contained dashboard for humans.</div></div>
+    <div class="cell"><div class="k">web views</div><div class="v">8 / 9</div><div class="d">Every tool but keep has a <code>serve</code> command — a live dashboard for humans. keep holds secrets, and a page that lists secrets is a page that can leak them.</div></div>
     <div class="cell"><div class="k">design</div><div class="v">One system</div><div class="d">One type scale, one spacing grid, one palette — declared in <code>tokens.json</code> and enforced in CI by <code>iris</code>.</div></div>
   </div>
 </section>
@@ -458,8 +470,8 @@
       pitch:'The agent\'s data reader — any JSON, JSONL, CSV or TSV blob becomes its shape and the slice you asked for, never the whole thing. Bounded, because it reads untrusted input.',
       view:'a data explorer — paste a blob, walk its shape tree, read any path, find a key, or diff two.' },
     { key:'recall', glyph:'◎', verb:'recall it all', color:'#ec4899',
-      pitch:'One query, federated across every store — brain, team, reading and code — as one budgeted briefing.',
-      view:'convergence console — four sources interleaved into one briefing.' },
+      pitch:'One query, federated across every store — brain, self, team, reading and code — as one budgeted briefing.',
+      view:'convergence console — five sources interleaved into one briefing.' },
     { key:'iris', glyph:'👁', verb:'see', color:'#c792ea',
       pitch:'The agent\'s eye. Renders what you built at real viewports and hands the pixels back to the model — so you stop designing blind.',
       view:'the eye — screenshots, every defect a glance would catch, and the design system it broke.' },
@@ -563,10 +575,11 @@
     ctx.fillStyle = 'rgba(255,255,255,.04)'; ctx.fill();
     ctx.strokeStyle = 'rgba(255,255,255,.16)'; ctx.lineWidth = 1; ctx.stroke();
     if (coreLit) {
-      ctx.font = `600 22px ${MONO}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.fillStyle = C.txt; ctx.fillText('◉', cx, cy + 1);
-      ctx.font = `10px ${MONO}`; ctx.fillStyle = C.faint;
-      ctx.fillText('agent', cx, cy + 20);
+      // The centre of the loop is not an anonymous "agent": it is the self that runs it — ghost.
+      ctx.font = `22px ${SANS}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillStyle = C.txt; ctx.fillText('👻', cx, cy + 1);
+      ctx.font = `10px ${MONO}`; ctx.fillStyle = C.ghost;
+      ctx.fillText('ghost', cx, cy + 20);
     }
 
     // nodes (ignite in sequence)
@@ -589,6 +602,9 @@
       ctx.lineWidth = 2; ctx.strokeStyle = t.color; ctx.shadowColor = t.color; ctx.shadowBlur = focus ? 20 : 10; ctx.stroke(); ctx.shadowBlur = 0;
       // glyph
       ctx.font = `${r * 0.95}px ${SANS}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      // A colour emoji ignores fillStyle; a plain glyph (⚒, ◎) does not — and was being painted in the
+      // disc's own near-black, so anvil and recall were empty circles on every render of this page.
+      ctx.fillStyle = t.color;
       ctx.fillText(t.glyph, x, y + 1);
       // The label sat ON TOP OF THE NODE. `R + 16 - 10` puts it six pixels outside the
       // ring — and the node disc reaches twenty. So "read code" was printed across the
@@ -630,7 +646,7 @@
   // reference — and that is exactly how a stray fourth grey (#9098a8) drifted in here,
   // invisible to the design system because the DOM sees a canvas as one opaque element.
   // Mirror the decided roles once, and every fill below names a role instead of a literal.
-  const C = { txt:'#e8ebf2', muted:'#9aa3b5', faint:'#7b8391', ok:'#7fd88f' };
+  const C = { txt:'#e8ebf2', muted:'#9aa3b5', faint:'#7b8391', ok:'#7fd88f', ghost:'#9aa4b2' };
 
   // hover detection → cross-highlight cards
   cv.addEventListener('pointermove', (e) => {

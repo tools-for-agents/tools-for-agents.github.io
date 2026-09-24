@@ -1,19 +1,19 @@
 #!/usr/bin/env node
 // consistent.mjs — DO THE REPOS STILL AGREE ON WHAT MUST BE IDENTICAL?
 //
-// The kit is eight repos that ship as ONE thing, evolving in parallel. That is exactly the shape
+// The kit is many repos that ship as ONE thing, evolving in parallel. That is exactly the shape
 // where a fix lands in six and misses the seventh — I have hit it: iris's serveStatic kept the weak
 // path guard for a full cycle after the other six were hardened, and the mutants-gate timeout bug
 // was latent in all seven copies at once. The behavioural gates (honest / sealed / additive /
 // loop / packaged) prove each SERVER does the right thing. Nothing proved the repos still AGREE.
 //
-// This checks only the invariants that MUST be identical across all seven, with NO legitimate
+// This checks only the invariants that MUST be identical across all of them, with NO legitimate
 // exception — so it cannot fire on a deliberate per-repo difference (e.g. the refused-write gate,
 // which four write-primary tools have and the three read-primary ones intentionally don't). A
 // consistency check that flags an intended difference is the "fires on correct work" trap; this is
 // scoped to leave no room for it.
 //
-//   node build/consistent.mjs --root <dir of the seven checkouts>
+//   node build/consistent.mjs --root <dir of the checkouts>
 
 import { readFileSync, existsSync } from 'node:fs';
 import { join, resolve } from 'node:path';
@@ -61,7 +61,7 @@ function mustHave(label, hasIt, who = ALL) {
 }
 
 // ── the invariants ────────────────────────────────────────────────────────────────────────
-// 1. Version — the kit tags one release across all seven; a partial bump ships mismatched tarballs.
+// 1. Version — the kit tags one release across all of them; a partial bump ships mismatched tarballs.
 mustAgree('package version', (r) => pkg(r)?.version);
 // 2. Node engine — the published packages promise the same runtime floor.
 mustAgree('engines.node', (r) => pkg(r)?.engines?.node);
