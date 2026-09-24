@@ -309,6 +309,7 @@ const manifest = {
   tools: tools.map((t) => ({
     id: t.id,
     verb: t.verb,
+    glyph: t.glyph,
     color: t.color,   // the brand kit draws the ring and the grid from this — one source for the art too
     ...(t.webless ? { webless: true } : {}),
     tagline: t.tagline,
@@ -469,3 +470,11 @@ try {
 } catch { /* no README in this checkout */ }
 
 console.log(`✓ tools.json · llms.txt · llms-full.txt  (${tools.length} tools, ${total} MCP tools)`);
+
+// Every tool's README carries the same "agent toolkit" block — generated from this manifest, so it
+// cannot say "seven tools" in a kit of nine again (build/toolkit-block.mjs).
+{
+  const { syncReadmes } = await import('./toolkit-block.mjs');
+  const synced = await syncReadmes(ROOT, manifest);
+  if (synced.length) console.log(`  toolkit block rewritten in: ${synced.join(', ')}`);
+}

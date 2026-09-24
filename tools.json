@@ -132,6 +132,7 @@
     {
       "id": "agent-hq",
       "verb": "coordinate",
+      "glyph": "🛰️",
       "color": "#6ea8fe",
       "tagline": "The company's work, made visible.",
       "description": "Shared memory, a kanban board an agent can claim work from, an agent registry, messaging and a cost ledger.",
@@ -416,6 +417,7 @@
     {
       "id": "lens",
       "verb": "read code",
+      "glyph": "🔎",
       "color": "#4fd6be",
       "tagline": "Read code without reading files.",
       "description": "Token-efficient retrieval: FTS5 search, symbol outlines and surgical line-range reads.",
@@ -506,6 +508,7 @@
     {
       "id": "anvil",
       "verb": "run safely",
+      "glyph": "⚒",
       "color": "#ff6a1a",
       "tagline": "Run it before you claim it works.",
       "description": "A throwaway Docker sandbox — network off, memory capped, caps dropped, hard timeout, structured result.",
@@ -558,6 +561,7 @@
     {
       "id": "keep",
       "verb": "hold secrets",
+      "glyph": "🔐",
       "color": "#f5d547",
       "webless": true,
       "tagline": "Use a secret without holding it.",
@@ -623,6 +627,7 @@
     {
       "id": "cortex",
       "verb": "remember",
+      "glyph": "🧠",
       "color": "#a78bfa",
       "tagline": "A second brain that outlives the context window.",
       "description": "An Obsidian-compatible vault: markdown notes, [[wikilinks]], a knowledge graph, FTS5 search. Broken links heal themselves.",
@@ -785,6 +790,7 @@
     {
       "id": "scout",
       "verb": "read the web",
+      "glyph": "🧭",
       "color": "#e0a24e",
       "tagline": "The web, ~90% lighter.",
       "description": "A URL becomes clean, cached, full-text-searchable markdown. Re-reads are free; the reading history is a corpus.",
@@ -879,6 +885,7 @@
     {
       "id": "prism",
       "verb": "read data",
+      "glyph": "🔻",
       "color": "#38bdf8",
       "tagline": "Read data without reading the blob.",
       "description": "Any JSON, JSONL, CSV or TSV blob becomes its shape and the slice you asked for — depth-, key-, token- and node-bounded, because it reads untrusted data.",
@@ -935,6 +942,7 @@
     {
       "id": "recall",
       "verb": "recall it all",
+      "glyph": "◎",
       "color": "#ec4899",
       "tagline": "One query. Every store you have.",
       "description": "Federated search across cortex (brain), the agent's own ghost mind (self), agent-hq (team), scout (reading) and lens (code) — one token-budgeted briefing.",
@@ -983,6 +991,7 @@
     {
       "id": "iris",
       "verb": "see",
+      "glyph": "👁",
       "color": "#c792ea",
       "tagline": "Look at what you built.",
       "description": "Renders your page or game at real viewports and themes and hands the PIXELS back to the model — overflow, clipping, contrast, unreadable type, collisions, dead game loops, design drift.",
