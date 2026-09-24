@@ -20,7 +20,12 @@ import { join, resolve } from 'node:path';
 
 const rootArg = process.argv.indexOf('--root');
 const ROOT = resolve(rootArg >= 0 ? process.argv[rootArg + 1] : '.');
-const REPOS = ['agent-hq', 'lens', 'anvil', 'cortex', 'scout', 'prism', 'recall', 'iris'];
+const REPOS = ['agent-hq', 'lens', 'anvil', 'keep', 'cortex', 'scout', 'prism', 'recall', 'iris'];
+// A tool with NO web view, on purpose, and on the record here rather than by omission: keep holds
+// secrets, and a page that lists secrets is a page that can leak them. The UI gates (`look`,
+// `dead-api`, the shared design tokens) have nothing to look at; every other invariant applies.
+const WEBLESS = ['keep'];
+const WEB = REPOS.filter((r) => !WEBLESS.includes(r));
 // A companion ships in the kit without being an MCP server, so the MCP- and web-shaped
 // invariants below genuinely do not apply to it. The rest do, and used to be skipped by
 // accident rather than on purpose: `ghost` was public, in the org, and silently exempt from
@@ -81,12 +86,12 @@ const hasGate = (gate) => (r) => new RegExp(`^  ${gate}:$`, 'm').test(read(r, '.
 // proves a stranger's first install works.
 for (const gate of ['test', 'mutants', 'first-run']) mustHave(`CI gate "${gate}"`, hasGate(gate));
 // TOOLS ONLY: `look` needs a web view to look at and `dead-api` an MCP surface to sweep.
-for (const gate of ['look', 'dead-api']) mustHave(`CI gate "${gate}"`, hasGate(gate), REPOS);
+for (const gate of ['look', 'dead-api']) mustHave(`CI gate "${gate}"`, hasGate(gate), WEB);
 // 6. The CI node version — the box the gates run on.
 mustAgree('CI node-version', (r) => (read(r, '.github/workflows/ci.yml') || '').match(/node-version: '?(\d+)'?/)?.[1]);
 // 7. The shared design tokens + strict — nobody vendors a copy of the design system.
 // TOOLS ONLY: a companion with no interface has no design system to drift from.
-mustHave('tokens: kit (shared design system)', (r) => /tokens: kit/.test(read(r, '.github/workflows/ci.yml') || ''), REPOS);
+mustHave('tokens: kit (shared design system)', (r) => /tokens: kit/.test(read(r, '.github/workflows/ci.yml') || ''), WEB);
 
 // 8. AND THE CHECKS THEMSELVES MUST COVER EVERY REPO.
 //

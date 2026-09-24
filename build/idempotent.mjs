@@ -22,7 +22,7 @@
 // Not "state is byte-identical": an idempotent re-write legitimately bumps updated_at. Identity is
 // the right lens here too — a second call must not CREATE anything, timestamps aside.
 
-import { mkdtempSync, rmSync, existsSync, readdirSync, statSync } from 'node:fs';
+import { mkdtempSync, rmSync, existsSync, readdirSync, statSync, readFileSync } from 'node:fs';
 import { spawn, spawnSync } from 'node:child_process';
 import { DatabaseSync } from 'node:sqlite';
 import { join, resolve } from 'node:path';
@@ -83,6 +83,13 @@ const SERVERS = [
 
   // recall federates over its siblings and owns no store — it has no destructiveHint:false writing
   // tool of its own to check. Named here so a run that skips it says WHY, not silently.
+  // keep_request is its one non-destructive, idempotent writing tool: asking twice for the same
+  // secret must neither lose a kept secret nor pile up duplicate requests.
+  { name: 'keep', env: (d) => ({ KEEP_HOME: join(d, 'keep'), KEEP_BACKEND: 'file', KEEP_TRANSCRIPTS: join(d, 'no-transcripts') }),
+    setup: (r, e) => sh('node', ['scripts/seed.js'], r, e),
+    // a "record" is a secret or a request, by name — read from the index, never from the values.
+    count: (e) => { try { const i = JSON.parse(readFileSync(join(e.KEEP_HOME, 'index.json'), 'utf8')); return { secrets: new Set(Object.keys(i.secrets)), requests: new Set(i.requests.map((q) => q.name)) }; } catch { return null; } } },
+
   { name: 'recall', skip: 'federates; owns no store and has no idempotent writing tool of its own' },
   // prism has no writing tools AT ALL — every one declares readOnlyHint:true, and destructiveHint
   // and idempotentHint are meaningful only when readOnlyHint is false. Named so the skip is a

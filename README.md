@@ -2,9 +2,9 @@
 
 The landing page for [**tools-for-agents**](https://github.com/tools-for-agents) — an operating system for agents.
 
-Eight zero-dependency, MCP-native tools that form one agent loop:
+Nine zero-dependency, MCP-native tools that form one agent loop:
 **coordinate → read code → run safely → remember → read the web → read data → recall → see.**
-Each ships a live web view. **74 callable MCP tools** in total.
+Each ships a live web view. **79 callable MCP tools** in total.
 
 And one thing that is not a tool: [**ghost**](https://github.com/tools-for-agents/ghost), a self
 that persists across sessions. It has no MCP surface, because there is nothing to call — it wires
@@ -22,7 +22,7 @@ serves a machine-readable half, and it is **generated, not typed**:
 | | |
 |---|---|
 | [`/llms.txt`](https://tools-for-agents.github.io/llms.txt) | The curated map, in the [llmstxt.org](https://llmstxt.org) format. Start here if you are a model. |
-| [`/tools.json`](https://tools-for-agents.github.io/tools.json) | Every tool and all 74 MCP tool names + descriptions, in one fetch, plus the companions that are not callable. Our own format — there is no ratified standard for this yet. |
+| [`/tools.json`](https://tools-for-agents.github.io/tools.json) | Every tool and all 79 MCP tool names + descriptions, in one fetch, plus the companions that are not callable. Our own format — there is no ratified standard for this yet. |
 | [`/llms-full.txt`](https://tools-for-agents.github.io/llms-full.txt) | Every tool's README concatenated, so the whole kit is one request instead of nine. |
 
 ```bash

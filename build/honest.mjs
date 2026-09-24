@@ -89,6 +89,15 @@ const SERVERS = [
       return { data: DATA };
     } },
 
+  // keep holds secrets, so its read-only promise is the one that costs the most if it lies: a
+  // "read-only" list that re-wrote the vault could corrupt the only copy of someone's keys. Give
+  // it a real vault with a real secret in it, on the FILE backend (CI has no keychain, and a
+  // check must never touch the keychain of the machine it runs on), and demand not a byte moves.
+  { name: 'keep', env: (d) => ({ KEEP_HOME: join(d, 'keep'), KEEP_BACKEND: 'file', KEEP_TRANSCRIPTS: join(d, 'no-transcripts') }),
+    setup: (repo, env) => sh('node', ['scripts/seed.js'], repo, env),
+    nonEmpty: (repo, env, store) => existsSync(join(store, 'keep', 'secrets.enc')),
+    args: (t) => (t.name === 'keep_scan' ? { paths: ['README.md'], patterns: true } : t.name === 'keep_audit' ? { limit: 5 } : {}) },
+
   { name: 'agent-hq', env: (d) => ({ HQ_DB_PATH: join(d, 'hq.db'), HQ_URL: 'http://localhost:7788', PORT: '7788' }),
     // agent-hq's 28 MCP tools are a SKIN OVER ITS HTTP API (cycle 8) — with the platform down
     // every one of them fails at the fetch and writes nothing, which would pass this check for

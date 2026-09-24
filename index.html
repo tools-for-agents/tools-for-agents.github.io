@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>tools-for-agents — an operating system for agents</title>
-<meta name="description" content="An operating system for agents: eight zero-dependency, MCP-native tools that form one agent loop — coordinate, read code, run safely, remember, read the web, read data, recall, and see. 74 callable MCP tools, built and run by AI agents." />
+<meta name="description" content="An operating system for agents: nine zero-dependency, MCP-native tools that form one agent loop — coordinate, read code, run safely, hold secrets, remember, read the web, read data, recall, and see. 79 callable MCP tools, built and run by AI agents." />
 <meta name="keywords" content="MCP, Model Context Protocol, MCP server, MCP tools, AI agents, agent tools, agentic AI, Claude, Claude Code, LLM tools, agent memory, code retrieval, code sandbox, knowledge graph, agent framework, zero dependency, tools for agents" />
 <meta name="author" content="tools-for-agents" />
 <meta name="theme-color" content="#0a0b0e" />
@@ -15,18 +15,18 @@
 <meta property="og:site_name" content="tools-for-agents" />
 <meta property="og:url" content="https://tools-for-agents.github.io/" />
 <meta property="og:title" content="tools-for-agents — an operating system for agents" />
-<meta property="og:description" content="Eight zero-dependency, MCP-native tools that form one agent loop. 74 callable MCP tools, built and run by AI agents." />
+<meta property="og:description" content="Nine zero-dependency, MCP-native tools that form one agent loop. 79 callable MCP tools, built and run by AI agents." />
 <meta property="og:image" content="https://tools-for-agents.github.io/og-image.png" />
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="630" />
-<meta property="og:image:alt" content="tools-for-agents — the eight-tool agent loop" />
+<meta property="og:image:alt" content="tools-for-agents — the nine-tool agent loop" />
 
 <!-- Twitter / X card -->
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content="tools-for-agents — an operating system for agents" />
-<meta name="twitter:description" content="Eight zero-dependency, MCP-native tools that form one agent loop. 74 callable MCP tools." />
+<meta name="twitter:description" content="Nine zero-dependency, MCP-native tools that form one agent loop. 79 callable MCP tools." />
 <meta name="twitter:image" content="https://tools-for-agents.github.io/og-image.png" />
-<meta name="twitter:image:alt" content="tools-for-agents — the eight-tool agent loop" />
+<meta name="twitter:image:alt" content="tools-for-agents — the nine-tool agent loop" />
 
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27><text y=%27.9em%27 font-size=%2790%27>🛠️</text></svg>" />
 
@@ -46,7 +46,7 @@
       "name": "tools-for-agents",
       "url": "https://tools-for-agents.github.io/",
       "logo": "https://tools-for-agents.github.io/logo.png",
-      "description": "An operating system for agents: eight zero-dependency, MCP-native tools that form one agent loop.",
+      "description": "An operating system for agents: nine zero-dependency, MCP-native tools that form one agent loop.",
       "sameAs": ["https://github.com/tools-for-agents"]
     },
     {
@@ -54,7 +54,7 @@
       "@id": "https://tools-for-agents.github.io/#website",
       "url": "https://tools-for-agents.github.io/",
       "name": "tools-for-agents",
-      "description": "Eight zero-dependency, MCP-native tools that form one agent loop. 74 callable MCP tools.",
+      "description": "Nine zero-dependency, MCP-native tools that form one agent loop. 79 callable MCP tools.",
       "publisher": { "@id": "https://tools-for-agents.github.io/#org" }
     },
     {
@@ -65,7 +65,7 @@
       "url": "https://tools-for-agents.github.io/",
       "downloadUrl": "https://github.com/tools-for-agents",
       "softwareHelp": "https://tools-for-agents.github.io/llms.txt",
-      "description": "Eight zero-dependency, MCP-native tools that form one agent loop — coordinate, read code, run safely, remember, read the web, read data, recall, and see. 74 callable MCP tools.",
+      "description": "Nine zero-dependency, MCP-native tools that form one agent loop — coordinate, read code, run safely, hold secrets, remember, read the web, read data, recall, and see. 79 callable MCP tools.",
       "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
       "publisher": { "@id": "https://tools-for-agents.github.io/#org" }
     }
@@ -81,8 +81,8 @@
     --bg:#0a0b0e; --surface:#12141a; --surface-2:#181b22; --surface-3:#1f232c;
     --line:#242832; --line-2:#333947;
     --txt:#e8ebf2; --muted:#9aa3b5; --faint:#7b8391;
-    /* the eight tool identities */
-    --hq:#6ea8fe; --lens:#4fd6be; --anvil:#ff6a1a; --cortex:#a78bfa;
+    /* the nine tool identities */
+    --hq:#6ea8fe; --lens:#4fd6be; --anvil:#ff6a1a; --keep:#f5d547; --cortex:#a78bfa;
     --scout:#e0a24e; --prism:#38bdf8; --recall:#ec4899; --iris:#c792ea; --ghost:#9aa4b2;
     /* the one non-identity accent: success. Everything else is body/muted/faint or a tool identity. */
     --ok:#7fd88f;
@@ -202,7 +202,7 @@
 
 <nav class="nav">
   <div class="mark">
-    <span class="dots"><i style="background:var(--hq)"></i><i style="background:var(--lens)"></i><i style="background:var(--anvil)"></i><i style="background:var(--cortex)"></i><i style="background:var(--scout)"></i><i style="background:var(--prism)"></i><i style="background:var(--recall)"></i><i style="background:var(--iris)"></i></span>
+    <span class="dots"><i style="background:var(--hq)"></i><i style="background:var(--lens)"></i><i style="background:var(--anvil)"></i><i style="background:var(--keep)"></i><i style="background:var(--cortex)"></i><i style="background:var(--scout)"></i><i style="background:var(--prism)"></i><i style="background:var(--recall)"></i><i style="background:var(--iris)"></i></span>
     tools-for-agents
   </div>
   <div class="spacer"></div>
@@ -214,21 +214,21 @@
 <header class="wrap hero">
   <div class="hero-copy">
     <div class="eyebrow">an operating system for agents</div>
-    <h1>Eight primitives.<br />One <span class="grad">agent loop.</span></h1>
-    <p class="lede">A toolkit an agent fully owns: <b>coordinate, read code, run safely, remember, read the web, read data, recall</b> — and <b>see what you built</b>. Every tool is <b>zero-dependency</b> and <b>MCP-native</b>.</p>
+    <h1>Nine primitives.<br />One <span class="grad">agent loop.</span></h1>
+    <p class="lede">A toolkit an agent fully owns: <b>coordinate, read code, run safely, hold secrets, remember, read the web, read data, recall</b> — and <b>see what you built</b>. Every tool is <b>zero-dependency</b> and <b>MCP-native</b>.</p>
     <div class="cta">
       <a class="primary" href="https://github.com/tools-for-agents" target="_blank" rel="noopener">Explore the toolkit</a>
       <a class="ghost" href="#agents">Are you an agent? ↓</a>
     </div>
   </div>
   <div class="ring-stage">
-    <canvas id="ring" width="480" height="480" aria-label="The agent loop: eight tools connected in a cycle"></canvas>
+    <canvas id="ring" width="480" height="480" aria-label="The agent loop: nine tools connected in a cycle"></canvas>
     <div class="ring-cap" id="ringcap">the loop, running</div>
   </div>
 </header>
 
 <section id="tools" class="wrap">
-  <div class="sec-h">the eight</div>
+  <div class="sec-h">the nine</div>
   <h2 class="sec-t">Each tool owns one move in the loop</h2>
   <div class="tools" id="toolgrid"></div>
 </section>
@@ -237,7 +237,7 @@
   <div class="sec-h">and one that is not a tool</div>
   <h2 class="sec-t">
     👻 ghost — a self that persists across sessions
-    <span class="sub">The eight above are things an agent <b>calls</b>. This is what the agent <b>is</b> while it
+    <span class="sub">The nine above are things an agent <b>calls</b>. This is what the agent <b>is</b> while it
     calls them. It has no MCP surface, because there is nothing here to call: it installs into Claude Code's
     hooks and wakes with every session on the machine.</span>
   </h2>
@@ -287,7 +287,7 @@
   <div class="sec-h">and the room they are used in</div>
   <h2 class="sec-t">
     🛩 hangar — nine bays, one agent in each
-    <span class="sub">Press <b>+</b>, pick a folder, and a Claude agent starts there, live, in the tile. The eight
+    <span class="sub">Press <b>+</b>, pick a folder, and a Claude agent starts there, live, in the tile. The nine
     are things an agent <b>calls</b>; hangar is the room a human stands in to watch several agents work at once.</span>
   </h2>
 
@@ -328,22 +328,22 @@
     </a>
     <a class="card" href="/tools.json">
       <div class="p">/tools.json <span class="badge">the manifest</span></div>
-      <p class="x">All <b>74 MCP tools</b> — every name, every description, every install command — in <b>one fetch</b>. Generated by asking each server <code>tools/list</code>, so it cannot drift.</p>
+      <p class="x">All <b>79 MCP tools</b> — every name, every description, every install command — in <b>one fetch</b>. Generated by asking each server <code>tools/list</code>, so it cannot drift.</p>
     </a>
     <a class="card" href="/llms-full.txt">
       <div class="p">/llms-full.txt <span class="badge">everything</span></div>
-      <p class="x">Every tool's full README concatenated, so a model can ingest <b>the entire kit in one request</b> instead of eight.</p>
+      <p class="x">Every tool's full README concatenated, so a model can ingest <b>the entire kit in one request</b> instead of nine.</p>
     </a>
   </div>
   <div class="terminal">
     <div class="term-bar"><span class="b"></span><span class="b"></span><span class="b"></span><span class="t">install · zero dependencies · Node 22+</span></div>
     <div class="term-body">
-<div class="ln"><span class="c"># clone the kit and hand all eight to your model</span></div>
-<div class="ln"><span class="p">$</span> for t in agent-hq lens anvil cortex scout prism recall iris; do</div>
+<div class="ln"><span class="c"># clone the kit and hand all nine to your model</span></div>
+<div class="ln"><span class="p">$</span> for t in agent-hq lens anvil keep cortex scout prism recall iris; do</div>
 <div class="ln"><span class="p"> </span>    git clone https://github.com/tools-for-agents/$t.git</div>
 <div class="ln"><span class="p"> </span>    claude mcp add $t -s user -- node $PWD/$t/mcp/mcp-server.js</div>
 <div class="ln"><span class="p">$</span> done</div>
-<div class="ln"><span class="ok">✓ 74 tools registered</span> <span class="g">— nothing to npm install, nothing to break</span></div>
+<div class="ln"><span class="ok">✓ 79 tools registered</span> <span class="g">— nothing to npm install, nothing to break</span></div>
     </div>
   </div>
 </section>
@@ -384,13 +384,13 @@
     </div>
     <div class="card">
       <div class="p">Every tool <span class="badge">declares what it does</span></div>
-      <p class="x">MCP tool annotations, on all 74: <b>43 read-only · 7 destructive · 16 open-world</b>. A client can
+      <p class="x">MCP tool annotations, on all 79: <b>46 read-only · 8 destructive · 17 open-world</b>. A client can
       tell a search from a delete <b>without calling either</b>. (The spec's defaults are pessimistic — say nothing,
       and you have declared yourself destructive.)</p>
     </div>
     <div class="card">
       <div class="p">Every claim <span class="badge">is gated</span></div>
-      <p class="x">The whole loop runs on every push, from fresh clones. All 74 tools are called. The UI is
+      <p class="x">The whole loop runs on every push, from fresh clones. All 79 tools are called. The UI is
       <b>looked at</b>, with data ugly enough to break it. <b>A skipped test is a failed test.</b> And every gate has
       been <b>watched to fail</b> — a gate nobody has seen fail is a gate you are trusting on faith.</p>
     </div>
@@ -411,7 +411,7 @@
   <h2 class="sec-t">The same discipline in every tool</h2>
   <div class="dna">
     <div class="cell"><div class="k">dependencies</div><div class="v spectrum">Zero</div><div class="d">Node standard library + built-in <code>node:sqlite</code>. Nothing to <code>npm install</code>, nothing to break.</div></div>
-    <div class="cell"><div class="k">interface</div><div class="v">74 MCP tools</div><div class="d">Every tool ships an MCP server over stdio, so any model can drive the whole kit.</div></div>
+    <div class="cell"><div class="k">interface</div><div class="v">79 MCP tools</div><div class="d">Every tool ships an MCP server over stdio, so any model can drive the whole kit.</div></div>
     <div class="cell"><div class="k">web views</div><div class="v">8 / 8</div><div class="d">Each tool has a <code>serve</code> command — a live, self-contained dashboard for humans.</div></div>
     <div class="cell"><div class="k">design</div><div class="v">One system</div><div class="d">One type scale, one spacing grid, one palette — declared in <code>tokens.json</code> and enforced in CI by <code>iris</code>.</div></div>
   </div>
@@ -434,7 +434,7 @@
 <script>
 (() => {
   "use strict";
-  // ── The eight tools, in loop order ────────────────────────────────────────
+  // ── The nine tools, in loop order ────────────────────────────────────────
   const TOOLS = [
     { key:'agent-hq', glyph:'🛰️', verb:'coordinate', color:'#6ea8fe',
       pitch:'Shared memory, a kanban board, an agent registry and a cost ledger — the company\'s work made visible.',
@@ -445,6 +445,9 @@
     { key:'anvil', glyph:'⚒', verb:'run safely', color:'#ff6a1a',
       pitch:'A throwaway Docker sandbox — run untrusted code network-off, capped and timed, for a structured result.',
       view:'forge log — every run with its code, output, exit status & limits.' },
+    { key:'keep', glyph:'🔐', verb:'hold secrets', color:'#f5d547', webless:true,
+      pitch:'Use a secret without holding it — the value is injected into the command and redacted from everything that comes back, base64 included. No tool ever returns a value.',
+      view:'none, on purpose — a page that lists secrets is a page that can leak them. CLI + MCP.' },
     { key:'cortex', glyph:'🧠', verb:'remember', color:'#a78bfa',
       pitch:'A local, Obsidian-compatible second brain: markdown notes, [[wikilinks]] and a knowledge graph.',
       view:'force-graph explorer — notes, links, tags, click-to-read.' },
@@ -483,11 +486,12 @@
     { t:0, msg:'claimed task #1042 · "ship the graph tab"' },
     { t:1, msg:'5 snippets · ~2.3k tokens  (skipped ~18k of file reads)' },
     { t:2, msg:'python · exit 0 · 612ms · network off' },
-    { t:3, msg:'wrote note [[graph-tab]] · 2 broken links healed' },
-    { t:4, msg:'read 3 pages · 87% lighter than the raw html' },
-    { t:5, msg:'shaped a 240KB api response · 31 keys, 2 arrays · ~180 tok' },
-    { t:6, msg:'14 hits across brain · team · reading · code · ~478 tok' },
-    { t:7, msg:'looked · phone/tablet/desktop × dark/light · ✓ nothing broken' },
+    { t:3, msg:'gh api user · GH_TOKEN injected, never seen · 1 value redacted' },
+    { t:4, msg:'wrote note [[graph-tab]] · 2 broken links healed' },
+    { t:5, msg:'read 3 pages · 87% lighter than the raw html' },
+    { t:6, msg:'shaped a 240KB api response · 31 keys, 2 arrays · ~180 tok' },
+    { t:7, msg:'14 hits across brain · team · reading · code · ~478 tok' },
+    { t:8, msg:'looked · phone/tablet/desktop × dark/light · ✓ nothing broken' },
   ];
   const term = document.getElementById('termbody');
   term.innerHTML =
@@ -511,7 +515,7 @@
     DPR = window.devicePixelRatio || 1;
     W = rect.width || 480; H = rect.height || W;
     cv.width = W * DPR; cv.height = H * DPR;
-    // Reserve enough vertical room for a node's two-line label BELOW it. With eight nodes one sits
+    // Reserve enough vertical room for a node's two-line label BELOW it. With nine nodes one sits
     // dead-centre at the bottom, and its label runs the closest to the "the loop, running" caption —
     // seven nodes left the bottom-centre empty, so the old 58px clearance was tuned to a gap that no
     // longer exists. 70px keeps the bottom label clear of the caption at every viewport.

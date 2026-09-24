@@ -99,6 +99,13 @@ const SERVERS = [
     setup: (r, e, s) => sh('node', ['scripts/seed.js', join(s, 'seed')], r, e) },
   { name: 'iris',     env: (d) => ({ IRIS_OUT: join(d, 'iris') }),
     setup: (r, e) => sh('node', ['src/cli.js', 'look', 'test/fixtures/clean.html', '--viewports', 'desktop', '--themes', 'dark'], r, e) },
+  // keep: four closed tools (list, audit, scan, request) against a seeded vault. keep_run is the
+  // open one, honestly — the command it runs may do anything. It CANNOT be this row's proof: the
+  // wall lives inside the node process, and keep_run's reach is a child process (curl, gh) the
+  // wall never sees. A proof that passes for that reason proves nothing, so there is none here;
+  // scout's row proves the wall.
+  { name: 'keep', env: (d) => ({ KEEP_HOME: join(d, 'keep'), KEEP_BACKEND: 'file', KEEP_TRANSCRIPTS: join(d, 'no-transcripts') }),
+    setup: (r, e) => sh('node', ['scripts/seed.js'], r, e) },
   // prism declares openWorldHint:TRUE on all four tools, and honestly — its `source` accepts an
   // http(s) URL, so it really may leave the machine. There is no openWorldHint:false tool of its
   // to hold home. Named here so a run that skips it says WHY, not silently.

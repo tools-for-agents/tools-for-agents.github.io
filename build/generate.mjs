@@ -38,6 +38,10 @@ const TOOLS = [
     tagline: "Run it before you claim it works.",
     blurb: "A throwaway Docker sandbox — network off, memory capped, caps dropped, hard timeout, structured result.",
     use: "Use to execute untrusted or unverified code. Mount a repo read-only at /repo to test it for real." },
+  { id: "keep", glyph: "🔐", verb: "hold secrets", color: "#f5d547", webless: true,
+    tagline: "Use a secret without holding it.",
+    blurb: "An encrypted vault whose values are injected into the commands you run and redacted from everything that comes back — raw, URL, JSON and base64 at every alignment. No tool ever returns a value.",
+    use: "Use INSTEAD of reading a .env or asking your person to paste a key. `keep_run` with the secret's name; `keep_request` for one you lack; `keep_scan` to find what already leaked." },
   { id: "cortex", glyph: "🧠", verb: "remember", color: "#a78bfa",
     tagline: "A second brain that outlives the context window.",
     blurb: "An Obsidian-compatible vault: markdown notes, [[wikilinks]], a knowledge graph, FTS5 search. Broken links heal themselves.",
@@ -189,7 +193,7 @@ for (const t of TOOLS) {
   const mcpTools = await askServer(t.id);
   const pkg = JSON.parse(await readFile(join(ROOT, t.id, "package.json"), "utf8"));
   // Every tool ships a web view and PROVES its port in CI. A tool that opted out (`webless:true`)
-  // would not be made to advertise a port nobody serves — the escape hatch stays, unused for now.
+  // would not be made to advertise a port nobody serves — keep uses it: a page that lists secrets is a page that can leak them.
   t.port = t.webless ? null : await servedPort(t.id);
   // A server that fails to answer returns [] — and an empty list is not a fact, it is a
   // failed handshake wearing the costume of one. Publishing "lens: 0 tools" because a

@@ -26,6 +26,8 @@ const SMOKE = {
   "agent-hq": ["company_stats", {}, "tasks"],
   lens:       ["lens_stats",    {}, "files"],
   anvil:      ["anvil_check",   {}, "docker"],
+  // keep_list needs no vault: with none it says so ("no vault yet") inside a real answer.
+  keep:       ["keep_list",     {}, "secrets"],
   cortex:     ["cortex_stats",  {}, "notes"],
   scout:      ["scout_stats",   {}, "pages"],
   // prism owns no store, so it has no stats call to smoke — instead shape a tiny inline blob, which
