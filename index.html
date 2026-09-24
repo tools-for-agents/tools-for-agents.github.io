@@ -113,7 +113,7 @@
   @media (max-width:520px) { .nav a.gh { display:none; } }
 
   /* ── Hero ────────────────────────────────────────────────── */
-  .hero { display:grid; grid-template-columns:1.05fr .95fr; gap:24px; align-items:center; padding:24px 0 40px; }
+  .hero { display:grid; grid-template-columns:1.05fr .95fr; gap:24px; align-items:center; padding-top:24px; padding-bottom:40px; }   /* vertical only: the header is also .wrap, and "padding:24px 0 40px" erased its side gutter — every phone got text on the glass edge */
   .eyebrow { font-family:var(--mono); font-size:12px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); display:flex; align-items:center; gap:8px; }
   .eyebrow::before { content:""; width:24px; height:1px; background:var(--line-2); }
   h1 { font-size:clamp(30px,5vw,40px); line-height:1.08; letter-spacing:-1.2px; font-weight:800; margin:16px 0 0; text-wrap:balance; }
@@ -123,6 +123,13 @@
   .cta { display:flex; gap:12px; flex-wrap:wrap; align-items:center; }
   .cta .primary { font-family:var(--mono); font-size:14px; text-decoration:none; background:var(--txt); color:var(--bg); font-weight:600; padding:12px 16px; border-radius:8px; transition:transform .1s; }
   .cta .primary:hover { transform:translateY(-1px); }
+  .hero > * { min-width:0; }   /* a grid item grows to its widest nowrap child unless told it may shrink */
+  .oneline { margin-top:24px; max-width:44ch; min-width:0; }
+  .oneline .k { font-family:var(--mono); font-size:12px; letter-spacing:1px; text-transform:uppercase; color:var(--muted); margin-bottom:8px; }
+  .oneline > code { display:block; font-family:var(--mono); font-size:14px; color:var(--txt); background:var(--surface); border:1px solid var(--line); border-radius:8px; padding:12px 16px; overflow-x:auto; white-space:nowrap; }
+  .oneline .d { font-size:12px; line-height:1.5; color:var(--muted); margin-top:8px; }
+  .oneline .d code { font-family:var(--mono); font-size:12px; color:var(--txt); white-space:nowrap; }
+  @media (max-width:520px) { .oneline > code { white-space:normal; overflow-wrap:anywhere; } }   /* the whole command, visible, on a phone */
   .cta .ghost { font-family:var(--mono); font-size:14px; color:var(--muted); text-decoration:none; padding:12px 4px; }
   .cta .ghost:hover { color:var(--txt); }
 
@@ -219,6 +226,11 @@
     <div class="cta">
       <a class="primary" href="https://github.com/tools-for-agents" target="_blank" rel="noopener">Explore the toolkit</a>
       <a class="ghost" href="#agents">Are you an agent? ↓</a>
+    </div>
+    <div class="oneline" aria-label="Install everything with one command">
+      <div class="k">install everything — one command</div>
+      <code id="installcmd">curl -fsSL https://tools-for-agents.github.io/install.sh | sh</code>
+      <div class="d">clones, links and registers the nine with Claude Code. Add <code>-s -- --with-ghost</code> for a self that persists, <code>--guard</code> to keep agents out of your <code>.env</code>.</div>
     </div>
   </div>
   <div class="ring-stage">

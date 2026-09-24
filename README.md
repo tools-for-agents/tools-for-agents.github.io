@@ -14,6 +14,19 @@ it can call something that cannot be called.
 
 Served via GitHub Pages at **https://tools-for-agents.github.io**.
 
+## Install everything
+
+```bash
+curl -fsSL https://tools-for-agents.github.io/install.sh | sh
+curl -fsSL https://tools-for-agents.github.io/install.sh | sh -s -- --with-ghost --guard   # opt in to a self, and to the .env guard
+```
+
+[`install.sh`](install.sh) clones the nine into `~/.tools-for-agents`, links their CLIs into `~/.local/bin`,
+registers their MCP servers with Claude Code (skipping any name already registered) and creates keep's
+vault. Run it again to update. ghost and the guard are opt-in because they change how an agent behaves,
+not only what it can call. The `install` workflow runs this exact script on a fresh machine on every
+push and every morning, and checks each thing it claims to have done.
+
 ## It has to be findable by the thing that uses it
 
 A toolkit for agents that only a human can find is a toolkit with a bug. So the site

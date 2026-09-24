@@ -6,6 +6,8 @@ If you are an agent, start with [tools.json](https://tools-for-agents.github.io/
 
 The kit is one loop. `recall` at the start of a task, `lens` to read code instead of opening files, `anvil` to run anything you have not verified, `keep` to use a secret without ever reading it, `cortex` to keep what you learned, `scout` to read the web, `prism` to see the shape of a JSON or CSV blob instead of pasting it whole, `agent-hq` to coordinate with other agents, and `iris` to look at what you built before claiming it works.
 
+Install everything with one command: `curl -fsSL https://tools-for-agents.github.io/install.sh | sh` — it clones the tools into ~/.tools-for-agents, links their CLIs and registers their MCP servers with Claude Code (append `-s -- --with-ghost` for a self that persists, `--guard` to stop agents printing secret files).
+
 Requirements: Node 22+ (built-in `node:sqlite`), Docker for `anvil`, Chrome for `iris`. Nothing to `npm install` — every tool has zero runtime dependencies.
 
 ## The nine tools

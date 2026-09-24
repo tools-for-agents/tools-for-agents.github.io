@@ -1,0 +1,55 @@
+# THE ONE COMMAND ON THE FRONT PAGE, RUN BY A STRANGER.
+#
+# The page promises: `curl -fsSL https://tools-for-agents.github.io/install.sh | sh`. A promise on a
+# landing page that nobody runs is a promise that breaks the first time a repo moves a bin, renames a
+# server or starts needing something the script does not check for — and the person who finds out is
+# the stranger it was written for. So on every push, and every morning: a fresh machine, an empty
+# home, the real repos from GitHub, the script exactly as served — then prove what it said it did.
+name: install
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: '17 7 * * *'
+  workflow_dispatch:
+
+jobs:
+  one-command:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: a stranger runs the one command (with ghost and the guard)
+        env:
+          HOME: ${{ runner.temp }}/home
+          TFA_NO_CLAUDE: '1'     # no Claude Code on the runner — the registration step is proven by the local test
+        run: |
+          mkdir -p "$HOME"
+          sh install.sh --with-ghost --guard | tee "$RUNNER_TEMP/install.txt"
+      - name: prove what it said it did
+        env:
+          HOME: ${{ runner.temp }}/home
+        run: |
+          set -e
+          D="$HOME/.tools-for-agents"; B="$HOME/.local/bin"
+          for t in agent-hq lens anvil keep cortex scout prism recall iris ghost; do
+            test -f "$D/$t/package.json" || { echo "::error::$t was not installed"; exit 1; }
+          done
+          for b in lens keep recall prism iris ghost scout cortex anvil; do
+            test -x "$B/$b" || { echo "::error::$b was not linked into $B"; exit 1; }
+            "$B/$b" --help >/dev/null 2>&1 || "$B/$b" help >/dev/null 2>&1 || { echo "::error::$b does not run from its link"; exit 1; }
+          done
+          "$B/keep" status | grep -q "opens     yes" || { echo "::error::keep's vault does not open"; exit 1; }
+          grep -q '"PreToolUse"' "$HOME/.claude/settings.json" || { echo "::error::--guard did not install keep guard"; exit 1; }
+          grep -q '"SessionStart"' "$HOME/.claude/settings.json" || { echo "::error::--with-ghost did not install ghost's hooks"; exit 1; }
+          "$B/ghost" status | grep -q "hooks     installed" || { echo "::error::ghost says its hooks are not installed"; exit 1; }
+          echo "✓ the one command did everything it says" >> "$GITHUB_STEP_SUMMARY"
+      - name: and running it again updates, it does not break
+        env:
+          HOME: ${{ runner.temp }}/home
+          TFA_NO_CLAUDE: '1'
+        run: sh install.sh | grep -q "lens updated"
