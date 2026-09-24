@@ -184,7 +184,7 @@ jobs:
       - name: check out the seven tools
         run: |
           mkdir -p _tools
-          for t in agent-hq lens anvil cortex scout recall iris; do
+          for t in agent-hq lens anvil keep cortex scout recall iris; do
             git clone --depth 1 -q "https://github.com/tools-for-agents/$t.git" "_tools/$t"
           done
       - name: every openWorldHint:false must stay home
@@ -214,7 +214,7 @@ jobs:
       - name: check out the seven tools
         run: |
           mkdir -p _tools
-          for t in agent-hq lens anvil cortex scout recall iris; do
+          for t in agent-hq lens anvil keep cortex scout recall iris; do
             git clone --depth 1 -q "https://github.com/tools-for-agents/$t.git" "_tools/$t"
           done
       - name: every destructiveHint:false tool must only add
@@ -243,7 +243,7 @@ jobs:
       - name: check out the seven tools
         run: |
           mkdir -p _tools
-          for t in agent-hq lens anvil cortex scout recall iris; do
+          for t in agent-hq lens anvil keep cortex scout recall iris; do
             git clone --depth 1 -q "https://github.com/tools-for-agents/$t.git" "_tools/$t"
           done
       - name: every idempotentHint:true tool must be safe to retry
