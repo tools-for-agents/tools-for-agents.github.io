@@ -947,7 +947,7 @@
       "mcpTools": [
         {
           "name": "recall_search",
-          "description": "Recall everything relevant to a query across ALL your knowledge at once: your second brain (cortex notes), the team's shared memory (agent-hq), your reading history (scout pages) and your code (lens). Returns one ranked, token-budgeted briefing with each hit tagged by source. Use this FIRST when starting a task — it loads the right context so you don't re-derive what you already know or re-read the web.",
+          "description": "Recall everything relevant to a query across ALL your knowledge at once: your second brain (cortex notes), your own lived memory if a ghost mind lives on this machine (episodes, your person's words, your will and craft notes), the team's shared memory (agent-hq), your reading history (scout pages) and your code (lens). Returns one ranked, token-budgeted briefing with each hit tagged by source. Use this FIRST when starting a task — it loads the right context so you don't re-derive what you already know or re-read the web.",
           "annotations": {
             "readOnlyHint": true,
             "openWorldHint": true
