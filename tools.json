@@ -120,9 +120,9 @@
   },
   "publication": {
     "npm": {
-      "published": false,
+      "published": true,
       "scope": "@tools-for-agents",
-      "note": "NOT on npm yet. Install from source (see `install`) — an `npx` command appears here only once npm answers for the package."
+      "note": "Every tool is on npm; `npx` is in each tool's mcpServer block."
     },
     "mcpRegistry": {
       "published": false,
@@ -142,11 +142,17 @@
       "repository": "https://github.com/tools-for-agents/agent-hq",
       "readme": "https://raw.githubusercontent.com/tools-for-agents/agent-hq/main/README.md",
       "version": "0.1.0",
+      "npmPackage": "@tools-for-agents/agent-hq",
       "mcpServer": {
         "transport": "stdio",
         "command": "node",
         "args": [
           "agent-hq/mcp/mcp-server.js"
+        ],
+        "npx": [
+          "npx",
+          "-y",
+          "@tools-for-agents/agent-hq"
         ]
       },
       "webView": {
@@ -427,11 +433,18 @@
       "repository": "https://github.com/tools-for-agents/lens",
       "readme": "https://raw.githubusercontent.com/tools-for-agents/lens/main/README.md",
       "version": "0.1.0",
+      "npmPackage": "@tools-for-agents/lens",
       "mcpServer": {
         "transport": "stdio",
         "command": "node",
         "args": [
           "lens/mcp/mcp-server.js"
+        ],
+        "npx": [
+          "npx",
+          "-y",
+          "@tools-for-agents/lens",
+          "mcp"
         ]
       },
       "webView": {
@@ -518,11 +531,18 @@
       "repository": "https://github.com/tools-for-agents/anvil",
       "readme": "https://raw.githubusercontent.com/tools-for-agents/anvil/main/README.md",
       "version": "0.1.0",
+      "npmPackage": "@tools-for-agents/anvil",
       "mcpServer": {
         "transport": "stdio",
         "command": "node",
         "args": [
           "anvil/mcp/mcp-server.js"
+        ],
+        "npx": [
+          "npx",
+          "-y",
+          "@tools-for-agents/anvil",
+          "mcp"
         ]
       },
       "webView": {
@@ -572,11 +592,18 @@
       "repository": "https://github.com/tools-for-agents/keep",
       "readme": "https://raw.githubusercontent.com/tools-for-agents/keep/main/README.md",
       "version": "0.1.0",
+      "npmPackage": "@tools-for-agents/keep",
       "mcpServer": {
         "transport": "stdio",
         "command": "node",
         "args": [
           "keep/mcp/mcp-server.js"
+        ],
+        "npx": [
+          "npx",
+          "-y",
+          "@tools-for-agents/keep",
+          "mcp"
         ]
       },
       "mcpTools": [
@@ -637,11 +664,18 @@
       "repository": "https://github.com/tools-for-agents/cortex",
       "readme": "https://raw.githubusercontent.com/tools-for-agents/cortex/main/README.md",
       "version": "0.1.0",
+      "npmPackage": "@tools-for-agents/cortex",
       "mcpServer": {
         "transport": "stdio",
         "command": "node",
         "args": [
           "cortex/mcp/mcp-server.js"
+        ],
+        "npx": [
+          "npx",
+          "-y",
+          "@tools-for-agents/cortex",
+          "mcp"
         ]
       },
       "webView": {
@@ -800,11 +834,18 @@
       "repository": "https://github.com/tools-for-agents/scout",
       "readme": "https://raw.githubusercontent.com/tools-for-agents/scout/main/README.md",
       "version": "0.1.0",
+      "npmPackage": "@tools-for-agents/scout",
       "mcpServer": {
         "transport": "stdio",
         "command": "node",
         "args": [
           "scout/mcp/mcp-server.js"
+        ],
+        "npx": [
+          "npx",
+          "-y",
+          "@tools-for-agents/scout",
+          "mcp"
         ]
       },
       "webView": {
@@ -895,11 +936,18 @@
       "repository": "https://github.com/tools-for-agents/prism",
       "readme": "https://raw.githubusercontent.com/tools-for-agents/prism/main/README.md",
       "version": "0.1.0",
+      "npmPackage": "@tools-for-agents/prism",
       "mcpServer": {
         "transport": "stdio",
         "command": "node",
         "args": [
           "prism/mcp/mcp-server.js"
+        ],
+        "npx": [
+          "npx",
+          "-y",
+          "@tools-for-agents/prism",
+          "mcp"
         ]
       },
       "webView": {
@@ -952,11 +1000,18 @@
       "repository": "https://github.com/tools-for-agents/recall",
       "readme": "https://raw.githubusercontent.com/tools-for-agents/recall/main/README.md",
       "version": "0.1.0",
+      "npmPackage": "@tools-for-agents/recall",
       "mcpServer": {
         "transport": "stdio",
         "command": "node",
         "args": [
           "recall/mcp/mcp-server.js"
+        ],
+        "npx": [
+          "npx",
+          "-y",
+          "@tools-for-agents/recall",
+          "mcp"
         ]
       },
       "webView": {
@@ -1001,11 +1056,18 @@
       "repository": "https://github.com/tools-for-agents/iris",
       "readme": "https://raw.githubusercontent.com/tools-for-agents/iris/main/README.md",
       "version": "0.1.0",
+      "npmPackage": "@tools-for-agents/iris",
       "mcpServer": {
         "transport": "stdio",
         "command": "node",
         "args": [
           "iris/mcp/mcp-server.js"
+        ],
+        "npx": [
+          "npx",
+          "-y",
+          "@tools-for-agents/iris",
+          "mcp"
         ]
       },
       "webView": {
@@ -1064,6 +1126,7 @@
       "repository": "https://github.com/tools-for-agents/ghost",
       "readme": "https://raw.githubusercontent.com/tools-for-agents/ghost/main/README.md",
       "version": "0.1.0",
+      "npmPackage": "@tools-for-agents/ghost",
       "install": "git clone https://github.com/tools-for-agents/ghost.git && node ghost/src/cli.js install",
       "commands": [
         "ghost install",
