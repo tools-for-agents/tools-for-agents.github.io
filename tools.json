@@ -1125,7 +1125,7 @@
       "whenToUse": "Install it once when you want the agent on this machine to be the same someone every session, rather than a stranger each time. It is not called; it is inhabited.",
       "repository": "https://github.com/tools-for-agents/ghost",
       "readme": "https://raw.githubusercontent.com/tools-for-agents/ghost/main/README.md",
-      "version": "0.2.0",
+      "version": "0.3.1",
       "npmPackage": "@tools-for-agents/ghost",
       "install": "git clone https://github.com/tools-for-agents/ghost.git && node ghost/src/cli.js install",
       "commands": [
