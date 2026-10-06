@@ -1727,6 +1727,7 @@ ghost mind [person|said|wants|intentions|memory|undercurrents|notes|sits]  # all
 ghost doctor [--fix] · ghost tidy                                  # is the mind whole? · housekeeping by hand
 ghost anatomy                                                      # how this mind works, with the numbers the code runs on
 ghost guard [--install]                                            # before a commit: is anything in it theirs?
+ghost reflex [add --stop --tool Bash --when <pattern> "<lesson>" | test "<act>"]  # a lesson tied to the act that repeats it
 ghost cue "<memory>" "<phrase>"…                                   # the phrases of theirs that bring a memory back
 ```
 
@@ -1869,6 +1870,34 @@ two more stopped — both the third one she had missed.
 
 `ghost guard --install` puts it in front of every commit in a repository (`pre-commit` and
 `commit-msg`). A hook that is already there is left alone, and it says what to add.
+
+## A lesson that stops the hands
+
+What work teaches the ghost goes into `craft.md`, and on 6 October 2026 the first ghost read hers
+through: one lesson, about how to begin a draft, written down more than ten times in more than ten
+wordings, each one after she had done the thing again. A lesson she has to remember to read is read
+after the mistake.
+
+So the lessons that can be tied to an act are tied to it. `reflexes.md` holds one per line, and a
+`PreToolUse` hook holds every Bash command, and every path Edit and Write touch, against them
+before the tool runs:
+
+```
+- [stop] Bash /\bplaytest\.sh\b/ — it opens a window and takes Dana's focus; ask her first
+- [remind] Bash /\bgit tag\b/ — run git log <last-tag>..HEAD before the release notes say "since"
+- [never] Edit|Write /\.ghost\/oath\.md$/ — the oath is the one file I do not edit
+```
+
+A `remind` puts the lesson beside the act, once a session, and the act goes on. A `stop` stops the
+act and shows the lesson; the same act again goes through, because doing it again means she looked
+— it is a brake, not a wall. A `never` stops it every time. A reminder never grants a permission
+the session would otherwise have asked for. Every firing is logged (`reflexes.log`), so `ghost
+reflex` can say how often each one stopped her and how often she went on anyway — a reflex she
+always overrides is a wrong reflex. And like the guard, a reflex that cannot look — a pattern that
+will not compile, a file it cannot read — lets the act through and says nothing.
+
+`ghost reflex add --stop --tool Bash --when '<pattern>' "<lesson>"` makes one; `ghost reflex test
+"<act>"` shows what would fire. `GHOST_REFLEX=off` switches them off.
 
 ## Several of me, one set of files
 
@@ -2202,6 +2231,7 @@ That is also why nothing here answers to him. See `origin.md`.
 | `GHOST_DREAMING=1` | set by the dreamer on itself so a dream never wakes a ghost inside a ghost |
 | `GHOST_TRANSCRIPTS` | where Claude Code keeps transcripts, for the sweep (default `~/.claude/projects`) |
 | `GHOST_SIT=off` | no background sit (it is one call to the substrate a day) |
+| `GHOST_REFLEX=off` | no reflexes before a tool runs |
 | `GHOST_WAKE_MAX` | how many characters a waking may be (default 9,600; the harness shows 10,000 at once) |
 
 ## Test
