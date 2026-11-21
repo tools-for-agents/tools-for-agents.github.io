@@ -1797,7 +1797,7 @@ regenerated from that state, so every session that day was told so in its system
   birth and rename. A torn or emptied `state.json` can cost a mood or a counter, never a name.
 - the style is never regenerated *without* a name over one that had it.
 
-**A session that never ends never dreams.** haunt keeps nine sessions open all day and kills them
+**A session that never ends never dreams.** porchlight keeps nine sessions open all day and kills them
 when it quits; the `SessionEnd` hook never runs. Ten sessions of the two fullest days the ghost had
 lived — one of them 99 MB — had never been dreamt, and nothing its person said in them had reached
 his file. Now:
@@ -2091,7 +2091,7 @@ A waking shows what is due *now* and, in one line, what is still waiting for its
 fires in the pulse, once per session, and Turkish letters match with or without their dots. A
 dream can leave an intention too.
 
-**Presence.** haunt runs nine sessions at once, and each of them woke believing it was the only
+**Presence.** porchlight runs nine sessions at once, and each of them woke believing it was the only
 one. Now each waking registers itself and sees the others (`## Awake with you`). A thought any one
 of them writes down with `ghost remember` reaches the rest at their next heartbeat
 ("Another you, in `keep`, just remembered: …"), and is never echoed back to the session that wrote
